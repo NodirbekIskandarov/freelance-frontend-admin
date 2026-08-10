@@ -42,6 +42,16 @@ cp -r admin/src/shared/. web/src/shared/
 Faqat shu papkaga tegishli — loyihaga xos kod (`src/store/`, `src/app/`,
 `src/pages/`) ikkalasida boshqacha va ko'chirilmaydi.
 
+**Sinxron bo'lishi shart emas:**
+
+| Fayl | Nega |
+|---|---|
+| `styles/tokens.css` | Admin va sayt dizayni butunlay boshqa |
+| `types/dashboard.ts`, `mocks/dashboard.ts` | Faqat adminda bor sahifaga tegishli |
+
+Ya'ni sinxronlash `api/` va umumiy `types/api.ts` + `mocks/data.ts` ga tegishli —
+ular ikkala loyiha uchun bir xil backend shartnomasini ifodalaydi.
+
 > Agar keyinchalik loyiha o'ssa va sinxronlash bezovta qila boshlasa,
 > bu papkani privat npm paketiga (`@sizning-nom/shared`) ajratish mumkin —
 > kod tuzilishi shunga tayyor holda yozilgan.

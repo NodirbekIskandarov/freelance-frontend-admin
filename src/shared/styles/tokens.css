@@ -1,74 +1,79 @@
 /*
- * Umumiy dizayn tokenlari (Tailwind v4 — CSS-first konfiguratsiya).
+ * Yopamiz.uz admin — dizayn tokenlari (Tailwind v4, CSS-first).
  *
- * DIQQAT: hozirgi qiymatlar VAQTINCHA o'rin egallovchi (placeholder).
- * `design/tokens/tokens.md` fayli to'lgach, shu yer haqiqiy Figma
- * qiymatlari bilan almashtiriladi va butun loyiha avtomatik yangilanadi.
+ * Qiymatlar `design/admin/*.png` fayllaridan piksel darajasida o'lchab olingan
+ * (rang gistogrammasi + nuqtaviy namunalar), taxmin qilinmagan.
  *
- * Ikkala app ham (web va admin) shu faylni import qiladi, shuning uchun
- * rang yoki shrift bir joyda o'zgaradi.
+ * Nomlash: Tailwind v4 `--color-X` dan `bg-X` / `text-X` / `border-X` yasaydi,
+ * shuning uchun nomlar qisqa va utility'ga to'g'ridan-to'g'ri mos.
+ *
+ * DIQQAT: bu fayl `web` loyihasidagi nusxasidan ATAYLAB farq qiladi —
+ * admin va sayt turli dizaynga ega. Sinxronlash `api/`, `types/`, `mocks/`
+ * papkalariga tegishli, tokenlarga emas.
  */
 
 @theme {
-  /* --- Brend ranglari --- */
-  --color-brand-50: #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-200: #bfdbfe;
-  --color-brand-300: #93c5fd;
-  --color-brand-400: #60a5fa;
-  --color-brand-500: #3b82f6;
-  --color-brand-600: #2563eb;
-  --color-brand-700: #1d4ed8;
-  --color-brand-800: #1e40af;
-  --color-brand-900: #1e3a8a;
+  /* --- Brend / accent (o'lchangan: #0C8E59) --- */
+  --color-brand-50: #e6f6ee;
+  --color-brand-100: #c2e9d6;
+  --color-brand-200: #8ed7b5;
+  --color-brand-300: #55c391;
+  --color-brand-400: #22a973;
+  --color-brand-500: #0d8f5a;
+  --color-brand-600: #0c8e59;
+  --color-brand-700: #0a7549;
+  --color-brand-800: #085c3a;
+  --color-brand-900: #06452c;
 
-  /* --- Neytral (matn, chegara, fon) --- */
-  --color-ink-50: #f8fafc;
-  --color-ink-100: #f1f5f9;
-  --color-ink-200: #e2e8f0;
-  --color-ink-300: #cbd5e1;
-  --color-ink-400: #94a3b8;
-  --color-ink-500: #64748b;
-  --color-ink-600: #475569;
-  --color-ink-700: #334155;
-  --color-ink-800: #1e293b;
-  --color-ink-900: #0f172a;
+  /* --- Fon qatlamlari (o'lchangan) --- */
+  --color-canvas: #070d17; /* body */
+  --color-sidebar: #0a111c;
+  --color-topbar: #060c16;
+  --color-card: #0e1622;
+  --color-elevated: #14232b; /* sidebar faol element, hover */
+  --color-input: #0c1421;
+
+  /* --- Chegara (o'lchangan: #171F2D) --- */
+  --color-line: #171f2d;
+  --color-line-strong: #222d3d;
+
+  /* --- Matn --- */
+  --color-fg: #ffffff;
+  --color-fg-soft: #c8d1dc;
+  --color-fg-muted: #8b97a3;
+  --color-fg-dim: #66727f;
 
   /* --- Holat ranglari --- */
-  --color-success: #16a34a;
-  --color-warning: #d97706;
-  --color-danger: #dc2626;
-  --color-info: #0284c7;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+  --color-purple: #a855f7;
+  --color-orange: #f97316;
+  --color-cyan: #06b6d4;
 
   /* --- Radius --- */
-  --radius-control: 0.5rem; /* tugma, input */
+  --radius-control: 0.5rem;
   --radius-card: 0.75rem;
+  --radius-badge: 0.375rem;
   --radius-modal: 1rem;
 
   /* --- Soya --- */
-  --shadow-card: 0 1px 3px rgb(15 23 42 / 0.08), 0 1px 2px rgb(15 23 42 / 0.04);
-  --shadow-dropdown: 0 10px 25px rgb(15 23 42 / 0.1);
-  --shadow-modal: 0 25px 50px rgb(15 23 42 / 0.15);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-dropdown: 0 10px 30px rgb(0 0 0 / 0.5);
+  --shadow-modal: 0 25px 60px rgb(0 0 0 / 0.6);
 
-  /* --- Konteyner --- */
-  --spacing-container: 80rem; /* 1280px */
+  /* --- Layout o'lchamlari (o'lchangan) --- */
+  --spacing-sidebar: 15.25rem; /* 244px */
+  --spacing-topbar: 4.125rem; /* 66px */
 }
 
 /*
- * Semantik qatlam: komponentlar to'g'ridan-to'g'ri `brand-600` emas,
- * `--color-primary` kabi ma'noli nomlarga tayanadi. Shunda dizaynda
- * brend rangi almashsa, komponentlarga tegmasdan shu yer o'zgaradi.
+ * Semantik qatlam. Komponentlar `brand-600` emas, `primary` ga tayanadi —
+ * brend rangi almashsa faqat shu yer o'zgaradi.
  */
 @theme inline {
   --color-primary: var(--color-brand-600);
-  --color-primary-hover: var(--color-brand-700);
-  --color-primary-soft: var(--color-brand-50);
-
-  --color-surface: #ffffff;
-  --color-surface-muted: var(--color-ink-50);
-  --color-border: var(--color-ink-200);
-
-  --color-text: var(--color-ink-900);
-  --color-text-muted: var(--color-ink-500);
-  --color-text-inverse: #ffffff;
+  --color-primary-hover: var(--color-brand-500);
+  --color-primary-active: var(--color-brand-700);
 }

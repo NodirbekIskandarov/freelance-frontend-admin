@@ -2,15 +2,57 @@
 @import './shared/styles/tokens.css';
 
 @layer base {
+  html {
+    color-scheme: dark;
+  }
+
   body {
-    background-color: var(--color-surface-muted);
-    color: var(--color-text);
+    background-color: var(--color-canvas);
+    color: var(--color-fg);
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
   /* Klaviatura bilan yurganda fokus ko'rinib turishi kerak (a11y). */
   :focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
+  }
+
+  /*
+   * Ingichka scrollbar — dizaynda sidebar va jadval ichida shunday.
+   * WebKit va Firefox uchun alohida sintaksis kerak.
+   */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--color-line-strong);
+    border-radius: 9999px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-fg-dim);
+  }
+}
+
+@layer components {
+  /*
+   * Jadval va kartalarda takrorlanadigan nozik ajratgich chizig'i.
+   * Dizaynda chegara juda past kontrastli (#171F2D fon #0E1622 ustida).
+   */
+  .divide-line > * + * {
+    border-top: 1px solid var(--color-line);
   }
 }

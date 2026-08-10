@@ -1,6 +1,8 @@
 import { delay, http, HttpResponse } from 'msw';
 
 import type { AuthTokens, LoginResponse, Paginated, User } from '../types/api';
+import type { DashboardData } from '../types/dashboard';
+import { mockDashboard } from './dashboard';
 import { mockUsers } from './data';
 
 // Yo'llar wildcard bilan boshlanadi — shunda handler baseUrl'dan qat'i nazar
@@ -28,6 +30,11 @@ function paginate<T>(items: T[], page: number, limit: number): Paginated<T> {
 }
 
 export const handlers = [
+  http.get('*/dashboard', async () => {
+    await delay(LATENCY_MS);
+    return HttpResponse.json<DashboardData>(mockDashboard);
+  }),
+
   http.post('*/auth/login', async ({ request }) => {
     await delay(LATENCY_MS);
 
