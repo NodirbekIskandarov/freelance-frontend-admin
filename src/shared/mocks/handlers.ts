@@ -28,6 +28,17 @@ import { mockInstituteRequests, mockInstitutes, regions } from './institutes';
 import type { InstituteSubjectsResponse, SubjectDetail, SubjectRow } from '../types/tasks';
 import { instituteSummaries, mockSubjectRequests, mockSubjects } from './subjects';
 import { mockInstituteSubjects, mockSubjectDetail } from './tasks';
+import type {
+  InstituteSubmissionsResponse,
+  SubmissionDetailResponse,
+  TodaySubmissionsResponse,
+} from '../types/submissions';
+import {
+  mockInstituteSubmissions,
+  mockSubmissionDetail,
+  mockTodaySubmissions,
+} from './submissions';
+import { submissionInstitutes } from './submissions';
 import { mockApplicationDetail } from './applicationDetail';
 import { mockContentOverview } from './content';
 import { mockApplications, universities } from './applications';
@@ -81,6 +92,27 @@ export function createHandlers(baseUrl: string) {
   const path = (suffix: string) => `${baseUrl.replace(/\/$/, '')}/${suffix}`;
 
   return [
+    http.get(path(`admin/submissions/today`), async () => {
+      await delay(LATENCY_MS);
+      return HttpResponse.json<TodaySubmissionsResponse>(mockTodaySubmissions);
+    }),
+
+    http.get(path(`admin/submissions/institutes/:instituteId`), async ({ params }) => {
+      await delay(LATENCY_MS);
+
+      const found = submissionInstitutes.find((item) => item.id === params.instituteId);
+
+      return HttpResponse.json<InstituteSubmissionsResponse>({
+        ...mockInstituteSubmissions,
+        instituteShort: found?.short ?? mockInstituteSubmissions.instituteShort,
+      });
+    }),
+
+    http.get(path(`admin/submissions/subjects/:subjectId`), async () => {
+      await delay(LATENCY_MS);
+      return HttpResponse.json<SubmissionDetailResponse>(mockSubmissionDetail);
+    }),
+
     http.get(path(`admin/institutes/:instituteId/subject-rows`), async ({ request, params }) => {
       await delay(LATENCY_MS);
 
