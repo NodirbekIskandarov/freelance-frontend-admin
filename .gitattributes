@@ -1,0 +1,14 @@
+# Repository ichida qator oxiri doim LF.
+# Bo'lmasa Windows va macOS'da ishlaganda butun fayl o'zgargandek ko'rinadi.
+* text=auto eol=lf
+
+# Binar fayllarga tegilmasin.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary

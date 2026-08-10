@@ -1,0 +1,74 @@
+/*
+ * Umumiy dizayn tokenlari (Tailwind v4 — CSS-first konfiguratsiya).
+ *
+ * DIQQAT: hozirgi qiymatlar VAQTINCHA o'rin egallovchi (placeholder).
+ * `design/tokens/tokens.md` fayli to'lgach, shu yer haqiqiy Figma
+ * qiymatlari bilan almashtiriladi va butun loyiha avtomatik yangilanadi.
+ *
+ * Ikkala app ham (web va admin) shu faylni import qiladi, shuning uchun
+ * rang yoki shrift bir joyda o'zgaradi.
+ */
+
+@theme {
+  /* --- Brend ranglari --- */
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+
+  /* --- Neytral (matn, chegara, fon) --- */
+  --color-ink-50: #f8fafc;
+  --color-ink-100: #f1f5f9;
+  --color-ink-200: #e2e8f0;
+  --color-ink-300: #cbd5e1;
+  --color-ink-400: #94a3b8;
+  --color-ink-500: #64748b;
+  --color-ink-600: #475569;
+  --color-ink-700: #334155;
+  --color-ink-800: #1e293b;
+  --color-ink-900: #0f172a;
+
+  /* --- Holat ranglari --- */
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+  --color-info: #0284c7;
+
+  /* --- Radius --- */
+  --radius-control: 0.5rem; /* tugma, input */
+  --radius-card: 0.75rem;
+  --radius-modal: 1rem;
+
+  /* --- Soya --- */
+  --shadow-card: 0 1px 3px rgb(15 23 42 / 0.08), 0 1px 2px rgb(15 23 42 / 0.04);
+  --shadow-dropdown: 0 10px 25px rgb(15 23 42 / 0.1);
+  --shadow-modal: 0 25px 50px rgb(15 23 42 / 0.15);
+
+  /* --- Konteyner --- */
+  --spacing-container: 80rem; /* 1280px */
+}
+
+/*
+ * Semantik qatlam: komponentlar to'g'ridan-to'g'ri `brand-600` emas,
+ * `--color-primary` kabi ma'noli nomlarga tayanadi. Shunda dizaynda
+ * brend rangi almashsa, komponentlarga tegmasdan shu yer o'zgaradi.
+ */
+@theme inline {
+  --color-primary: var(--color-brand-600);
+  --color-primary-hover: var(--color-brand-700);
+  --color-primary-soft: var(--color-brand-50);
+
+  --color-surface: #ffffff;
+  --color-surface-muted: var(--color-ink-50);
+  --color-border: var(--color-ink-200);
+
+  --color-text: var(--color-ink-900);
+  --color-text-muted: var(--color-ink-500);
+  --color-text-inverse: #ffffff;
+}
