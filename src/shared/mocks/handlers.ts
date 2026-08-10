@@ -10,7 +10,9 @@ import type { DashboardData } from '../types/dashboard';
 import type { Freelancer, FreelancersListResponse, FreelancerStatus } from '../types/freelancers';
 import type { AdminUser, UsersListResponse, UserStatus } from '../types/users';
 import type { ApplicationDetail } from '../types/applicationDetail';
+import type { ContentOverview } from '../types/content';
 import { mockApplicationDetail } from './applicationDetail';
+import { mockContentOverview } from './content';
 import { mockApplications, universities } from './applications';
 import { mockDashboard } from './dashboard';
 import { mockUsers } from './data';
@@ -62,6 +64,11 @@ export function createHandlers(baseUrl: string) {
   const path = (suffix: string) => `${baseUrl.replace(/\/$/, '')}/${suffix}`;
 
   return [
+    http.get(path(`admin/content-overview`), async () => {
+      await delay(LATENCY_MS);
+      return HttpResponse.json<ContentOverview>(mockContentOverview);
+    }),
+
     // Aniq yo'l umumiy ro'yxatdan OLDIN turishi kerak: MSW birinchi mos
     // kelgan handler'ni ishlatadi, aks holda ":id" ni ro'yxat ushlab qoladi.
     http.get(path(`admin/freelancer-applications/:id`), async ({ params }) => {
