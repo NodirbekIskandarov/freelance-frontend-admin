@@ -9,6 +9,8 @@ import type {
 import type { DashboardData } from '../types/dashboard';
 import type { Freelancer, FreelancersListResponse, FreelancerStatus } from '../types/freelancers';
 import type { AdminUser, UsersListResponse, UserStatus } from '../types/users';
+import type { ApplicationDetail } from '../types/applicationDetail';
+import { mockApplicationDetail } from './applicationDetail';
 import { mockApplications, universities } from './applications';
 import { mockDashboard } from './dashboard';
 import { mockUsers } from './data';
@@ -60,6 +62,37 @@ export function createHandlers(baseUrl: string) {
   const path = (suffix: string) => `${baseUrl.replace(/\/$/, '')}/${suffix}`;
 
   return [
+    // Aniq yo'l umumiy ro'yxatdan OLDIN turishi kerak: MSW birinchi mos
+    // kelgan handler'ni ishlatadi, aks holda ":id" ni ro'yxat ushlab qoladi.
+    http.get(path(`admin/freelancer-applications/:id`), async ({ params }) => {
+      await delay(LATENCY_MS);
+
+      const found = mockApplications.find((item) => item.id === params.id);
+      if (!found) {
+        return HttpResponse.json({ message: 'Ariza topilmadi' }, { status: 404 });
+      }
+
+      // Batafsil ma'lumot faqat bitta namuna uchun to'liq yozilgan;
+      // qolganlari uchun ro'yxatdagi qiymatlar bilan to'ldiriladi.
+      return HttpResponse.json<ApplicationDetail>({
+        ...mockApplicationDetail,
+        id: found.id,
+        displayId: found.displayId,
+        status: found.status,
+        name: found.userName,
+        phone: found.phone,
+        university: {
+          short: found.university,
+          full: mockApplicationDetail.university.full,
+        },
+        personal: {
+          ...mockApplicationDetail.personal,
+          fullName: found.userName,
+          phone: found.phone,
+        },
+      });
+    }),
+
     http.get(path(`admin/freelancer-applications`), async ({ request }) => {
       await delay(LATENCY_MS);
 

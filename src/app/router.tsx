@@ -29,6 +29,10 @@ const ApplicationsPage = lazy(async () => ({
   default: (await import('@/features/applications/ApplicationsPage')).ApplicationsPage,
 }));
 
+const ApplicationDetailPage = lazy(async () => ({
+  default: (await import('@/features/applications/ApplicationDetailPage')).ApplicationDetailPage,
+}));
+
 export const router = createBrowserRouter([
   {
     path: '/login',
@@ -45,6 +49,7 @@ export const router = createBrowserRouter([
       { path: 'foydalanuvchilar', element: <UsersPage /> },
       { path: 'freelancerlar', element: <FreelancersPage /> },
       { path: 'freelancer-arizalari', element: <ApplicationsPage /> },
+      { path: 'freelancer-arizalari/:id', element: <ApplicationDetailPage /> },
 
       { path: 'kontent', element: <PlaceholderPage title="Kontent boshqaruvi" /> },
       { path: 'institutlar', element: <PlaceholderPage title="Institutlar" /> },
