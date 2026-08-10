@@ -30,7 +30,11 @@ export function RevenueBarChart({ data }: { data: RevenuePoint[] }) {
       </div>
 
       <ResponsiveContainer width="100%" height={230}>
-        <BarChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -8 }} barCategoryGap="34%">
+        <BarChart
+          data={data}
+          margin={{ top: 4, right: 8, bottom: 0, left: -8 }}
+          barCategoryGap="34%"
+        >
           <CartesianGrid stroke={GRID_COLOR} vertical={false} />
           <XAxis
             dataKey="date"

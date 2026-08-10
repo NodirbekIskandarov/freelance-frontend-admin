@@ -37,7 +37,11 @@ export function PageHeader({
             <ol className="flex flex-wrap items-center gap-2 text-sm text-fg-muted">
               {breadcrumbs.map((crumb, index) => (
                 <li key={crumb.label} className="flex items-center gap-2">
-                  {index > 0 && <span aria-hidden className="text-fg-dim">›</span>}
+                  {index > 0 && (
+                    <span aria-hidden className="text-fg-dim">
+                      ›
+                    </span>
+                  )}
                   {crumb.to ? (
                     <Link to={crumb.to} className="transition-colors hover:text-primary">
                       {crumb.label}

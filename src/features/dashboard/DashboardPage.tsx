@@ -87,7 +87,9 @@ export function DashboardPage() {
       {/* 8 ta stat karta — dizaynda 4 ustun, 2 qator */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {isLoading
-          ? Array.from({ length: 8 }, (_, index) => <CardSkeleton key={index} className="h-[118px]" />)
+          ? Array.from({ length: 8 }, (_, index) => (
+              <CardSkeleton key={index} className="h-[118px]" />
+            ))
           : data?.stats.map((stat) => {
               const style = statStyles[stat.key] ?? { icon: Users, tone: 'info' as StatTone };
               return (
@@ -106,7 +108,9 @@ export function DashboardPage() {
       {/* 3 ta grafik */}
       <section className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-3">
         {isLoading || !data ? (
-          Array.from({ length: 3 }, (_, index) => <CardSkeleton key={index} className="h-[340px]" />)
+          Array.from({ length: 3 }, (_, index) => (
+            <CardSkeleton key={index} className="h-[340px]" />
+          ))
         ) : (
           <>
             <Card className="pb-5">

@@ -31,9 +31,7 @@ export interface CreateBaseQueryOptions {
 function isAuthTokens(value: unknown): value is AuthTokens {
   if (typeof value !== 'object' || value === null) return false;
   const candidate = value as Record<string, unknown>;
-  return (
-    typeof candidate.accessToken === 'string' && typeof candidate.refreshToken === 'string'
-  );
+  return typeof candidate.accessToken === 'string' && typeof candidate.refreshToken === 'string';
 }
 
 /**

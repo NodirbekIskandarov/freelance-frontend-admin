@@ -1,0 +1,129 @@
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+import { cn } from '@/lib/cn';
+
+import { Select } from './Select';
+
+interface PaginationProps {
+  page: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  perPage: number;
+  onPerPageChange: (perPage: number) => void;
+  perPageOptions?: number[];
+  /** Chapda turadigan matn: "Jami 12 482 ta foydalanuvchi". */
+  summary?: string;
+}
+
+/**
+ * Ko'rsatiladigan sahifa raqamlari: boshi, joriy sahifa atrofi va oxiri.
+ * Orasidagi uzilishlar `'…'` bilan belgilanadi.
+ *
+ * 625 sahifa bo'lganda hammasini chizib bo'lmaydi — dizaynda ham
+ * `1 2 3 … 625` ko'rinishi bor.
+ */
+function pageItems(page: number, totalPages: number): (number | '…')[] {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const items: (number | '…')[] = [];
+  const around = [page - 1, page, page + 1].filter((n) => n > 1 && n < totalPages);
+  const middle = around.length > 0 ? around : [2, 3];
+
+  items.push(1);
+  if ((middle[0] ?? 2) > 2) items.push('…');
+  items.push(...middle);
+  if ((middle[middle.length - 1] ?? 0) < totalPages - 1) items.push('…');
+  items.push(totalPages);
+
+  return items;
+}
+
+const buttonBase =
+  'grid h-8 min-w-8 place-items-center rounded-control border px-2 text-[13px] font-medium transition-colors';
+
+export function Pagination({
+  page,
+  totalPages,
+  onPageChange,
+  perPage,
+  onPerPageChange,
+  perPageOptions = [10, 20, 50, 100],
+  summary,
+}: PaginationProps) {
+  const items = pageItems(page, totalPages);
+
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line px-5 py-4">
+      {summary ? <p className="text-[13px] text-fg-muted">{summary}</p> : <span />}
+
+      <div className="flex items-center gap-4">
+        <nav aria-label="Sahifalar" className="flex items-center gap-1.5">
+          <button
+            type="button"
+            aria-label="Oldingi sahifa"
+            disabled={page <= 1}
+            onClick={() => onPageChange(page - 1)}
+            className={cn(
+              buttonBase,
+              'border-line text-fg-muted hover:bg-elevated hover:text-fg disabled:pointer-events-none disabled:opacity-40',
+            )}
+          >
+            <ChevronLeft className="size-4" strokeWidth={2} />
+          </button>
+
+          {items.map((item, index) =>
+            item === '…' ? (
+              <span
+                key={`gap-${index}`}
+                className="grid h-8 min-w-8 place-items-center text-[13px] text-fg-dim"
+              >
+                …
+              </span>
+            ) : (
+              <button
+                key={item}
+                type="button"
+                aria-current={item === page ? 'page' : undefined}
+                onClick={() => onPageChange(item)}
+                className={cn(
+                  buttonBase,
+                  item === page
+                    ? 'border-primary bg-primary text-white'
+                    : 'border-line text-fg-muted hover:bg-elevated hover:text-fg',
+                )}
+              >
+                {item}
+              </button>
+            ),
+          )}
+
+          <button
+            type="button"
+            aria-label="Keyingi sahifa"
+            disabled={page >= totalPages}
+            onClick={() => onPageChange(page + 1)}
+            className={cn(
+              buttonBase,
+              'border-line text-fg-muted hover:bg-elevated hover:text-fg disabled:pointer-events-none disabled:opacity-40',
+            )}
+          >
+            <ChevronRight className="size-4" strokeWidth={2} />
+          </button>
+        </nav>
+
+        <Select
+          aria-label="Sahifadagi qatorlar soni"
+          size="sm"
+          value={String(perPage)}
+          onChange={(event) => onPerPageChange(Number(event.target.value))}
+          options={perPageOptions.map((option) => ({
+            value: String(option),
+            label: `${option} / sahifa`,
+          }))}
+        />
+      </div>
+    </div>
+  );
+}

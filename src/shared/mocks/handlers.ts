@@ -2,11 +2,10 @@ import { delay, http, HttpResponse } from 'msw';
 
 import type { AuthTokens, LoginResponse, Paginated, User } from '../types/api';
 import type { DashboardData } from '../types/dashboard';
+import type { AdminUser, UsersListResponse, UserStatus } from '../types/users';
 import { mockDashboard } from './dashboard';
 import { mockUsers } from './data';
-
-// Yo'llar wildcard bilan boshlanadi — shunda handler baseUrl'dan qat'i nazar
-// ishlaydi (web va admin turli portlarda, .env da manzil o'zgarishi mumkin).
+import { mockAdminUsers } from './users';
 
 /** Tarmoq kechikishini taqlid qiladi — loading holatlari real ko'rinsin. */
 const LATENCY_MS = 300;
@@ -29,69 +28,145 @@ function paginate<T>(items: T[], page: number, limit: number): Paginated<T> {
   };
 }
 
-export const handlers = [
-  http.get('*/dashboard', async () => {
-    await delay(LATENCY_MS);
-    return HttpResponse.json<DashboardData>(mockDashboard);
-  }),
+/** Ustun nomiga qarab saralaydi. Backend ham xuddi shunday qilishi kutiladi. */
+function sortUsers(items: AdminUser[], sortBy: string, order: 'asc' | 'desc'): AdminUser[] {
+  const direction = order === 'asc' ? 1 : -1;
 
-  http.post('*/auth/login', async ({ request }) => {
-    await delay(LATENCY_MS);
+  return [...items].sort((a, b) => {
+    if (sortBy === 'balance') return (a.balance - b.balance) * direction;
+    if (sortBy === 'name') return a.name.localeCompare(b.name, 'uz') * direction;
+    if (sortBy === 'registeredAt') return a.registeredAt.localeCompare(b.registeredAt) * direction;
+    return 0;
+  });
+}
 
-    const body = (await request.json()) as { email?: string; password?: string };
-    const user = mockUsers.find((candidate) => candidate.email === body.email);
+// Handler'lar API manziliga bog'lab yaratiladi.
+//
+// Ilgari yo'llar wildcard bilan yozilgan edi va bu jiddiy xatoga olib keldi:
+// wildcard + "users/:id" naqshi Vite'ning dev modul so'rovini ham ushlab qolardi
+// (/src/features/users/UsersPage.tsx da :id = "UsersPage.tsx"), natijada sahifa
+// "Failed to fetch dynamically imported module" bilan yiqilardi.
+//
+// To'liq manzilga bog'langanda handler faqat haqiqiy API so'rovlarini ushlaydi.
+export function createHandlers(baseUrl: string) {
+  const path = (suffix: string) => `${baseUrl.replace(/\/$/, '')}/${suffix}`;
 
-    if (!user || !body.password) {
-      return HttpResponse.json(
-        { message: 'Email yoki parol noto‘g‘ri' },
-        { status: 401 },
-      );
-    }
+  return [
+    http.get(path(`dashboard`), async () => {
+      await delay(LATENCY_MS);
+      return HttpResponse.json<DashboardData>(mockDashboard);
+    }),
 
-    return HttpResponse.json<LoginResponse>({ ...tokens, user });
-  }),
+    http.get(path(`admin/users`), async ({ request }) => {
+      await delay(LATENCY_MS);
 
-  http.post('*/auth/refresh', async () => {
-    await delay(LATENCY_MS);
-    return HttpResponse.json<AuthTokens>(tokens);
-  }),
+      const url = new URL(request.url);
+      const page = Number(url.searchParams.get('page') ?? '1');
+      const limit = Number(url.searchParams.get('limit') ?? '20');
+      const search = url.searchParams.get('search')?.trim().toLowerCase() ?? '';
+      const status = url.searchParams.get('status') ?? 'all';
+      const sortBy = url.searchParams.get('sortBy') ?? '';
+      const sortOrder = url.searchParams.get('sortOrder') === 'asc' ? 'asc' : 'desc';
 
-  http.get('*/auth/me', async () => {
-    await delay(LATENCY_MS);
-    const user = mockUsers[0];
-    if (!user) {
-      return HttpResponse.json({ message: 'Foydalanuvchi topilmadi' }, { status: 404 });
-    }
-    return HttpResponse.json<User>(user);
-  }),
+      let filtered = mockAdminUsers;
 
-  http.get('*/users', async ({ request }) => {
-    await delay(LATENCY_MS);
+      if (status !== 'all') {
+        filtered = filtered.filter((user) => user.status === (status as UserStatus));
+      }
 
-    const url = new URL(request.url);
-    const page = Number(url.searchParams.get('page') ?? '1');
-    const limit = Number(url.searchParams.get('limit') ?? '10');
-    const search = url.searchParams.get('search')?.toLowerCase() ?? '';
-
-    const filtered = search
-      ? mockUsers.filter(
+      if (search) {
+        filtered = filtered.filter(
           (user) =>
             user.name.toLowerCase().includes(search) ||
-            user.email.toLowerCase().includes(search),
-        )
-      : mockUsers;
+            user.email.toLowerCase().includes(search) ||
+            user.phone.includes(search) ||
+            user.displayId.toLowerCase().includes(search),
+        );
+      }
 
-    return HttpResponse.json<Paginated<User>>(paginate(filtered, page, limit));
-  }),
+      if (sortBy) {
+        filtered = sortUsers(filtered, sortBy, sortOrder);
+      }
 
-  http.get('*/users/:id', async ({ params }) => {
-    await delay(LATENCY_MS);
+      const start = (page - 1) * limit;
 
-    const user = mockUsers.find((candidate) => candidate.id === params.id);
-    if (!user) {
-      return HttpResponse.json({ message: 'Foydalanuvchi topilmadi' }, { status: 404 });
-    }
+      return HttpResponse.json<UsersListResponse>({
+        items: filtered.slice(start, start + limit),
+        pagination: {
+          page,
+          limit,
+          total: filtered.length,
+          totalPages: Math.max(1, Math.ceil(filtered.length / limit)),
+        },
+        // Statistika dizayndagi qiymatlar — ular butun platforma bo'yicha,
+        // filtrga bog'liq emas.
+        stats: {
+          total: 12_482,
+          totalDeltaThisMonth: 245,
+          addedToday: 56,
+          addedTodayDelta: 12,
+          active: 11_258,
+          activePercent: '90.2%',
+          blocked: 324,
+          blockedPercent: '2.6%',
+        },
+      });
+    }),
 
-    return HttpResponse.json<User>(user);
-  }),
-];
+    http.post(path(`auth/login`), async ({ request }) => {
+      await delay(LATENCY_MS);
+
+      const body = (await request.json()) as { email?: string; password?: string };
+      const user = mockUsers.find((candidate) => candidate.email === body.email);
+
+      if (!user || !body.password) {
+        return HttpResponse.json({ message: 'Email yoki parol noto‘g‘ri' }, { status: 401 });
+      }
+
+      return HttpResponse.json<LoginResponse>({ ...tokens, user });
+    }),
+
+    http.post(path(`auth/refresh`), async () => {
+      await delay(LATENCY_MS);
+      return HttpResponse.json<AuthTokens>(tokens);
+    }),
+
+    http.get(path(`auth/me`), async () => {
+      await delay(LATENCY_MS);
+      const user = mockUsers[0];
+      if (!user) {
+        return HttpResponse.json({ message: 'Foydalanuvchi topilmadi' }, { status: 404 });
+      }
+      return HttpResponse.json<User>(user);
+    }),
+
+    http.get(path(`users`), async ({ request }) => {
+      await delay(LATENCY_MS);
+
+      const url = new URL(request.url);
+      const page = Number(url.searchParams.get('page') ?? '1');
+      const limit = Number(url.searchParams.get('limit') ?? '10');
+      const search = url.searchParams.get('search')?.toLowerCase() ?? '';
+
+      const filtered = search
+        ? mockUsers.filter(
+            (user) =>
+              user.name.toLowerCase().includes(search) || user.email.toLowerCase().includes(search),
+          )
+        : mockUsers;
+
+      return HttpResponse.json<Paginated<User>>(paginate(filtered, page, limit));
+    }),
+
+    http.get(path(`users/:id`), async ({ params }) => {
+      await delay(LATENCY_MS);
+
+      const user = mockUsers.find((candidate) => candidate.id === params.id);
+      if (!user) {
+        return HttpResponse.json({ message: 'Foydalanuvchi topilmadi' }, { status: 404 });
+      }
+
+      return HttpResponse.json<User>(user);
+    }),
+  ];
+}

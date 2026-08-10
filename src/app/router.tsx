@@ -17,6 +17,10 @@ const DashboardPage = lazy(async () => ({
   default: (await import('@/features/dashboard/DashboardPage')).DashboardPage,
 }));
 
+const UsersPage = lazy(async () => ({
+  default: (await import('@/features/users/UsersPage')).UsersPage,
+}));
+
 export const router = createBrowserRouter([
   {
     path: '/login',
@@ -30,7 +34,7 @@ export const router = createBrowserRouter([
 
       { path: 'dashboard', element: <DashboardPage /> },
 
-      { path: 'foydalanuvchilar', element: <PlaceholderPage title="Foydalanuvchilar" /> },
+      { path: 'foydalanuvchilar', element: <UsersPage /> },
       { path: 'freelancerlar', element: <PlaceholderPage title="Freelancerlar" /> },
       { path: 'freelancer-arizalari', element: <PlaceholderPage title="Freelancer arizalari" /> },
 

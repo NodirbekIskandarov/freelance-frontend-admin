@@ -1,7 +1,11 @@
-import { handlers } from '@/shared/mocks';
 import { setupWorker } from 'msw/browser';
 
-export const worker = setupWorker(...handlers);
+import { env } from '@/lib/env';
+import { createHandlers } from '@/shared/mocks';
+
+// Handler'lar API manziliga bog'lanadi — wildcard ishlatilsa, ular Vite'ning
+// dev modul so'rovlarini ham ushlab qolardi.
+export const worker = setupWorker(...createHandlers(env.apiUrl));
 
 /**
  * Bu modul faqat dinamik import orqali yuklanadi (`main.tsx` ga qarang),
@@ -9,7 +13,7 @@ export const worker = setupWorker(...handlers);
  */
 export async function enableMocking(): Promise<void> {
   await worker.start({
-    // Mock qilinmagan so'rovlar (rasm, shrift) haqiqiy tarmoqqa o'tsin.
+    // Mock qilinmagan so'rovlar (rasm, shrift, Vite modullari) o'tib ketsin.
     onUnhandledRequest: 'bypass',
   });
 }

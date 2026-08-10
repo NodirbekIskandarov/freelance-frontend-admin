@@ -30,8 +30,19 @@ export interface StatCardProps {
     /** Qiymatdan keyingi izoh: "bugun", "bu oy". */
     note?: string;
   };
+  /**
+   * O'q ikonkasisiz rangli matn (2-rasmdagi "90.2%" va "2.6%").
+   * `trend` bilan birga ishlatilmaydi.
+   */
+  caption?: { text: string; tone: 'success' | 'danger' | 'muted' };
   className?: string;
 }
+
+const captionTones = {
+  success: 'text-success',
+  danger: 'text-danger',
+  muted: 'text-fg-muted',
+} as const;
 
 const trendStyles = {
   up: { icon: ArrowUp, color: 'text-success' },
@@ -39,7 +50,15 @@ const trendStyles = {
   flat: { icon: Minus, color: 'text-fg-muted' },
 } as const;
 
-export function StatCard({ label, value, icon: Icon, tone, trend, className }: StatCardProps) {
+export function StatCard({
+  label,
+  value,
+  icon: Icon,
+  tone,
+  trend,
+  caption,
+  className,
+}: StatCardProps) {
   const trendStyle = trend ? trendStyles[trend.direction] : null;
   const TrendIcon = trendStyle?.icon;
 
@@ -65,6 +84,12 @@ export function StatCard({ label, value, icon: Icon, tone, trend, className }: S
             <TrendIcon className={cn('size-3.5 shrink-0', trendStyle.color)} strokeWidth={2.5} />
             <span className={cn('font-medium', trendStyle.color)}>{trend.value}</span>
             {trend.note && <span className="text-fg-muted">{trend.note}</span>}
+          </p>
+        )}
+
+        {caption && (
+          <p className={cn('mt-1.5 text-[13px] font-medium', captionTones[caption.tone])}>
+            {caption.text}
           </p>
         )}
       </div>

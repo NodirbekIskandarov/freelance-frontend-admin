@@ -10,7 +10,10 @@ import { PageHeader } from '@/components/ui/PageHeader';
 export function PlaceholderPage({ title }: { title: string }) {
   return (
     <>
-      <PageHeader title={title} breadcrumbs={[{ label: 'Bosh sahifa', to: '/' }, { label: title }]} />
+      <PageHeader
+        title={title}
+        breadcrumbs={[{ label: 'Bosh sahifa', to: '/' }, { label: title }]}
+      />
       <div className="grid place-items-center rounded-card border border-dashed border-line bg-card px-6 py-20 text-center">
         <Construction className="size-8 text-fg-dim" strokeWidth={1.5} />
         <p className="mt-3 text-sm font-medium text-fg-soft">Bu sahifa hali qurilmagan</p>

@@ -134,10 +134,7 @@ function SupportCard() {
 export function Sidebar({ className }: { className?: string }) {
   return (
     <aside
-      className={cn(
-        'flex w-sidebar shrink-0 flex-col border-r border-line bg-sidebar',
-        className,
-      )}
+      className={cn('flex w-sidebar shrink-0 flex-col border-r border-line bg-sidebar', className)}
     >
       <Logo />
 
