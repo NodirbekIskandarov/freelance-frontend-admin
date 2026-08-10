@@ -17,7 +17,15 @@ import type {
   InstituteRequestsListResponse,
   InstitutesListResponse,
 } from '../types/institutes';
+import type {
+  InstitutesPanelResponse,
+  Subject,
+  SubjectRequest,
+  SubjectRequestsListResponse,
+  SubjectsListResponse,
+} from '../types/subjects';
 import { mockInstituteRequests, mockInstitutes, regions } from './institutes';
+import { instituteSummaries, mockSubjectRequests, mockSubjects } from './subjects';
 import { mockApplicationDetail } from './applicationDetail';
 import { mockContentOverview } from './content';
 import { mockApplications, universities } from './applications';
@@ -71,6 +79,114 @@ export function createHandlers(baseUrl: string) {
   const path = (suffix: string) => `${baseUrl.replace(/\/$/, '')}/${suffix}`;
 
   return [
+    http.get(path(`admin/institute-summaries`), async ({ request }) => {
+      await delay(LATENCY_MS);
+
+      const url = new URL(request.url);
+      const page = Number(url.searchParams.get('page') ?? '1');
+      const limit = Number(url.searchParams.get('limit') ?? '8');
+      const search = url.searchParams.get('search')?.trim().toLowerCase() ?? '';
+
+      const filtered = search
+        ? instituteSummaries.filter(
+            (item) =>
+              item.short.toLowerCase().includes(search) || item.name.toLowerCase().includes(search),
+          )
+        : instituteSummaries;
+
+      const start = (page - 1) * limit;
+
+      return HttpResponse.json<InstitutesPanelResponse>({
+        items: filtered.slice(start, start + limit),
+        pagination: {
+          page,
+          limit,
+          total: filtered.length,
+          totalPages: Math.max(1, Math.ceil(filtered.length / limit)),
+        },
+      });
+    }),
+
+    http.get(path(`admin/institutes/:instituteId/subjects`), async ({ request, params }) => {
+      await delay(LATENCY_MS);
+
+      const url = new URL(request.url);
+      const page = Number(url.searchParams.get('page') ?? '1');
+      const limit = Number(url.searchParams.get('limit') ?? '10');
+      const search = url.searchParams.get('search')?.trim().toLowerCase() ?? '';
+      const course = url.searchParams.get('course') ?? 'all';
+
+      const institute =
+        instituteSummaries.find((item) => item.id === params.instituteId) ?? instituteSummaries[0]!;
+
+      let filtered: Subject[] = mockSubjects;
+      if (course !== 'all') filtered = filtered.filter((item) => item.course === course);
+      if (search) filtered = filtered.filter((item) => item.name.toLowerCase().includes(search));
+
+      const start = (page - 1) * limit;
+
+      return HttpResponse.json<SubjectsListResponse>({
+        institute,
+        items: filtered.slice(start, start + limit),
+        pagination: {
+          page,
+          limit,
+          total: institute.subjectCount,
+          totalPages: Math.max(1, Math.ceil(institute.subjectCount / limit)),
+        },
+        courses: ['1-kurs', '2-kurs', '3-kurs', '4-kurs'],
+      });
+    }),
+
+    http.get(path(`admin/subject-requests`), async ({ request }) => {
+      await delay(LATENCY_MS);
+
+      const url = new URL(request.url);
+      const page = Number(url.searchParams.get('page') ?? '1');
+      const limit = Number(url.searchParams.get('limit') ?? '10');
+      const search = url.searchParams.get('search')?.trim().toLowerCase() ?? '';
+      const institute = url.searchParams.get('institute') ?? 'all';
+      const status = url.searchParams.get('status') ?? 'all';
+      const tab = url.searchParams.get('tab') ?? 'all';
+
+      let filtered: SubjectRequest[] = mockSubjectRequests;
+
+      // Tab filtri statusdan alohida: dizaynda ular mustaqil boshqariladi.
+      if (tab === 'pending') {
+        filtered = filtered.filter(
+          (item) => item.status === 'Kutilmoqda' || item.status === 'Tasdiqlashda',
+        );
+      } else if (tab === 'rejected') {
+        filtered = filtered.filter((item) => item.status === 'Rad etilgan');
+      }
+
+      if (institute !== 'all') {
+        filtered = filtered.filter((item) => item.institute.short === institute);
+      }
+      if (status !== 'all') filtered = filtered.filter((item) => item.status === status);
+      if (search) {
+        filtered = filtered.filter(
+          (item) =>
+            item.name.toLowerCase().includes(search) ||
+            item.institute.name.toLowerCase().includes(search) ||
+            item.requester.name.toLowerCase().includes(search),
+        );
+      }
+
+      const start = (page - 1) * limit;
+
+      return HttpResponse.json<SubjectRequestsListResponse>({
+        items: filtered.slice(start, start + limit),
+        pagination: {
+          page,
+          limit,
+          total: filtered.length,
+          totalPages: Math.max(1, Math.ceil(filtered.length / limit)),
+        },
+        institutes: instituteSummaries.map((item) => item.short),
+      });
+    }),
+
     http.get(path(`admin/institutes`), async ({ request }) => {
       await delay(LATENCY_MS);
 
