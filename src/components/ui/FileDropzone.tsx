@@ -14,6 +14,12 @@ interface FileDropzoneProps {
   children?: ReactNode;
   /** Zona ostidagi qo'shimcha satr (15-rasmdagi ruxsat etilgan formatlar). */
   hint?: string;
+  /**
+   * Zona ichidagi tugma ko'rinishidagi yorliq (15-rasm).
+   * `<button>` emas, `<span>`: butun zona allaqachon bosiladigan, ichiga
+   * yana bosiladigan element qo'yilsa fokus tartibi chalkashadi.
+   */
+  actionLabel?: string;
   className?: string;
 }
 
@@ -31,6 +37,7 @@ export function FileDropzone({
   onFiles,
   children,
   hint,
+  actionLabel,
   className,
 }: FileDropzoneProps) {
   const inputId = useId();
@@ -77,6 +84,12 @@ export function FileDropzone({
             </>
           )}
         </p>
+
+        {actionLabel && (
+          <span className="rounded-control border border-line bg-card px-4 py-2 text-sm font-medium text-fg-soft">
+            {actionLabel}
+          </span>
+        )}
 
         {hint && <p className="text-xs text-fg-dim">{hint}</p>}
 
