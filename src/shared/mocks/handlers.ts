@@ -1,9 +1,15 @@
 import { delay, http, HttpResponse } from 'msw';
 
 import type { AuthTokens, LoginResponse, Paginated, User } from '../types/api';
+import type {
+  ApplicationsListResponse,
+  ApplicationStatus,
+  FreelancerApplication,
+} from '../types/applications';
 import type { DashboardData } from '../types/dashboard';
 import type { Freelancer, FreelancersListResponse, FreelancerStatus } from '../types/freelancers';
 import type { AdminUser, UsersListResponse, UserStatus } from '../types/users';
+import { mockApplications, universities } from './applications';
 import { mockDashboard } from './dashboard';
 import { mockUsers } from './data';
 import { institutes, mockFreelancers, specialities } from './freelancers';
@@ -54,6 +60,62 @@ export function createHandlers(baseUrl: string) {
   const path = (suffix: string) => `${baseUrl.replace(/\/$/, '')}/${suffix}`;
 
   return [
+    http.get(path(`admin/freelancer-applications`), async ({ request }) => {
+      await delay(LATENCY_MS);
+
+      const url = new URL(request.url);
+      const page = Number(url.searchParams.get('page') ?? '1');
+      const limit = Number(url.searchParams.get('limit') ?? '20');
+      const search = url.searchParams.get('search')?.trim().toLowerCase() ?? '';
+      const status = url.searchParams.get('status') ?? 'all';
+      const university = url.searchParams.get('university') ?? 'all';
+      const speciality = url.searchParams.get('speciality') ?? 'all';
+
+      let filtered: FreelancerApplication[] = mockApplications;
+
+      if (status !== 'all') {
+        filtered = filtered.filter((item) => item.status === (status as ApplicationStatus));
+      }
+      if (university !== 'all') {
+        filtered = filtered.filter((item) => item.university === university);
+      }
+      if (speciality !== 'all') {
+        filtered = filtered.filter((item) => item.speciality === speciality);
+      }
+      if (search) {
+        filtered = filtered.filter(
+          (item) =>
+            item.userName.toLowerCase().includes(search) ||
+            item.phone.includes(search) ||
+            item.university.toLowerCase().includes(search) ||
+            item.displayId.toLowerCase().includes(search),
+        );
+      }
+
+      const start = (page - 1) * limit;
+
+      return HttpResponse.json<ApplicationsListResponse>({
+        items: filtered.slice(start, start + limit),
+        pagination: {
+          page,
+          limit,
+          total: filtered.length,
+          totalPages: Math.max(1, Math.ceil(filtered.length / limit)),
+        },
+        stats: {
+          total: 248,
+          totalPercent: '100%',
+          pending: 86,
+          pendingPercent: '34.7%',
+          approved: 128,
+          approvedPercent: '51.6%',
+          rejected: 34,
+          rejectedPercent: '13.7%',
+        },
+        filters: { universities, specialities },
+      });
+    }),
+
     http.get(path(`admin/freelancers`), async ({ request }) => {
       await delay(LATENCY_MS);
 
