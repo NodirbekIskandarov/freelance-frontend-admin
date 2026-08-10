@@ -2,9 +2,11 @@ import { delay, http, HttpResponse } from 'msw';
 
 import type { AuthTokens, LoginResponse, Paginated, User } from '../types/api';
 import type { DashboardData } from '../types/dashboard';
+import type { Freelancer, FreelancersListResponse, FreelancerStatus } from '../types/freelancers';
 import type { AdminUser, UsersListResponse, UserStatus } from '../types/users';
 import { mockDashboard } from './dashboard';
 import { mockUsers } from './data';
+import { institutes, mockFreelancers, specialities } from './freelancers';
 import { mockAdminUsers } from './users';
 
 /** Tarmoq kechikishini taqlid qiladi — loading holatlari real ko'rinsin. */
@@ -52,6 +54,74 @@ export function createHandlers(baseUrl: string) {
   const path = (suffix: string) => `${baseUrl.replace(/\/$/, '')}/${suffix}`;
 
   return [
+    http.get(path(`admin/freelancers`), async ({ request }) => {
+      await delay(LATENCY_MS);
+
+      const url = new URL(request.url);
+      const page = Number(url.searchParams.get('page') ?? '1');
+      const limit = Number(url.searchParams.get('limit') ?? '20');
+      const search = url.searchParams.get('search')?.trim().toLowerCase() ?? '';
+      const status = url.searchParams.get('status') ?? 'all';
+      const speciality = url.searchParams.get('speciality') ?? 'all';
+      const institute = url.searchParams.get('institute') ?? 'all';
+      const sortBy = url.searchParams.get('sortBy') ?? '';
+      const sortOrder = url.searchParams.get('sortOrder') === 'asc' ? 'asc' : 'desc';
+
+      let filtered: Freelancer[] = mockFreelancers;
+
+      if (status !== 'all') {
+        filtered = filtered.filter((item) => item.status === (status as FreelancerStatus));
+      }
+      if (speciality !== 'all') {
+        filtered = filtered.filter((item) => item.speciality === speciality);
+      }
+      if (institute !== 'all') {
+        filtered = filtered.filter((item) => item.institute === institute);
+      }
+      if (search) {
+        filtered = filtered.filter(
+          (item) =>
+            item.name.toLowerCase().includes(search) ||
+            item.phone.includes(search) ||
+            item.displayId.toLowerCase().includes(search) ||
+            item.speciality.toLowerCase().includes(search),
+        );
+      }
+
+      if (sortBy) {
+        const direction = sortOrder === 'asc' ? 1 : -1;
+        filtered = [...filtered].sort((a, b) => {
+          if (sortBy === 'rating') return (a.rating - b.rating) * direction;
+          if (sortBy === 'completedJobs') return (a.completedJobs - b.completedJobs) * direction;
+          if (sortBy === 'income') return (a.income - b.income) * direction;
+          return 0;
+        });
+      }
+
+      const start = (page - 1) * limit;
+
+      return HttpResponse.json<FreelancersListResponse>({
+        items: filtered.slice(start, start + limit),
+        pagination: {
+          page,
+          limit,
+          total: filtered.length,
+          totalPages: Math.max(1, Math.ceil(filtered.length / limit)),
+        },
+        stats: {
+          total: 1248,
+          totalDeltaThisMonth: 32,
+          active: 1102,
+          activePercent: '88.3%',
+          temporarilyBlocked: 86,
+          temporarilyBlockedPercent: '6.9%',
+          blocked: 60,
+          blockedPercent: '4.8%',
+        },
+        filters: { specialities, institutes },
+      });
+    }),
+
     http.get(path(`dashboard`), async () => {
       await delay(LATENCY_MS);
       return HttpResponse.json<DashboardData>(mockDashboard);

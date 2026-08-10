@@ -21,6 +21,10 @@ const UsersPage = lazy(async () => ({
   default: (await import('@/features/users/UsersPage')).UsersPage,
 }));
 
+const FreelancersPage = lazy(async () => ({
+  default: (await import('@/features/freelancers/FreelancersPage')).FreelancersPage,
+}));
+
 export const router = createBrowserRouter([
   {
     path: '/login',
@@ -35,7 +39,7 @@ export const router = createBrowserRouter([
       { path: 'dashboard', element: <DashboardPage /> },
 
       { path: 'foydalanuvchilar', element: <UsersPage /> },
-      { path: 'freelancerlar', element: <PlaceholderPage title="Freelancerlar" /> },
+      { path: 'freelancerlar', element: <FreelancersPage /> },
       { path: 'freelancer-arizalari', element: <PlaceholderPage title="Freelancer arizalari" /> },
 
       { path: 'kontent', element: <PlaceholderPage title="Kontent boshqaruvi" /> },

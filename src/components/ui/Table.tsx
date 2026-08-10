@@ -32,7 +32,20 @@ interface TableProps<T> {
   sort?: SortState;
   onSortChange?: (key: string) => void;
   onRowClick?: (row: T) => void;
+  /**
+   * `compact` — ustun ko'p bo'lgan jadvallar uchun (freelancerlar: 11 ustun).
+   * Kengroq to'ldirish bilan qator konteynerdan chiqib ketadi.
+   */
+  density?: 'normal' | 'compact';
 }
+
+const densityStyles = {
+  normal: { head: 'px-4 py-3.5 text-[13px]', cell: 'px-4 py-4 text-sm' },
+  // Sarlavha shrifti kataknikidan kichik: 11 ustunli jadvalda eng keng
+  // sarlavhalar ("Pasport/ID rasmi", "Bajarilgan ishlar") jadval kengligini
+  // belgilab qo'yadi va oxirgi ustunni ekrandan chiqarib yuboradi.
+  compact: { head: 'px-2.5 py-3.5 text-[11px]', cell: 'px-2.5 py-3 text-[13px]' },
+} as const;
 
 const alignClass = {
   left: 'text-left',
@@ -58,10 +71,13 @@ export function Table<T>({
   sort,
   onSortChange,
   onRowClick,
+  density = 'normal',
 }: TableProps<T>) {
+  const spacing = densityStyles[density];
+
   return (
     <div className="overflow-x-auto">
-      <table className="w-full border-collapse text-sm">
+      <table className="w-full border-collapse">
         <thead>
           <tr className="border-b border-line">
             {columns.map((column) => {
@@ -76,7 +92,8 @@ export function Table<T>({
                   }
                   className={cn(
                     // Sarlavhalar bir qatorda qoladi — dizaynda ham shunday.
-                    'px-4 py-3.5 text-[13px] font-medium whitespace-nowrap text-fg-muted',
+                    'font-medium whitespace-nowrap text-fg-muted',
+                    spacing.head,
                     alignClass[column.align ?? 'left'],
                     column.headerClassName,
                   )}
@@ -114,7 +131,7 @@ export function Table<T>({
             Array.from({ length: skeletonRows }, (_, rowIndex) => (
               <tr key={rowIndex} className="border-b border-line">
                 {columns.map((column) => (
-                  <td key={column.key} className="px-4 py-4">
+                  <td key={column.key} className={spacing.cell}>
                     <span className="block h-4 animate-pulse rounded bg-elevated" />
                   </td>
                 ))}
@@ -143,7 +160,8 @@ export function Table<T>({
                   <td
                     key={column.key}
                     className={cn(
-                      'px-4 py-4 text-fg-soft',
+                      'text-fg-soft',
+                      spacing.cell,
                       alignClass[column.align ?? 'left'],
                       column.className,
                     )}

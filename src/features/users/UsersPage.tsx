@@ -22,16 +22,12 @@ import { SearchInput } from '@/components/ui/SearchInput';
 import { Select } from '@/components/ui/Select';
 import { StatCard } from '@/components/ui/StatCard';
 import { Table, type Column, type SortState } from '@/components/ui/Table';
+import { formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { getApiErrorMessage } from '@/shared/api';
 import type { AdminUser, UserStatus } from '@/shared/types/users';
 
 import { useGetUsersQuery } from './usersApi';
-
-/** 125000 → "125 000". Dizaynda ming ajratgichi — probel. */
-function formatSom(value: number): string {
-  return value.toLocaleString('ru-RU').replace(/ /g, ' ');
-}
 
 const statusOptions = [
   { value: 'all', label: 'Barcha statuslar' },
