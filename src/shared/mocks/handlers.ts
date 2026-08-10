@@ -11,6 +11,13 @@ import type { Freelancer, FreelancersListResponse, FreelancerStatus } from '../t
 import type { AdminUser, UsersListResponse, UserStatus } from '../types/users';
 import type { ApplicationDetail } from '../types/applicationDetail';
 import type { ContentOverview } from '../types/content';
+import type {
+  Institute,
+  InstituteRequest,
+  InstituteRequestsListResponse,
+  InstitutesListResponse,
+} from '../types/institutes';
+import { mockInstituteRequests, mockInstitutes, regions } from './institutes';
 import { mockApplicationDetail } from './applicationDetail';
 import { mockContentOverview } from './content';
 import { mockApplications, universities } from './applications';
@@ -64,6 +71,77 @@ export function createHandlers(baseUrl: string) {
   const path = (suffix: string) => `${baseUrl.replace(/\/$/, '')}/${suffix}`;
 
   return [
+    http.get(path(`admin/institutes`), async ({ request }) => {
+      await delay(LATENCY_MS);
+
+      const url = new URL(request.url);
+      const page = Number(url.searchParams.get('page') ?? '1');
+      const limit = Number(url.searchParams.get('limit') ?? '10');
+      const search = url.searchParams.get('search')?.trim().toLowerCase() ?? '';
+      const region = url.searchParams.get('region') ?? 'all';
+      const status = url.searchParams.get('status') ?? 'all';
+
+      let filtered: Institute[] = mockInstitutes;
+
+      if (region !== 'all') filtered = filtered.filter((item) => item.region === region);
+      if (status !== 'all') filtered = filtered.filter((item) => item.status === status);
+      if (search) {
+        filtered = filtered.filter(
+          (item) =>
+            item.name.toLowerCase().includes(search) || item.short.toLowerCase().includes(search),
+        );
+      }
+
+      const start = (page - 1) * limit;
+
+      return HttpResponse.json<InstitutesListResponse>({
+        items: filtered.slice(start, start + limit),
+        pagination: {
+          page,
+          limit,
+          total: 128,
+          totalPages: Math.max(1, Math.ceil(128 / limit)),
+        },
+        regions,
+      });
+    }),
+
+    http.get(path(`admin/institute-requests`), async ({ request }) => {
+      await delay(LATENCY_MS);
+
+      const url = new URL(request.url);
+      const page = Number(url.searchParams.get('page') ?? '1');
+      const limit = Number(url.searchParams.get('limit') ?? '10');
+      const search = url.searchParams.get('search')?.trim().toLowerCase() ?? '';
+      const region = url.searchParams.get('region') ?? 'all';
+      const status = url.searchParams.get('status') ?? 'all';
+
+      let filtered: InstituteRequest[] = mockInstituteRequests;
+
+      if (region !== 'all') filtered = filtered.filter((item) => item.region === region);
+      if (status !== 'all') filtered = filtered.filter((item) => item.status === status);
+      if (search) {
+        filtered = filtered.filter(
+          (item) =>
+            item.name.toLowerCase().includes(search) ||
+            item.requester.name.toLowerCase().includes(search),
+        );
+      }
+
+      const start = (page - 1) * limit;
+
+      return HttpResponse.json<InstituteRequestsListResponse>({
+        items: filtered.slice(start, start + limit),
+        pagination: {
+          page,
+          limit,
+          total: filtered.length,
+          totalPages: Math.max(1, Math.ceil(filtered.length / limit)),
+        },
+        regions,
+      });
+    }),
+
     http.get(path(`admin/content-overview`), async () => {
       await delay(LATENCY_MS);
       return HttpResponse.json<ContentOverview>(mockContentOverview);

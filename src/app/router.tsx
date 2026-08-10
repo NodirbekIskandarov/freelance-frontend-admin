@@ -37,6 +37,14 @@ const ContentPage = lazy(async () => ({
   default: (await import('@/features/content/ContentPage')).ContentPage,
 }));
 
+const InstitutesPage = lazy(async () => ({
+  default: (await import('@/features/institutes/InstitutesPage')).InstitutesPage,
+}));
+
+const InstituteRequestsPage = lazy(async () => ({
+  default: (await import('@/features/institutes/InstituteRequestsPage')).InstituteRequestsPage,
+}));
+
 export const router = createBrowserRouter([
   {
     path: '/login',
@@ -56,11 +64,8 @@ export const router = createBrowserRouter([
       { path: 'freelancer-arizalari/:id', element: <ApplicationDetailPage /> },
 
       { path: 'kontent', element: <ContentPage /> },
-      { path: 'institutlar', element: <PlaceholderPage title="Institutlar" /> },
-      {
-        path: 'institutlar/arizalar',
-        element: <PlaceholderPage title="Institut qo'shish arizalari" />,
-      },
+      { path: 'institutlar', element: <InstitutesPage /> },
+      { path: 'institutlar/arizalar', element: <InstituteRequestsPage /> },
       { path: 'fanlar', element: <PlaceholderPage title="Fanlar" /> },
       { path: 'fanlar/arizalar', element: <PlaceholderPage title="Fan qo'shish arizalari" /> },
       { path: 'topshiriqlar', element: <PlaceholderPage title="Topshiriqlar" /> },
