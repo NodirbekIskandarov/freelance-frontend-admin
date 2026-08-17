@@ -22,15 +22,11 @@ const UsersPage = lazy(async () => ({
 }));
 
 const FreelancersPage = lazy(async () => ({
-  default: (await import('@/features/freelancers/FreelancersPage')).FreelancersPage,
+  default: (await import('@/features/adminFreelance/FreelancersPage')).FreelancersPage,
 }));
 
 const ApplicationsPage = lazy(async () => ({
-  default: (await import('@/features/applications/ApplicationsPage')).ApplicationsPage,
-}));
-
-const ApplicationDetailPage = lazy(async () => ({
-  default: (await import('@/features/applications/ApplicationDetailPage')).ApplicationDetailPage,
+  default: (await import('@/features/adminFreelance/ApplicationsPage')).ApplicationsPage,
 }));
 
 const ContentPage = lazy(async () => ({
@@ -50,7 +46,15 @@ const SubjectsPage = lazy(async () => ({
 }));
 
 const SubjectRequestsPage = lazy(async () => ({
-  default: (await import('@/features/subjects/SubjectRequestsPage')).SubjectRequestsPage,
+  default: (await import('@/features/adminRequests/SubjectRequestsPage')).SubjectRequestsPage,
+}));
+
+const AssignmentRequestsPage = lazy(async () => ({
+  default: (await import('@/features/adminRequests/AssignmentRequestsPage')).AssignmentRequestsPage,
+}));
+
+const SolutionReportsPage = lazy(async () => ({
+  default: (await import('@/features/adminRequests/SolutionReportsPage')).SolutionReportsPage,
 }));
 
 const AssignmentsPage = lazy(async () => ({
@@ -97,7 +101,6 @@ export const router = createBrowserRouter([
       { path: 'foydalanuvchilar', element: <UsersPage /> },
       { path: 'freelancerlar', element: <FreelancersPage /> },
       { path: 'freelancer-arizalari', element: <ApplicationsPage /> },
-      { path: 'freelancer-arizalari/:id', element: <ApplicationDetailPage /> },
 
       { path: 'kontent', element: <ContentPage /> },
       { path: 'institutlar', element: <InstitutesPage /> },
@@ -113,15 +116,14 @@ export const router = createBrowserRouter([
         element: <PlaceholderPage title="Yuborilgan institutlar" />,
       },
       { path: 'yuborilgan/fanlar', element: <PlaceholderPage title="Yuborilgan fanlar" /> },
-      {
-        path: 'yuborilgan/topshiriqlar',
-        element: <PlaceholderPage title="Yuborilgan topshiriqlar" />,
-      },
+      { path: 'yuborilgan/topshiriqlar', element: <AssignmentRequestsPage /> },
       { path: 'yuborilgan/javoblar', element: <SubmissionsPage /> },
       {
         path: 'yuborilgan/javoblar/:instituteId/:subjectId',
         element: <SubmissionDetailPage />,
       },
+
+      { path: 'shikoyatlar', element: <SolutionReportsPage /> },
 
       { path: 'yechimlar', element: <SolutionsPage /> },
       { path: 'yechimlar/:id', element: <SolutionDetailPage /> },

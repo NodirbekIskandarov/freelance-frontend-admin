@@ -1,0 +1,201 @@
+import { Check, X } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
+
+import { Badge, type BadgeTone } from '@/components/ui/Badge';
+import { IconButton } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Pagination } from '@/components/ui/Pagination';
+import { SearchInput } from '@/components/ui/SearchInput';
+import { Select } from '@/components/ui/Select';
+import { Table, type Column } from '@/components/ui/Table';
+import { formatSom } from '@/lib/format';
+import { getApiErrorMessage } from '@/shared/api';
+import { REQUEST_STATUS_LABELS, type RequestStatus } from '@/shared/types/adminFreelance';
+import { REQUEST_STATUS_FILTER_OPTIONS } from '@/shared/types/adminRequests';
+
+import { RejectReasonModal } from './RejectReasonModal';
+
+const statusTones: Record<RequestStatus, BadgeTone> = {
+  pending: 'warning',
+  approved: 'success',
+  rejected: 'danger',
+};
+
+export function StatusBadge({ status }: { status: RequestStatus }) {
+  return <Badge tone={statusTones[status]}>{REQUEST_STATUS_LABELS[status]}</Badge>;
+}
+
+/** Uchala arizalar sahifasi bir xil holatga ega. */
+interface RequestRow {
+  id: string;
+  status: RequestStatus;
+}
+
+/**
+ * Fan arizalari, topshiriq arizalari va shikoyatlar — bir xil ekran:
+ * holat filtri, qidiruv, jadval va har qatorda tasdiqlash/rad etish.
+ * Uch nusxa yozish o'rniga farq qiladigan qismlari (sarlavha, ustunlar,
+ * so'rov hook'lari) tashqaridan beriladi.
+ */
+export function RequestsShell<T extends RequestRow>({
+  title,
+  breadcrumbLabel,
+  columns,
+  useList,
+  approve,
+  reject,
+  rejectTitle,
+  rowName,
+  summaryLabel,
+  emptyMessage,
+  extraFilter,
+}: {
+  title: string;
+  breadcrumbLabel: string;
+  columns: Column<T>[];
+  useList: (args: { page: number; page_size: number; ordering: string; status?: RequestStatus; search?: string }) => {
+    data?: { results: T[]; count: number; total_pages: number };
+    isLoading: boolean;
+    isFetching: boolean;
+    error?: unknown;
+  };
+  approve: { run: (id: string) => void; isLoading: boolean; error?: unknown };
+  reject: { run: (id: string, reason: string) => Promise<boolean>; isLoading: boolean; error?: unknown };
+  rejectTitle: string;
+  rowName: (row: T) => string;
+  summaryLabel: string;
+  emptyMessage: string;
+  extraFilter?: ReactNode;
+}) {
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(20);
+  const [status, setStatus] = useState('pending');
+  const [search, setSearch] = useState('');
+  const [rejectTarget, setRejectTarget] = useState<T | null>(null);
+
+  const { data, isLoading, isFetching, error } = useList({
+    page,
+    page_size: perPage,
+    ordering: '-created_at',
+    ...(status !== 'all' ? { status: status as RequestStatus } : {}),
+    ...(search ? { search } : {}),
+  });
+
+  async function confirmReject(reason: string) {
+    if (!rejectTarget) return;
+    const ok = await reject.run(rejectTarget.id, reason);
+    if (ok) setRejectTarget(null);
+  }
+
+  const actionColumn: Column<T> = {
+    key: 'actions',
+    header: 'Amallar',
+    align: 'right',
+    cell: (row) =>
+      row.status === 'pending' ? (
+        <span className="flex items-center justify-end gap-2">
+          <IconButton
+            label={`${rowName(row)} — tasdiqlash`}
+            tone="success"
+            size="sm"
+            disabled={approve.isLoading}
+            onClick={() => approve.run(row.id)}
+          >
+            <Check className="size-4" strokeWidth={2} />
+          </IconButton>
+          <IconButton
+            label={`${rowName(row)} — rad etish`}
+            tone="danger"
+            size="sm"
+            onClick={() => setRejectTarget(row)}
+          >
+            <X className="size-4" strokeWidth={2} />
+          </IconButton>
+        </span>
+      ) : (
+        <span className="text-xs text-fg-muted">Ko&apos;rib chiqilgan</span>
+      ),
+  };
+
+  return (
+    <>
+      <PageHeader
+        title={title}
+        breadcrumbs={[{ label: 'Bosh sahifa', to: '/' }, { label: breadcrumbLabel }]}
+      />
+
+      {error !== undefined && error !== null ? (
+        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
+          {getApiErrorMessage(error)}
+        </div>
+      ) : (
+        <>
+          {approve.error !== undefined && approve.error !== null && (
+            <div className="mb-4 rounded-card border border-danger/25 bg-danger/10 p-4 text-sm text-danger">
+              {getApiErrorMessage(approve.error)}
+            </div>
+          )}
+
+          <section className="flex flex-wrap items-center gap-3">
+            <Select
+              aria-label="Holat bo'yicha filtr"
+              options={REQUEST_STATUS_FILTER_OPTIONS}
+              value={status}
+              onChange={(event) => {
+                setStatus(event.target.value);
+                setPage(1);
+              }}
+              className="w-48"
+            />
+            {extraFilter}
+
+            <div className="ml-auto">
+              <SearchInput
+                value={search}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setPage(1);
+                }}
+                className="w-72"
+              />
+            </div>
+          </section>
+
+          <Card className="mt-4 overflow-hidden">
+            <Table
+              columns={[...columns, actionColumn]}
+              rows={data?.results ?? []}
+              rowKey={(row) => row.id}
+              isLoading={isLoading || isFetching}
+              skeletonRows={perPage > 20 ? 20 : perPage}
+              emptyMessage={emptyMessage}
+            />
+
+            <Pagination
+              page={page}
+              totalPages={data?.total_pages ?? 1}
+              onPageChange={setPage}
+              perPage={perPage}
+              onPerPageChange={(value) => {
+                setPerPage(value);
+                setPage(1);
+              }}
+              summary={data ? `Jami ${formatSom(data.count)} ta ${summaryLabel}` : undefined}
+            />
+          </Card>
+        </>
+      )}
+
+      <RejectReasonModal
+        open={rejectTarget !== null}
+        title={rejectTitle}
+        itemName={rejectTarget ? rowName(rejectTarget) : undefined}
+        isLoading={reject.isLoading}
+        error={reject.error}
+        onConfirm={(reason) => void confirmReject(reason)}
+        onClose={() => setRejectTarget(null)}
+      />
+    </>
+  );
+}

@@ -1,24 +1,11 @@
 import { delay, http, HttpResponse } from 'msw';
 
-import type {
-  ApplicationsListResponse,
-  ApplicationStatus,
-  FreelancerApplication,
-} from '../types/applications';
-import type { DashboardData } from '../types/dashboard';
-import type { Freelancer, FreelancersListResponse, FreelancerStatus } from '../types/freelancers';
-import type { ApplicationDetail } from '../types/applicationDetail';
 import type { ContentOverview } from '../types/content';
 import type {
   InstituteRequest,
   InstituteRequestsListResponse,
 } from '../types/institutes';
-import type {
-  SubjectRequest,
-  SubjectRequestsListResponse,
-} from '../types/subjects';
 import { mockInstituteRequests, regions } from './institutes';
-import { instituteSummaries, mockSubjectRequests } from './subjects';
 import type {
   InstituteSubmissionsResponse,
   SubmissionDetailResponse,
@@ -30,11 +17,7 @@ import {
   mockTodaySubmissions,
 } from './submissions';
 import { submissionInstitutes } from './submissions';
-import { mockApplicationDetail } from './applicationDetail';
 import { mockContentOverview } from './content';
-import { mockApplications, universities } from './applications';
-import { mockDashboard } from './dashboard';
-import { institutes, mockFreelancers, specialities } from './freelancers';
 
 /** Tarmoq kechikishini taqlid qiladi — loading holatlari real ko'rinsin. */
 const LATENCY_MS = 300;
@@ -71,55 +54,6 @@ export function createHandlers(baseUrl: string) {
     http.get(path(`admin/submissions/subjects/:subjectId`), async () => {
       await delay(LATENCY_MS);
       return HttpResponse.json<SubmissionDetailResponse>(mockSubmissionDetail);
-    }),
-
-    http.get(path(`admin/subject-requests`), async ({ request }) => {
-      await delay(LATENCY_MS);
-
-      const url = new URL(request.url);
-      const page = Number(url.searchParams.get('page') ?? '1');
-      const limit = Number(url.searchParams.get('limit') ?? '10');
-      const search = url.searchParams.get('search')?.trim().toLowerCase() ?? '';
-      const institute = url.searchParams.get('institute') ?? 'all';
-      const status = url.searchParams.get('status') ?? 'all';
-      const tab = url.searchParams.get('tab') ?? 'all';
-
-      let filtered: SubjectRequest[] = mockSubjectRequests;
-
-      // Tab filtri statusdan alohida: dizaynda ular mustaqil boshqariladi.
-      if (tab === 'pending') {
-        filtered = filtered.filter(
-          (item) => item.status === 'Kutilmoqda' || item.status === 'Tasdiqlashda',
-        );
-      } else if (tab === 'rejected') {
-        filtered = filtered.filter((item) => item.status === 'Rad etilgan');
-      }
-
-      if (institute !== 'all') {
-        filtered = filtered.filter((item) => item.institute.short === institute);
-      }
-      if (status !== 'all') filtered = filtered.filter((item) => item.status === status);
-      if (search) {
-        filtered = filtered.filter(
-          (item) =>
-            item.name.toLowerCase().includes(search) ||
-            item.institute.name.toLowerCase().includes(search) ||
-            item.requester.name.toLowerCase().includes(search),
-        );
-      }
-
-      const start = (page - 1) * limit;
-
-      return HttpResponse.json<SubjectRequestsListResponse>({
-        items: filtered.slice(start, start + limit),
-        pagination: {
-          page,
-          limit,
-          total: filtered.length,
-          totalPages: Math.max(1, Math.ceil(filtered.length / limit)),
-        },
-        institutes: instituteSummaries.map((item) => item.short),
-      });
     }),
 
     http.get(path(`admin/institute-requests`), async ({ request }) => {
@@ -165,173 +99,5 @@ export function createHandlers(baseUrl: string) {
 
     // Aniq yo'l umumiy ro'yxatdan OLDIN turishi kerak: MSW birinchi mos
     // kelgan handler'ni ishlatadi, aks holda ":id" ni ro'yxat ushlab qoladi.
-    http.get(path(`admin/freelancer-applications/:id`), async ({ params }) => {
-      await delay(LATENCY_MS);
-
-      const found = mockApplications.find((item) => item.id === params.id);
-      if (!found) {
-        return HttpResponse.json({ message: 'Ariza topilmadi' }, { status: 404 });
-      }
-
-      // Batafsil ma'lumot faqat bitta namuna uchun to'liq yozilgan;
-      // qolganlari uchun ro'yxatdagi qiymatlar bilan to'ldiriladi.
-      return HttpResponse.json<ApplicationDetail>({
-        ...mockApplicationDetail,
-        id: found.id,
-        displayId: found.displayId,
-        status: found.status,
-        name: found.userName,
-        phone: found.phone,
-        university: {
-          short: found.university,
-          full: mockApplicationDetail.university.full,
-        },
-        personal: {
-          ...mockApplicationDetail.personal,
-          fullName: found.userName,
-          phone: found.phone,
-        },
-      });
-    }),
-
-    http.get(path(`admin/freelancer-applications`), async ({ request }) => {
-      await delay(LATENCY_MS);
-
-      const url = new URL(request.url);
-      const page = Number(url.searchParams.get('page') ?? '1');
-      const limit = Number(url.searchParams.get('limit') ?? '20');
-      const search = url.searchParams.get('search')?.trim().toLowerCase() ?? '';
-      const status = url.searchParams.get('status') ?? 'all';
-      const university = url.searchParams.get('university') ?? 'all';
-      const speciality = url.searchParams.get('speciality') ?? 'all';
-
-      let filtered: FreelancerApplication[] = mockApplications;
-
-      if (status !== 'all') {
-        filtered = filtered.filter((item) => item.status === (status as ApplicationStatus));
-      }
-      if (university !== 'all') {
-        filtered = filtered.filter((item) => item.university === university);
-      }
-      if (speciality !== 'all') {
-        filtered = filtered.filter((item) => item.speciality === speciality);
-      }
-      if (search) {
-        filtered = filtered.filter(
-          (item) =>
-            item.userName.toLowerCase().includes(search) ||
-            item.phone.includes(search) ||
-            item.university.toLowerCase().includes(search) ||
-            item.displayId.toLowerCase().includes(search),
-        );
-      }
-
-      const start = (page - 1) * limit;
-
-      return HttpResponse.json<ApplicationsListResponse>({
-        items: filtered.slice(start, start + limit),
-        pagination: {
-          page,
-          limit,
-          total: filtered.length,
-          totalPages: Math.max(1, Math.ceil(filtered.length / limit)),
-        },
-        stats: {
-          total: 248,
-          totalPercent: '100%',
-          pending: 86,
-          pendingPercent: '34.7%',
-          approved: 128,
-          approvedPercent: '51.6%',
-          rejected: 34,
-          rejectedPercent: '13.7%',
-        },
-        filters: { universities, specialities },
-      });
-    }),
-
-    http.get(path(`admin/freelancers`), async ({ request }) => {
-      await delay(LATENCY_MS);
-
-      const url = new URL(request.url);
-      const page = Number(url.searchParams.get('page') ?? '1');
-      const limit = Number(url.searchParams.get('limit') ?? '20');
-      const search = url.searchParams.get('search')?.trim().toLowerCase() ?? '';
-      const status = url.searchParams.get('status') ?? 'all';
-      const speciality = url.searchParams.get('speciality') ?? 'all';
-      const institute = url.searchParams.get('institute') ?? 'all';
-      const sortBy = url.searchParams.get('sortBy') ?? '';
-      const sortOrder = url.searchParams.get('sortOrder') === 'asc' ? 'asc' : 'desc';
-
-      let filtered: Freelancer[] = mockFreelancers;
-
-      if (status !== 'all') {
-        filtered = filtered.filter((item) => item.status === (status as FreelancerStatus));
-      }
-      if (speciality !== 'all') {
-        filtered = filtered.filter((item) => item.speciality === speciality);
-      }
-      if (institute !== 'all') {
-        filtered = filtered.filter((item) => item.institute === institute);
-      }
-      if (search) {
-        filtered = filtered.filter(
-          (item) =>
-            item.name.toLowerCase().includes(search) ||
-            item.phone.includes(search) ||
-            item.displayId.toLowerCase().includes(search) ||
-            item.speciality.toLowerCase().includes(search),
-        );
-      }
-
-      if (sortBy) {
-        const direction = sortOrder === 'asc' ? 1 : -1;
-        filtered = [...filtered].sort((a, b) => {
-          if (sortBy === 'rating') return (a.rating - b.rating) * direction;
-          if (sortBy === 'completedJobs') return (a.completedJobs - b.completedJobs) * direction;
-          if (sortBy === 'income') return (a.income - b.income) * direction;
-          return 0;
-        });
-      }
-
-      const start = (page - 1) * limit;
-
-      return HttpResponse.json<FreelancersListResponse>({
-        items: filtered.slice(start, start + limit),
-        pagination: {
-          page,
-          limit,
-          total: filtered.length,
-          totalPages: Math.max(1, Math.ceil(filtered.length / limit)),
-        },
-        stats: {
-          total: 1248,
-          totalDeltaThisMonth: 32,
-          active: 1102,
-          activePercent: '88.3%',
-          temporarilyBlocked: 86,
-          temporarilyBlockedPercent: '6.9%',
-          blocked: 60,
-          blockedPercent: '4.8%',
-        },
-        filters: { specialities, institutes },
-      });
-    }),
-
-    http.get(path(`dashboard`), async () => {
-      await delay(LATENCY_MS);
-      return HttpResponse.json<DashboardData>(mockDashboard);
-    }),
-
-    /*
-     * Auth handler'lari OLIB TASHLANDI — kirish endi haqiqiy backendga
-     * ketadi (`/api/v1/auth/login/`). Ular qolganda mock soxta token
-     * qaytarib, moderatsiya endpoint'lari 401 bilan yiqilardi.
-     *
-     * Diqqat: mock yo'llari oxirida slash yo'q (`auth/login`), haqiqiy
-     * backendniki bor (`auth/login/`) — shu sababli ular baribir
-     * to'qnashmasdi, lekin ikki xil "kirish" bo'lishi chalkashtirardi.
-     */
-
   ];
 }

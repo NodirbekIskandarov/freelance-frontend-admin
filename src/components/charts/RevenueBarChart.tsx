@@ -8,13 +8,29 @@ const AXIS_COLOR = '#8B97A3';
 const GRID_COLOR = '#171F2D';
 const BAR_COLOR = '#22C55E';
 
-/** Y o'qi bo'linmalari — dizaynda 0 dan 10M gacha 2M qadam bilan. */
-const Y_TICKS = [0, 2_000_000, 4_000_000, 6_000_000, 8_000_000, 10_000_000];
+/**
+ * Y o'qi ma'lumotdan hisoblanadi.
+ *
+ * Ilgari u 0–10M ga qotib qo'yilgan edi (dizayn maketidagi qiymatlar
+ * shunday edi). Haqiqiy daromad hozircha nol va grafik bo'sh maydonga
+ * cho'zilib, hech narsa ko'rsatmasdi. Endi o'q eng katta qiymatga
+ * moslashadi, nol bo'lsa esa kichik standart oraliq olinadi.
+ */
+function ticksFor(max: number): { ticks: number[]; domain: [number, number] } {
+  const top = max > 0 ? Math.ceil(max * 1.2) : 100_000;
+  const step = Math.ceil(top / 5);
+  return {
+    ticks: [0, step, step * 2, step * 3, step * 4, step * 5],
+    domain: [0, step * 5],
+  };
+}
 
-/** 6 800 000 → "6M"; nol esa shunchaki "0" (dizaynda "0M" emas). */
-function formatMillions(value: number): string {
+/** 6 800 000 → "6M", 80 000 → "80K", nol esa shunchaki "0". */
+function formatAxis(value: number): string {
   if (value === 0) return '0';
-  return `${Math.round(value / 1_000_000)}M`;
+  if (value >= 1_000_000) return `${Math.round(value / 1_000_000)}M`;
+  if (value >= 1000) return `${Math.round(value / 1000)}K`;
+  return String(value);
 }
 
 function formatSom(value: number): string {
@@ -22,6 +38,8 @@ function formatSom(value: number): string {
 }
 
 export function RevenueBarChart({ data }: { data: RevenuePoint[] }) {
+  const { ticks, domain } = ticksFor(Math.max(...data.map((point) => point.amount), 0));
+
   return (
     <div>
       <div className="mb-4 flex items-center gap-2 px-1 text-[13px] text-fg-soft">
@@ -52,10 +70,10 @@ export function RevenueBarChart({ data }: { data: RevenuePoint[] }) {
             fontSize={12}
             tickLine={false}
             axisLine={false}
-            tickFormatter={formatMillions}
+            tickFormatter={formatAxis}
             width={48}
-            ticks={Y_TICKS}
-            domain={[0, 10_000_000]}
+            ticks={ticks}
+            domain={domain}
           />
           <Tooltip
             cursor={{ fill: 'rgba(255,255,255,0.04)' }}
