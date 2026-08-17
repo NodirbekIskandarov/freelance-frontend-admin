@@ -33,6 +33,25 @@ export interface AssignmentsQuery extends ApiListQuery {
   is_active?: boolean;
 }
 
+export interface VariantWriteRequest {
+  assignment: string;
+  number: number;
+  /** Bitta variantga nechta yechim e'lon qilinishi mumkinligi. */
+  max_published_solutions?: number;
+  is_active?: boolean;
+}
+
+export interface VariantsQuery extends ApiListQuery {
+  assignment?: string;
+  is_active?: boolean;
+}
+
+export const VARIANT_ORDERING_OPTIONS = [
+  { value: 'number', label: "Raqami bo'yicha" },
+  { value: '-number', label: "Raqami (teskari)" },
+  { value: '-request_count', label: "Ko'p so'ralganlari" },
+] as const;
+
 /** Variant — topshiriqning raqamlangan varianti. */
 export interface Variant {
   id: string;

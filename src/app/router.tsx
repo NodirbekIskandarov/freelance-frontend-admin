@@ -61,6 +61,10 @@ const AssignmentDetailPage = lazy(async () => ({
   default: (await import('@/features/assignments/AssignmentDetailPage')).AssignmentDetailPage,
 }));
 
+const VariantsPage = lazy(async () => ({
+  default: (await import('@/features/assignments/VariantsPage')).VariantsPage,
+}));
+
 const SubmissionsPage = lazy(async () => ({
   default: (await import('@/features/submissions/SubmissionsPage')).SubmissionsPage,
 }));
@@ -102,7 +106,7 @@ export const router = createBrowserRouter([
       { path: 'fanlar/arizalar', element: <SubjectRequestsPage /> },
       { path: 'topshiriqlar', element: <AssignmentsPage /> },
       { path: 'topshiriqlar/:id', element: <AssignmentDetailPage /> },
-      { path: 'variantlar', element: <PlaceholderPage title="Variantlar" /> },
+      { path: 'variantlar', element: <VariantsPage /> },
 
       {
         path: 'yuborilgan/institutlar',

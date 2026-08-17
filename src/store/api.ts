@@ -29,6 +29,6 @@ export const baseApi = createApi({
       window.location.href = '/login';
     },
   }),
-  tagTypes: ['User', 'Product', 'Institute', 'Subject', 'Task', 'Solution'],
+  tagTypes: ['User', 'Product', 'Institute', 'Subject', 'Task', 'Solution', 'Variant'],
   endpoints: () => ({}),
 });

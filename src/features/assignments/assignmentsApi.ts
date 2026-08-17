@@ -5,6 +5,8 @@ import type {
   AssignmentWriteRequest,
   Subject,
   Variant,
+  VariantsQuery,
+  VariantWriteRequest,
 } from '@/shared/types/assignments';
 import { baseApi } from '@/store/api';
 
@@ -62,6 +64,32 @@ export const assignmentsApi = baseApi.injectEndpoints({
       query: (params) => ({ url: '/subjects/', params }),
       providesTags: ['Subject'],
     }),
+
+    getVariants: build.query<ApiPaginated<Variant>, VariantsQuery>({
+      query: (params) => ({ url: '/variants/', params }),
+      providesTags: (result) => [
+        { type: 'Variant' as const, id: 'LIST' },
+        ...(result?.results ?? []).map((item) => ({ type: 'Variant' as const, id: item.id })),
+      ],
+    }),
+
+    createVariant: build.mutation<Variant, VariantWriteRequest>({
+      query: (body) => ({ url: '/variants/', method: 'POST', body }),
+      invalidatesTags: [{ type: 'Variant', id: 'LIST' }],
+    }),
+
+    updateVariant: build.mutation<Variant, { id: string } & Partial<VariantWriteRequest>>({
+      query: ({ id, ...body }) => ({ url: `/variants/${id}/`, method: 'PATCH', body }),
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: 'Variant', id },
+        { type: 'Variant', id: 'LIST' },
+      ],
+    }),
+
+    deleteVariant: build.mutation<void, string>({
+      query: (id) => ({ url: `/variants/${id}/`, method: 'DELETE' }),
+      invalidatesTags: [{ type: 'Variant', id: 'LIST' }],
+    }),
   }),
 });
 
@@ -73,4 +101,8 @@ export const {
   useDeleteAssignmentMutation,
   useGetAssignmentVariantsQuery,
   useGetSubjectsQuery,
+  useGetVariantsQuery,
+  useCreateVariantMutation,
+  useUpdateVariantMutation,
+  useDeleteVariantMutation,
 } = assignmentsApi;
