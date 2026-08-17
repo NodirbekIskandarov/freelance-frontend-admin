@@ -25,6 +25,6 @@ Thumbs.db
 .oxlintcache
 
 Dockerfile
-docker-compose.yml
+docker-compose*.yml
 .dockerignore
 README.md

@@ -1,0 +1,68 @@
+name: Deploy Yopamiz Admin
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # No checkout needed — the deploy pulls the code on the VPS itself.
+      - name: Deploying to VPS via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            set -e
+            cd /var/www/yopamiz-front/freelance-frontend-admin
+
+            # Yangi kodni tortib olish
+            git pull origin main
+
+            # Production compose bilan build qilib ishga tushirish.
+            # (VITE_* qiymatlari serverdagi .env dan build args sifatida olinadi)
+            docker compose -f docker-compose.prod.yml up -d --build
+
+            # Eski va keraksiz docker imijlarni tozalash (serverda joy qolishi uchun)
+            docker image prune -f
+
+      # Deploy natijasini (muvaffaqiyat/xatolik) Telegram guruh mavzusiga yuborish.
+      - name: Notify Telegram
+        if: always()
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TG_THREAD: ${{ secrets.TELEGRAM_THREAD_ID }}
+          STATUS: ${{ job.status }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          set -eu
+          case "$STATUS" in
+            success)   EMOJI="✅"; STATE="muvaffaqiyatli yakunlandi" ;;
+            cancelled) EMOJI="⚠️"; STATE="bekor qilindi" ;;
+            *)         EMOJI="❌"; STATE="xatolik bilan tugadi" ;;
+          esac
+
+          RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          # Commit xabarining faqat 1-qatorini olib, HTML maxsus belgilarini himoyalash.
+          MSG=$(sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g' <<< "${COMMIT_MSG%%$'\n'*}")
+
+          TEXT=$(printf '%s <b>Deploy %s</b>\n\n<b>Repo:</b> %s\n<b>Branch:</b> %s\n<b>Commit:</b> <code>%s</code>\n<b>Xabar:</b> %s\n<b>Muallif:</b> %s\n\n<a href="%s">🔗 Loglarni ochish</a>' \
+            "$EMOJI" "$STATE" "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME" "${GITHUB_SHA:0:7}" "$MSG" "$GITHUB_ACTOR" "$RUN_URL")
+
+          args=(--silent --show-error --fail
+            -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage"
+            -d chat_id="${TG_CHAT}"
+            -d parse_mode="HTML"
+            -d disable_web_page_preview="true"
+            --data-urlencode "text=${TEXT}")
+          # Thread (forum mavzusi) id berilgan bo'lsagina qo'shiladi.
+          [ -n "${TG_THREAD:-}" ] && args+=(-d message_thread_id="${TG_THREAD}")
+
+          curl "${args[@]}"

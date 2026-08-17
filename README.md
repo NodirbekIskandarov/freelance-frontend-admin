@@ -105,3 +105,37 @@ ni o'chirish.
 Figma eksporti `../design/` papkasida (repository'dan tashqarida).
 Ranglar va shriftlar `src/shared/styles/tokens.css` da — hozircha
 vaqtinchalik qiymatlar, `design/tokens/tokens.md` to'lgach almashtiriladi.
+
+## Deploy (CI/CD)
+
+`main` ga push bo'lishi bilan `.github/workflows/deploy.yml` ishga tushadi:
+SSH orqali serverga kiradi, kodni tortadi va konteynerni qayta quradi.
+Natija (muvaffaqiyat yoki xatolik) Telegram guruhiga yuboriladi.
+
+Server manzili: `/var/www/yopamiz-front/freelance-frontend-admin`
+
+GitHub repo secrets (Settings → Secrets and variables → Actions):
+
+| Secret | Nima |
+| --- | --- |
+| `SERVER_HOST` | VPS IP yoki domen |
+| `SERVER_USER` | SSH foydalanuvchi |
+| `SSH_PRIVATE_KEY` | SSH maxfiy kalit (to'liq, `-----BEGIN...` bilan) |
+| `TELEGRAM_BOT_TOKEN` | Bot tokeni |
+| `TELEGRAM_CHAT_ID` | Guruh/chat id |
+| `TELEGRAM_THREAD_ID` | Forum mavzusi id — ixtiyoriy, bo'sh qoldirilsa ishlatilmaydi |
+
+Serverda bir martalik tayyorgarlik:
+
+```bash
+mkdir -p /var/www/yopamiz-front
+cd /var/www/yopamiz-front
+git clone https://github.com/NodirbekIskandarov/freelance-frontend-admin.git
+cd freelance-frontend-admin
+cp .env.prod.example .env   # qiymatlarni to'ldiring
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+`.env` dagi `VITE_*` qiymatlari build paytida bundle'ga yoziladi —
+o'zgartirgandan keyin qayta build kerak (deploy `--build` bilan ishlaydi,
+qo'lda esa `docker compose -f docker-compose.prod.yml up -d --build`).

@@ -1,0 +1,28 @@
+# Production rejimi (serverda CI/CD shu faylni ishlatadi):
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Barcha sozlamalar server'dagi `.env` faylidan olinadi (compose uni avtomatik
+# o'qiydi). VITE_* qiymatlari build paytida bundle ichiga yoziladi — ya'ni
+# `.env` o'zgarsa, konteynerni qayta *build* qilish shart (deploy shuni qiladi),
+# faqat restart yetarli emas.
+services:
+  admin:
+    build:
+      context: .
+      target: prod
+      args:
+        VITE_API_URL: ${VITE_API_URL:?.env da VITE_API_URL ko'rsatilmagan}
+        # Productionda mock API hech qachon yoqilmaydi.
+        VITE_ENABLE_MOCKS: 'false'
+    image: yopamiz-admin:prod
+    container_name: yopamiz-admin
+    restart: unless-stopped
+    ports:
+      # Host porti .env dagi ADMIN_PORT bilan boshqariladi.
+      - '${ADMIN_PORT:-8091}:8091'
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '-', 'http://127.0.0.1:8091/']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
