@@ -8,7 +8,6 @@ import type {
 } from '../types/applications';
 import type { DashboardData } from '../types/dashboard';
 import type { Freelancer, FreelancersListResponse, FreelancerStatus } from '../types/freelancers';
-import type { AdminUser, UsersListResponse, UserStatus } from '../types/users';
 import type { ApplicationDetail } from '../types/applicationDetail';
 import type { ContentOverview } from '../types/content';
 import type {
@@ -45,7 +44,6 @@ import { mockApplications, universities } from './applications';
 import { mockDashboard } from './dashboard';
 import { mockUsers } from './data';
 import { institutes, mockFreelancers, specialities } from './freelancers';
-import { mockAdminUsers } from './users';
 
 /** Tarmoq kechikishini taqlid qiladi — loading holatlari real ko'rinsin. */
 const LATENCY_MS = 300;
@@ -61,18 +59,6 @@ function paginate<T>(items: T[], page: number, limit: number): Paginated<T> {
       totalPages: Math.max(1, Math.ceil(items.length / limit)),
     },
   };
-}
-
-/** Ustun nomiga qarab saralaydi. Backend ham xuddi shunday qilishi kutiladi. */
-function sortUsers(items: AdminUser[], sortBy: string, order: 'asc' | 'desc'): AdminUser[] {
-  const direction = order === 'asc' ? 1 : -1;
-
-  return [...items].sort((a, b) => {
-    if (sortBy === 'balance') return (a.balance - b.balance) * direction;
-    if (sortBy === 'name') return a.name.localeCompare(b.name, 'uz') * direction;
-    if (sortBy === 'registeredAt') return a.registeredAt.localeCompare(b.registeredAt) * direction;
-    return 0;
-  });
 }
 
 // Handler'lar API manziliga bog'lab yaratiladi.
@@ -498,62 +484,6 @@ export function createHandlers(baseUrl: string) {
     http.get(path(`dashboard`), async () => {
       await delay(LATENCY_MS);
       return HttpResponse.json<DashboardData>(mockDashboard);
-    }),
-
-    http.get(path(`admin/users`), async ({ request }) => {
-      await delay(LATENCY_MS);
-
-      const url = new URL(request.url);
-      const page = Number(url.searchParams.get('page') ?? '1');
-      const limit = Number(url.searchParams.get('limit') ?? '20');
-      const search = url.searchParams.get('search')?.trim().toLowerCase() ?? '';
-      const status = url.searchParams.get('status') ?? 'all';
-      const sortBy = url.searchParams.get('sortBy') ?? '';
-      const sortOrder = url.searchParams.get('sortOrder') === 'asc' ? 'asc' : 'desc';
-
-      let filtered = mockAdminUsers;
-
-      if (status !== 'all') {
-        filtered = filtered.filter((user) => user.status === (status as UserStatus));
-      }
-
-      if (search) {
-        filtered = filtered.filter(
-          (user) =>
-            user.name.toLowerCase().includes(search) ||
-            user.email.toLowerCase().includes(search) ||
-            user.phone.includes(search) ||
-            user.displayId.toLowerCase().includes(search),
-        );
-      }
-
-      if (sortBy) {
-        filtered = sortUsers(filtered, sortBy, sortOrder);
-      }
-
-      const start = (page - 1) * limit;
-
-      return HttpResponse.json<UsersListResponse>({
-        items: filtered.slice(start, start + limit),
-        pagination: {
-          page,
-          limit,
-          total: filtered.length,
-          totalPages: Math.max(1, Math.ceil(filtered.length / limit)),
-        },
-        // Statistika dizayndagi qiymatlar — ular butun platforma bo'yicha,
-        // filtrga bog'liq emas.
-        stats: {
-          total: 12_482,
-          totalDeltaThisMonth: 245,
-          addedToday: 56,
-          addedTodayDelta: 12,
-          active: 11_258,
-          activePercent: '90.2%',
-          blocked: 324,
-          blockedPercent: '2.6%',
-        },
-      });
     }),
 
     /*

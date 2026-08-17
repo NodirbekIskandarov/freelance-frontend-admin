@@ -17,6 +17,10 @@ services:
     image: yopamiz-admin:prod
     container_name: yopamiz-admin
     restart: unless-stopped
+    environment:
+      # Konteyner ichidagi nginx `/api/` ni shu manzilga proksilaydi.
+      # Faqat VITE_API_URL nisbiy bo'lganda ishlatiladi.
+      API_UPSTREAM: ${API_UPSTREAM:-https://api.yopamiz.uz}
     ports:
       # Host porti .env dagi ADMIN_PORT bilan boshqariladi.
       - '${ADMIN_PORT:-8091}:8091'
