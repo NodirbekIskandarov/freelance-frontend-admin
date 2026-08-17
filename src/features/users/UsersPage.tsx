@@ -1,155 +1,182 @@
-import {
-  CircleX,
-  Download,
-  Eye,
-  Filter,
-  Lock,
-  Pencil,
-  Plus,
-  UserPlus,
-  Users,
-  UserRoundCheck,
-} from 'lucide-react';
+import { CircleCheck, CircleX, Clock, Lock, Users, UserRoundCheck } from 'lucide-react';
 import { useState } from 'react';
 
 import { Avatar } from '@/components/ui/Avatar';
-import { StatusBadge } from '@/components/ui/Badge';
-import { Button, IconButton } from '@/components/ui/Button';
+import { Badge, type BadgeTone } from '@/components/ui/Badge';
+import { IconButton } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Select } from '@/components/ui/Select';
 import { StatCard } from '@/components/ui/StatCard';
-import { Table, type Column, type SortState } from '@/components/ui/Table';
-import { formatSom } from '@/lib/format';
+import { Table, type Column } from '@/components/ui/Table';
+import { formatDateTime, formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { getApiErrorMessage } from '@/shared/api';
-import type { AdminUser, UserStatus } from '@/shared/types/users';
+import {
+  USER_ORDERING_OPTIONS,
+  USER_STATUS_LABELS,
+  type AdminUserAccount,
+} from '@/shared/types/adminUsers';
+import type { UserStatus } from '@/shared/types/auth';
 
-import { useGetUsersQuery } from './usersApi';
+import { useActivateUserMutation, useGetAdminUsersQuery } from './adminUsersApi';
+import { BlockUserModal } from './BlockUserModal';
 
 const statusOptions = [
   { value: 'all', label: 'Barcha statuslar' },
-  { value: 'Faol', label: 'Faol' },
-  { value: 'Kutilmoqda', label: 'Kutilmoqda' },
-  { value: 'Bloklangan', label: 'Bloklangan' },
+  { value: 'active', label: 'Faol' },
+  { value: 'pending', label: 'Kutilmoqda' },
+  { value: 'blocked', label: 'Bloklangan' },
+  { value: 'deleted', label: "O'chirilgan" },
 ];
 
-const dateOptions = [{ value: 'all', label: "Ro'yxatdan o'tgan sana" }];
-const balanceOptions = [{ value: 'all', label: "Balans oralig'i" }];
+const statusTones: Record<UserStatus, BadgeTone> = {
+  active: 'success',
+  pending: 'warning',
+  blocked: 'danger',
+  deleted: 'neutral',
+};
+
+/**
+ * Ko'rsatkichlar uchun alohida endpoint yo'q, shuning uchun ular
+ * status filtri bilan yengil so'rovlardan olinadi: `page_size=1` —
+ * bizga faqat `count` kerak, qatorlar emas.
+ */
+function useStatusCount(status?: UserStatus) {
+  const { data } = useGetAdminUsersQuery({ page_size: 1, ...(status ? { status } : {}) });
+  return data?.count;
+}
+
+function statValue(value: number | undefined): string {
+  return value === undefined ? '—' : formatSom(value);
+}
 
 export function UsersPage() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
   const [status, setStatus] = useState<UserStatus | 'all'>('all');
+  const [ordering, setOrdering] = useState<string>('-created_at');
   const [search, setSearch] = useState('');
-  const [sort, setSort] = useState<SortState | undefined>();
+  const [blockTarget, setBlockTarget] = useState<AdminUserAccount | null>(null);
 
   // Har harf uchun so'rov yubormaslik kerak — foydalanuvchi yozib
   // bo'lgandan keyin bitta so'rov ketadi.
   const debouncedSearch = useDebouncedValue(search, 350);
 
-  const { data, isLoading, isFetching, error } = useGetUsersQuery({
+  const { data, isLoading, isFetching, error } = useGetAdminUsersQuery({
     page,
-    limit: perPage,
-    status,
-    search: debouncedSearch || undefined,
-    sortBy: sort?.key,
-    sortOrder: sort?.direction,
+    page_size: perPage,
+    ordering,
+    ...(status !== 'all' ? { status } : {}),
+    ...(debouncedSearch ? { search: debouncedSearch } : {}),
   });
 
-  const handleSort = (key: string) => {
-    setSort((current) =>
-      current?.key === key
-        ? { key, direction: current.direction === 'asc' ? 'desc' : 'asc' }
-        : { key, direction: 'desc' },
-    );
-    setPage(1);
-  };
+  const totalCount = useStatusCount();
+  const activeCount = useStatusCount('active');
+  const pendingCount = useStatusCount('pending');
+  const blockedCount = useStatusCount('blocked');
 
-  const columns: Column<AdminUser>[] = [
+  const [activateUser, { isLoading: isActivating, error: activateError }] =
+    useActivateUserMutation();
+
+  const columns: Column<AdminUserAccount>[] = [
     {
-      key: 'displayId',
-      header: 'User ID',
-      cell: (row) => <span className="whitespace-nowrap text-fg-soft">{row.displayId}</span>,
-    },
-    {
-      key: 'name',
-      header: 'Ism familiya',
+      key: 'full_name',
+      header: 'Foydalanuvchi',
       cell: (row) => (
         <span className="flex items-center gap-3">
-          <Avatar name={row.name} src={row.avatarUrl} size="sm" />
-          <span className="whitespace-nowrap text-fg">{row.name}</span>
+          <Avatar name={row.full_name || row.email} size="sm" />
+          <span className="min-w-0">
+            <span className="block truncate text-fg">{row.full_name || '—'}</span>
+            <span className="block truncate text-xs text-fg-muted">{row.phone ?? '—'}</span>
+          </span>
         </span>
       ),
-    },
-    {
-      key: 'phone',
-      header: 'Telefon',
-      cell: (row) => <span className="whitespace-nowrap">{row.phone}</span>,
     },
     {
       key: 'email',
       header: 'Email',
-      // Uzun email butun jadvalni kengaytirib yubormasligi kerak.
-      className: 'max-w-[220px] truncate',
+      className: 'max-w-[220px]',
       cell: (row) => (
         <span className="block truncate" title={row.email}>
-          {row.email}
+          {row.email || '—'}
         </span>
       ),
     },
     {
-      key: 'registeredAt',
-      header: "Ro'yxatdan o'tgan sana",
-      sortable: true,
-      cell: (row) => <span className="whitespace-nowrap">{row.registeredAt}</span>,
+      key: 'verified',
+      header: 'Tasdiqlangan',
+      cell: (row) => (
+        <span className="flex flex-wrap gap-1.5">
+          <Badge tone={row.phone_verified ? 'success' : 'neutral'}>Telefon</Badge>
+          <Badge tone={row.email_verified ? 'success' : 'neutral'}>Email</Badge>
+        </span>
+      ),
     },
     {
-      key: 'balance',
-      header: "Balans (so'm)",
-      cell: (row) => <span className="whitespace-nowrap">{formatSom(row.balance)}</span>,
+      key: 'created_at',
+      header: "Ro'yxatdan o'tgan",
+      cell: (row) => (
+        <span className="whitespace-nowrap text-fg-muted">{formatDateTime(row.created_at)}</span>
+      ),
+    },
+    {
+      key: 'last_login_at',
+      header: 'Oxirgi kirish',
+      cell: (row) => (
+        <span className="whitespace-nowrap text-fg-muted">{formatDateTime(row.last_login_at)}</span>
+      ),
     },
     {
       key: 'status',
       header: 'Status',
-      cell: (row) => <StatusBadge status={row.status} />,
+      cell: (row) => (
+        <span className="flex items-center gap-1.5">
+          <Badge tone={statusTones[row.status]}>{USER_STATUS_LABELS[row.status]}</Badge>
+          {row.is_staff && <Badge tone="primary">Xodim</Badge>}
+        </span>
+      ),
     },
     {
       key: 'actions',
       header: 'Amallar',
+      align: 'right',
       cell: (row) => (
-        <span className="flex items-center gap-2">
-          <IconButton label={`${row.name} — ko'rish`} tone="success" size="sm">
-            <Eye className="size-4" strokeWidth={1.75} />
-          </IconButton>
-          <IconButton label={`${row.name} — tahrirlash`} tone="warning" size="sm">
-            <Pencil className="size-4" strokeWidth={1.75} />
-          </IconButton>
-          <IconButton label={`${row.name} — bloklash`} tone="danger" size="sm">
-            <Lock className="size-4" strokeWidth={1.75} />
-          </IconButton>
+        <span className="flex items-center justify-end gap-2">
+          {row.status !== 'active' && (
+            <IconButton
+              label={`${row.full_name || row.email} — faollashtirish`}
+              tone="success"
+              size="sm"
+              disabled={isActivating}
+              onClick={() => void activateUser(row.id)}
+            >
+              <CircleCheck className="size-4" strokeWidth={1.75} />
+            </IconButton>
+          )}
+
+          {row.status !== 'blocked' && (
+            <IconButton
+              label={`${row.full_name || row.email} — bloklash`}
+              tone="danger"
+              size="sm"
+              onClick={() => setBlockTarget(row)}
+            >
+              <Lock className="size-4" strokeWidth={1.75} />
+            </IconButton>
+          )}
         </span>
       ),
     },
   ];
-
-  const stats = data?.stats;
 
   return (
     <>
       <PageHeader
         title="Foydalanuvchilar"
         breadcrumbs={[{ label: 'Bosh sahifa', to: '/' }, { label: 'Foydalanuvchilar' }]}
-        actions={
-          <>
-            <Button variant="secondary" icon={<Download className="size-4" strokeWidth={1.75} />}>
-              Export (Excel)
-            </Button>
-            <Button icon={<Plus className="size-4" strokeWidth={2} />}>Yangi foydalanuvchi</Button>
-          </>
-        }
       />
 
       {error ? (
@@ -158,42 +185,36 @@ export function UsersPage() {
         </div>
       ) : (
         <>
+          {activateError && (
+            <div className="mb-4 rounded-card border border-danger/25 bg-danger/10 p-4 text-sm text-danger">
+              {getApiErrorMessage(activateError)}
+            </div>
+          )}
+
           <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
               label="Jami foydalanuvchilar"
-              value={stats ? formatSom(stats.total) : '—'}
+              value={statValue(totalCount)}
               icon={Users}
               tone="success"
-              trend={
-                stats
-                  ? { direction: 'up', value: String(stats.totalDeltaThisMonth), note: 'bu oy' }
-                  : undefined
-              }
             />
             <StatCard
-              label="Bugun qo‘shilganlar"
-              value={stats ? String(stats.addedToday) : '—'}
-              icon={UserPlus}
-              tone="info"
-              trend={
-                stats
-                  ? { direction: 'up', value: String(stats.addedTodayDelta), note: 'bugun' }
-                  : undefined
-              }
-            />
-            <StatCard
-              label="Faol foydalanuvchilar"
-              value={stats ? formatSom(stats.active) : '—'}
+              label="Faol"
+              value={statValue(activeCount)}
               icon={UserRoundCheck}
               tone="purple"
-              caption={stats ? { text: stats.activePercent, tone: 'success' } : undefined}
             />
             <StatCard
-              label="Bloklangan foydalanuvchilar"
-              value={stats ? formatSom(stats.blocked) : '—'}
+              label="Kutilmoqda"
+              value={statValue(pendingCount)}
+              icon={Clock}
+              tone="info"
+            />
+            <StatCard
+              label="Bloklangan"
+              value={statValue(blockedCount)}
               icon={CircleX}
               tone="danger"
-              caption={stats ? { text: stats.blockedPercent, tone: 'danger' } : undefined}
             />
           </section>
 
@@ -208,10 +229,19 @@ export function UsersPage() {
               }}
               className="w-48"
             />
-            <Select aria-label="Sana bo'yicha filtr" options={dateOptions} className="w-56" />
-            <Select aria-label="Balans bo'yicha filtr" options={balanceOptions} className="w-48" />
 
-            <div className="ml-auto flex items-center gap-3">
+            <Select
+              aria-label="Saralash"
+              options={[...USER_ORDERING_OPTIONS]}
+              value={ordering}
+              onChange={(event) => {
+                setOrdering(event.target.value);
+                setPage(1);
+              }}
+              className="w-52"
+            />
+
+            <div className="ml-auto">
               <SearchInput
                 value={search}
                 onChange={(event) => {
@@ -220,40 +250,35 @@ export function UsersPage() {
                 }}
                 className="w-72"
               />
-              <Button variant="secondary" icon={<Filter className="size-4" strokeWidth={1.75} />}>
-                Filtr
-              </Button>
             </div>
           </section>
 
           <Card className="mt-4 overflow-hidden">
             <Table
               columns={columns}
-              rows={data?.items ?? []}
+              rows={data?.results ?? []}
               rowKey={(row) => row.id}
               isLoading={isLoading || isFetching}
               skeletonRows={perPage > 20 ? 20 : perPage}
-              sort={sort}
-              onSortChange={handleSort}
               emptyMessage="Bunday foydalanuvchi topilmadi"
             />
 
             <Pagination
               page={page}
-              totalPages={data?.pagination.totalPages ?? 1}
+              totalPages={data?.total_pages ?? 1}
               onPageChange={setPage}
               perPage={perPage}
               onPerPageChange={(value) => {
                 setPerPage(value);
                 setPage(1);
               }}
-              summary={
-                data ? `Jami ${formatSom(data.pagination.total)} ta foydalanuvchi` : undefined
-              }
+              summary={data ? `Jami ${formatSom(data.count)} ta foydalanuvchi` : undefined}
             />
           </Card>
         </>
       )}
+
+      <BlockUserModal user={blockTarget} onClose={() => setBlockTarget(null)} />
     </>
   );
 }

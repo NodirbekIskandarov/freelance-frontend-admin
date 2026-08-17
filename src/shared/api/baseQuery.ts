@@ -91,10 +91,18 @@ export function createAppBaseQuery({
     },
   });
 
-  /** `fetchBaseQuery` ustiga konvertni ochish qatlami. */
+  /**
+   * `fetchBaseQuery` ustiga konvertni ochish qatlami.
+   *
+   * Muvaffaqiyat shoxi ATAYLAB yangidan quriladi, `{...result}` bilan
+   * emas: RTK Query natijasi diskriminatsiyalangan birlashma va spread
+   * `data` bilan `error` ni bir obyektda uchratib yuboradi — tip
+   * darajasida ham, mantiqan ham noto'g'ri holat.
+   */
   const rawBaseQuery: AppBaseQuery = async (args, api, extraOptions) => {
     const result = await fetchQuery(args, api, extraOptions);
-    return 'data' in result ? { ...result, data: unwrap(result.data) } : result;
+    if (result.error) return result;
+    return { data: unwrap(result.data), meta: result.meta };
   };
 
   let refreshInFlight: Promise<boolean> | null = null;
