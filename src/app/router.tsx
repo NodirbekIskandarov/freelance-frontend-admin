@@ -38,7 +38,7 @@ const ContentPage = lazy(async () => ({
 }));
 
 const InstitutesPage = lazy(async () => ({
-  default: (await import('@/features/institutes/InstitutesPage')).InstitutesPage,
+  default: (await import('@/features/catalogue/InstitutesPage')).InstitutesPage,
 }));
 
 const InstituteRequestsPage = lazy(async () => ({
@@ -46,7 +46,7 @@ const InstituteRequestsPage = lazy(async () => ({
 }));
 
 const SubjectsPage = lazy(async () => ({
-  default: (await import('@/features/subjects/SubjectsPage')).SubjectsPage,
+  default: (await import('@/features/catalogue/SubjectsPage')).SubjectsPage,
 }));
 
 const SubjectRequestsPage = lazy(async () => ({

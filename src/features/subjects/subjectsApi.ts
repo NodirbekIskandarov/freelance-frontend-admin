@@ -1,40 +1,23 @@
 import type {
-  InstitutesPanelResponse,
   SubjectRequestsListQuery,
   SubjectRequestsListResponse,
-  SubjectsListResponse,
 } from '@/shared/types/subjects';
 import { baseApi } from '@/store/api';
 
-interface InstitutePanelQuery {
-  page: number;
-  limit: number;
-  search?: string;
-}
-
-interface SubjectsQuery {
-  instituteId: string;
-  page: number;
-  limit: number;
-  search?: string;
-  course?: string;
-}
-
-export const subjectsApi = baseApi.injectEndpoints({
+/**
+ * Fan qo'shish ARIZALARI — hali mock.
+ *
+ * Fanlarning o'zi haqiqiy API'ga ko'chdi
+ * (`features/catalogue/catalogueApi.ts`), lekin backendda arizalarni
+ * ko'rish/tasdiqlash endpoint'i yo'q: sxemada faqat foydalanuvchi
+ * yuboradigan `POST /subject-requests/` bor.
+ *
+ * Diqqat: bu yerdagi endpoint nomi `getSubjectRequests` — `getSubjects`
+ * nomi katalog API'sida band. RTK Query bir xil nomdagi ikkinchi
+ * endpoint'ni jimgina tashlab ketadi.
+ */
+export const subjectRequestsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    getInstitutePanel: build.query<InstitutesPanelResponse, InstitutePanelQuery>({
-      query: (params) => ({ url: '/admin/institute-summaries', params }),
-      providesTags: ['Institute'],
-    }),
-
-    getSubjects: build.query<SubjectsListResponse, SubjectsQuery>({
-      query: ({ instituteId, ...params }) => ({
-        url: `/admin/institutes/${instituteId}/subjects`,
-        params,
-      }),
-      providesTags: ['Subject'],
-    }),
-
     getSubjectRequests: build.query<SubjectRequestsListResponse, SubjectRequestsListQuery>({
       query: (params) => ({ url: '/admin/subject-requests', params }),
       providesTags: ['Subject'],
@@ -42,5 +25,4 @@ export const subjectsApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetInstitutePanelQuery, useGetSubjectsQuery, useGetSubjectRequestsQuery } =
-  subjectsApi;
+export const { useGetSubjectRequestsQuery } = subjectRequestsApi;
