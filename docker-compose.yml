@@ -37,3 +37,4 @@ services:
       # nginx shabloni ishga tushishda shu manzilga proksi ochadi.
       API_UPSTREAM: ${API_UPSTREAM:-https://api.yopamiz.uz}
     restart: unless-stopped
+
