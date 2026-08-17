@@ -14,10 +14,21 @@ export const baseApi = createApi({
   baseQuery: createAppBaseQuery({
     baseUrl: env.apiUrl,
     tokens: tokenStore,
+    /*
+     * Refresh ham ishlamadi — seansni butunlay tozalaymiz.
+     * `tokenStore.clear()` ni `baseQuery` o'zi chaqiradi, bu yerda esa
+     * saqlangan foydalanuvchi yozuvi o'chiriladi: aks holda login
+     * sahifasida eski admin nomi ko'rinib turardi.
+     */
     onAuthFailure: () => {
+      try {
+        window.localStorage.removeItem('admin.auth.user');
+      } catch {
+        // ignore
+      }
       window.location.href = '/login';
     },
   }),
-  tagTypes: ['User', 'Product', 'Institute', 'Subject', 'Task'],
+  tagTypes: ['User', 'Product', 'Institute', 'Subject', 'Task', 'Solution'],
   endpoints: () => ({}),
 });

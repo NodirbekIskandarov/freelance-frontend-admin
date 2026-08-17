@@ -22,7 +22,9 @@ CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "8091"]
 # shuning uchun ular runtime env emas, build arg sifatida keladi.
 FROM node:22-alpine AS build
 WORKDIR /app
-ARG VITE_API_URL=http://localhost:3000/api
+# Nisbiy manzil: so'rov admin domeniga ketadi va nginx uni backendga
+# uzatadi (docker/default.conf.template). Shunda CORS umuman kerak emas.
+ARG VITE_API_URL=/api/v1
 ARG VITE_ENABLE_MOCKS=false
 ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_ENABLE_MOCKS=$VITE_ENABLE_MOCKS
@@ -33,7 +35,15 @@ RUN npm run build
 # ─── prod ─────────────────────────────────────────────────────────────────────
 # Statik build nginx orqali beriladi.
 FROM nginx:1.27-alpine AS prod
-COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+# `/etc/nginx/templates/*.template` — nginx image'ining o'z mexanizmi:
+# konteyner ishga tushganda envsubst bilan `/etc/nginx/conf.d/` ga
+# yoziladi. Shu sababli backend manzili build'ga qotib qolmaydi.
+#
+# `DOLLAR` — nginx'ning o'z `$uri` kabi o'zgaruvchilarini envsubst
+# yeb qo'ymasligi uchun; shablonda ular `${DOLLAR}uri` ko'rinishida.
+ENV API_UPSTREAM=https://api.yopamiz.uz
+ENV DOLLAR=$
+COPY docker/default.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 8091
 CMD ["nginx", "-g", "daemon off;"]

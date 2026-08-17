@@ -1,6 +1,6 @@
 import { delay, http, HttpResponse } from 'msw';
 
-import type { AuthTokens, LoginResponse, Paginated, User } from '../types/api';
+import type { Paginated, User } from '../types/api';
 import type {
   ApplicationsListResponse,
   ApplicationStatus,
@@ -49,11 +49,6 @@ import { mockAdminUsers } from './users';
 
 /** Tarmoq kechikishini taqlid qiladi — loading holatlari real ko'rinsin. */
 const LATENCY_MS = 300;
-
-const tokens: AuthTokens = {
-  accessToken: 'mock-access-token',
-  refreshToken: 'mock-refresh-token',
-};
 
 function paginate<T>(items: T[], page: number, limit: number): Paginated<T> {
   const start = (page - 1) * limit;
@@ -561,32 +556,15 @@ export function createHandlers(baseUrl: string) {
       });
     }),
 
-    http.post(path(`auth/login`), async ({ request }) => {
-      await delay(LATENCY_MS);
-
-      const body = (await request.json()) as { email?: string; password?: string };
-      const user = mockUsers.find((candidate) => candidate.email === body.email);
-
-      if (!user || !body.password) {
-        return HttpResponse.json({ message: 'Email yoki parol noto‘g‘ri' }, { status: 401 });
-      }
-
-      return HttpResponse.json<LoginResponse>({ ...tokens, user });
-    }),
-
-    http.post(path(`auth/refresh`), async () => {
-      await delay(LATENCY_MS);
-      return HttpResponse.json<AuthTokens>(tokens);
-    }),
-
-    http.get(path(`auth/me`), async () => {
-      await delay(LATENCY_MS);
-      const user = mockUsers[0];
-      if (!user) {
-        return HttpResponse.json({ message: 'Foydalanuvchi topilmadi' }, { status: 404 });
-      }
-      return HttpResponse.json<User>(user);
-    }),
+    /*
+     * Auth handler'lari OLIB TASHLANDI — kirish endi haqiqiy backendga
+     * ketadi (`/api/v1/auth/login/`). Ular qolganda mock soxta token
+     * qaytarib, moderatsiya endpoint'lari 401 bilan yiqilardi.
+     *
+     * Diqqat: mock yo'llari oxirida slash yo'q (`auth/login`), haqiqiy
+     * backendniki bor (`auth/login/`) — shu sababli ular baribir
+     * to'qnashmasdi, lekin ikki xil "kirish" bo'lishi chalkashtirardi.
+     */
 
     http.get(path(`users`), async ({ request }) => {
       await delay(LATENCY_MS);

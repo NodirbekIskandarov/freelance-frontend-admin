@@ -1,0 +1,52 @@
+server {
+    listen 8091;
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml;
+    gzip_min_length 1024;
+
+    # API backendga proksilanadi.
+    #
+    # Bu blok SHART: `VITE_API_URL` nisbiy (`/api/v1`), shuning uchun
+    # brauzer so'rovni admin domeniga yuboradi. Proksisiz u pastdagi SPA
+    # qoidasiga tushib, JSON o'rniga `index.html` qaytarardi.
+    #
+    # Nisbiy manzil ataylab tanlangan: so'rov same-origin bo'lgani uchun
+    # backendga har bir admin domenini CORS ro'yxatiga qo'shish shart emas.
+    location /api/ {
+        proxy_pass ${API_UPSTREAM};
+        proxy_set_header Host ${DOLLAR}proxy_host;
+        proxy_set_header X-Real-IP ${DOLLAR}remote_addr;
+        proxy_set_header X-Forwarded-For ${DOLLAR}proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto ${DOLLAR}scheme;
+
+        # Fayl yuklash/yuklab olish uchun — standart 1 MB yetmaydi.
+        client_max_body_size 25m;
+    }
+
+    # Hash'langan asset'lar — uzoq muddatli cache.
+    location /assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        try_files ${DOLLAR}uri =404;
+    }
+
+    # Service worker hech qachon cache'lanmaydi.
+    location = /mockServiceWorker.js {
+        add_header Cache-Control "no-store";
+        try_files ${DOLLAR}uri =404;
+    }
+
+    # SPA: barcha marshrutlar index.html ga (react-router client-side routing).
+    location / {
+        try_files ${DOLLAR}uri ${DOLLAR}uri/ /index.html;
+    }
+
+    location = /index.html {
+        add_header Cache-Control "no-store";
+    }
+}
