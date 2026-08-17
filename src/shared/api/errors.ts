@@ -18,6 +18,71 @@ function isApiErrorBody(value: unknown): value is ApiErrorBody {
 }
 
 /**
+ * Backend xato matnlari inglizcha keladi, panel esa o'zbekcha.
+ *
+ * Faqat HAQIQATDA kuzatilgan kodlar tarjima qilinadi — qolganlari uchun
+ * server matni ko'rsatiladi. Taxminiy kodlarni oldindan yozib qo'yish
+ * foydasiz: ular hech qachon mos kelmasligi mumkin, lekin ro'yxatni
+ * eskirgan ko'rinishga olib keladi.
+ */
+const ERROR_CODE_MESSAGES: Record<string, string> = {
+  authentication_failed: "Telefon raqam yoki parol noto'g'ri",
+  not_authenticated: 'Avtorizatsiya talab qilinadi',
+  permission_denied: "Bu amal uchun ruxsatingiz yo'q",
+  not_found: 'Ma‘lumot topilmadi',
+};
+
+function getErrorCode(data: unknown): string | null {
+  if (typeof data !== 'object' || data === null) return null;
+
+  const errors = (data as Record<string, unknown>).errors;
+  if (typeof errors !== 'object' || errors === null) return null;
+
+  const code = (errors as Record<string, unknown>).code;
+  return typeof code === 'string' ? code : null;
+}
+
+/** Obyekt ichidan birinchi ma'noli matnni topadi (satr yoki satrlar massivi). */
+function firstMessage(body: Record<string, unknown>): string | null {
+  if (typeof body.detail === 'string' && body.detail.trim() !== '') return body.detail;
+
+  for (const value of Object.values(body)) {
+    if (typeof value === 'string' && value.trim() !== '') return value;
+    if (Array.isArray(value)) {
+      const first = value.find((item) => typeof item === 'string' && item.trim() !== '');
+      if (typeof first === 'string') return first;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Backend xato tanasidan matn ajratadi.
+ *
+ * Server xatolarni konvertga o'raydi:
+ *   `{"success": false, "data": null,
+ *     "errors": {"detail": "Invalid phone or password.", "code": "…"}}`
+ * Validatsiya xatosida `errors` ichida maydon nomlari bo'ladi:
+ *   `{"errors": {"price": ["…"]}}`.
+ *
+ * Konvertsiz DRF shakli (`{"detail": …}`) ham qo'llab-quvvatlanadi —
+ * ba'zi xatolar (masalan 404 sahifasi) middleware'gacha yetib bormaydi.
+ */
+function getServerErrorMessage(data: unknown): string | null {
+  if (typeof data !== 'object' || data === null) return null;
+
+  const body = data as Record<string, unknown>;
+
+  if (typeof body.errors === 'object' && body.errors !== null) {
+    const fromEnvelope = firstMessage(body.errors as Record<string, unknown>);
+    if (fromEnvelope) return fromEnvelope;
+  }
+
+  return firstMessage(body);
+}
+
+/**
  * RTK Query xatosidan foydalanuvchiga ko'rsatiladigan matn ajratadi.
  * Xato tanasi backend'dan har xil shaklda kelishi mumkin, shuning uchun
  * bu yerda bir joyda normallashtiriladi — UI kodida `error as any` bo'lmaydi.
@@ -38,6 +103,13 @@ export function getApiErrorMessage(error: unknown, fallback = 'Nimadir xato ketd
     if (isApiErrorBody(error.data)) {
       return error.data.message;
     }
+
+    const code = getErrorCode(error.data);
+    if (code && ERROR_CODE_MESSAGES[code]) return ERROR_CODE_MESSAGES[code];
+
+    const serverMessage = getServerErrorMessage(error.data);
+    if (serverMessage) return serverMessage;
+
     if (typeof error.data === 'string' && error.data.trim() !== '') {
       return error.data;
     }

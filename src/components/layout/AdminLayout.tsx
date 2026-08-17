@@ -1,13 +1,25 @@
 import { Suspense, useState } from 'react';
-import { Outlet } from 'react-router';
+import { Navigate, Outlet } from 'react-router';
 
 import { cn } from '@/lib/cn';
+import { tokenStore } from '@/store/api';
 
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 
 export function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  /*
+   * Token yo'q bo'lsa sahifa umuman render qilinmaydi.
+   *
+   * Faqat 401 javobiga tayanish yetarli emas edi: token'siz ochilgan
+   * sahifa avval bo'sh jadval va "0" ko'rsatkichlarni chizib, keyingina
+   * login sahifasiga sakrardi. Token bor-yo'g'i esa lokal tekshiruv —
+   * haqiqiy ruxsatni backend beradi va yaroqsiz token'da `baseQuery`
+   * `onAuthFailure` orqali baribir bu yerga qaytaradi.
+   */
+  if (!tokenStore.getAccessToken()) return <Navigate to="/login" replace />;
 
   return (
     <div className="flex h-dvh overflow-hidden bg-canvas">

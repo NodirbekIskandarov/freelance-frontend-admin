@@ -69,6 +69,14 @@ const SubmissionDetailPage = lazy(async () => ({
   default: (await import('@/features/submissions/SubmissionDetailPage')).SubmissionDetailPage,
 }));
 
+const SolutionsPage = lazy(async () => ({
+  default: (await import('@/features/solutions/SolutionsPage')).SolutionsPage,
+}));
+
+const SolutionDetailPage = lazy(async () => ({
+  default: (await import('@/features/solutions/SolutionDetailPage')).SolutionDetailPage,
+}));
+
 export const router = createBrowserRouter([
   {
     path: '/login',
@@ -110,6 +118,9 @@ export const router = createBrowserRouter([
         path: 'yuborilgan/javoblar/:instituteId/:subjectId',
         element: <SubmissionDetailPage />,
       },
+
+      { path: 'yechimlar', element: <SolutionsPage /> },
+      { path: 'yechimlar/:id', element: <SolutionDetailPage /> },
 
       { path: 'tasdiqlangan-kontent', element: <PlaceholderPage title="Tasdiqlangan kontent" /> },
       { path: 'sotuv-statistikasi', element: <PlaceholderPage title="Sotuv statistikasi" /> },
