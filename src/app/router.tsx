@@ -53,12 +53,12 @@ const SubjectRequestsPage = lazy(async () => ({
   default: (await import('@/features/subjects/SubjectRequestsPage')).SubjectRequestsPage,
 }));
 
-const TasksPage = lazy(async () => ({
-  default: (await import('@/features/tasks/TasksPage')).TasksPage,
+const AssignmentsPage = lazy(async () => ({
+  default: (await import('@/features/assignments/AssignmentsPage')).AssignmentsPage,
 }));
 
-const SubjectDetailPage = lazy(async () => ({
-  default: (await import('@/features/tasks/SubjectDetailPage')).SubjectDetailPage,
+const AssignmentDetailPage = lazy(async () => ({
+  default: (await import('@/features/assignments/AssignmentDetailPage')).AssignmentDetailPage,
 }));
 
 const SubmissionsPage = lazy(async () => ({
@@ -100,8 +100,8 @@ export const router = createBrowserRouter([
       { path: 'institutlar/arizalar', element: <InstituteRequestsPage /> },
       { path: 'fanlar', element: <SubjectsPage /> },
       { path: 'fanlar/arizalar', element: <SubjectRequestsPage /> },
-      { path: 'topshiriqlar', element: <TasksPage /> },
-      { path: 'topshiriqlar/:subjectId', element: <SubjectDetailPage /> },
+      { path: 'topshiriqlar', element: <AssignmentsPage /> },
+      { path: 'topshiriqlar/:id', element: <AssignmentDetailPage /> },
       { path: 'variantlar', element: <PlaceholderPage title="Variantlar" /> },
 
       {

@@ -24,9 +24,7 @@ import type {
   SubjectsListResponse,
 } from '../types/subjects';
 import { mockInstituteRequests, mockInstitutes, regions } from './institutes';
-import type { InstituteSubjectsResponse, SubjectDetail, SubjectRow } from '../types/tasks';
 import { instituteSummaries, mockSubjectRequests, mockSubjects } from './subjects';
-import { mockInstituteSubjects, mockSubjectDetail } from './tasks';
 import type {
   InstituteSubmissionsResponse,
   SubmissionDetailResponse,
@@ -92,54 +90,6 @@ export function createHandlers(baseUrl: string) {
     http.get(path(`admin/submissions/subjects/:subjectId`), async () => {
       await delay(LATENCY_MS);
       return HttpResponse.json<SubmissionDetailResponse>(mockSubmissionDetail);
-    }),
-
-    http.get(path(`admin/institutes/:instituteId/subject-rows`), async ({ request, params }) => {
-      await delay(LATENCY_MS);
-
-      const url = new URL(request.url);
-      const page = Number(url.searchParams.get('page') ?? '1');
-      const limit = Number(url.searchParams.get('limit') ?? '10');
-      const search = url.searchParams.get('search')?.trim().toLowerCase() ?? '';
-      const course = url.searchParams.get('course') ?? 'all';
-      const semester = url.searchParams.get('semester') ?? 'all';
-      const status = url.searchParams.get('status') ?? 'all';
-
-      const institute =
-        instituteSummaries.find((item) => item.id === params.instituteId) ?? instituteSummaries[0]!;
-
-      let filtered: SubjectRow[] = mockInstituteSubjects;
-      if (course !== 'all') filtered = filtered.filter((item) => String(item.course) === course);
-      if (semester !== 'all') {
-        filtered = filtered.filter((item) => String(item.semester) === semester);
-      }
-      if (status !== 'all') filtered = filtered.filter((item) => item.status === status);
-      if (search) filtered = filtered.filter((item) => item.name.toLowerCase().includes(search));
-
-      const start = (page - 1) * limit;
-
-      return HttpResponse.json<InstituteSubjectsResponse>({
-        institute,
-        items: filtered.slice(start, start + limit),
-        pagination: {
-          page,
-          limit,
-          total: institute.subjectCount,
-          totalPages: Math.max(1, Math.ceil(institute.subjectCount / limit)),
-        },
-        filters: {
-          courses: ['1', '2', '3', '4'],
-          semesters: ['1', '2', '3', '4', '5', '6', '7', '8'],
-          taskTypes: ['Mustaqil ish', 'Amaliy ish', 'Laboratoriya ishi'],
-          statuses: ['Faol', 'Kutilmoqda'],
-        },
-        pendingRequestCount: 18,
-      });
-    }),
-
-    http.get(path(`admin/subjects/:subjectId`), async () => {
-      await delay(LATENCY_MS);
-      return HttpResponse.json<SubjectDetail>(mockSubjectDetail);
     }),
 
     http.get(path(`admin/institute-summaries`), async ({ request }) => {
