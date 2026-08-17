@@ -9,8 +9,10 @@ services:
     ports:
       - '8091:8091'
     environment:
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:3000/api}
+      # Nisbiy manzil — Vite dev proksisi orqali API_UPSTREAM'ga boradi.
+      VITE_API_URL: ${VITE_API_URL:-/api/v1}
       VITE_ENABLE_MOCKS: ${VITE_ENABLE_MOCKS:-true}
+      API_UPSTREAM: ${API_UPSTREAM:-https://api.yopamiz.uz}
     volumes:
       # Kod host'dan ulanadi — HMR ishlaydi.
       - .:/app
@@ -25,10 +27,13 @@ services:
       context: .
       target: prod
       args:
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000/api}
+        VITE_API_URL: ${VITE_API_URL:-/api/v1}
         VITE_ENABLE_MOCKS: 'false'
     image: yopamiz-admin:prod
     container_name: yopamiz-admin-prod
     ports:
       - '8091:8091'
+    environment:
+      # nginx shabloni ishga tushishda shu manzilga proksi ochadi.
+      API_UPSTREAM: ${API_UPSTREAM:-https://api.yopamiz.uz}
     restart: unless-stopped
