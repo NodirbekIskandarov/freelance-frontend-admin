@@ -1,6 +1,5 @@
 import { delay, http, HttpResponse } from 'msw';
 
-import type { Paginated, User } from '../types/api';
 import type {
   ApplicationsListResponse,
   ApplicationStatus,
@@ -35,24 +34,11 @@ import { mockApplicationDetail } from './applicationDetail';
 import { mockContentOverview } from './content';
 import { mockApplications, universities } from './applications';
 import { mockDashboard } from './dashboard';
-import { mockUsers } from './data';
 import { institutes, mockFreelancers, specialities } from './freelancers';
 
 /** Tarmoq kechikishini taqlid qiladi — loading holatlari real ko'rinsin. */
 const LATENCY_MS = 300;
 
-function paginate<T>(items: T[], page: number, limit: number): Paginated<T> {
-  const start = (page - 1) * limit;
-  return {
-    items: items.slice(start, start + limit),
-    pagination: {
-      page,
-      limit,
-      total: items.length,
-      totalPages: Math.max(1, Math.ceil(items.length / limit)),
-    },
-  };
-}
 
 // Handler'lar API manziliga bog'lab yaratiladi.
 //
@@ -347,33 +333,5 @@ export function createHandlers(baseUrl: string) {
      * to'qnashmasdi, lekin ikki xil "kirish" bo'lishi chalkashtirardi.
      */
 
-    http.get(path(`users`), async ({ request }) => {
-      await delay(LATENCY_MS);
-
-      const url = new URL(request.url);
-      const page = Number(url.searchParams.get('page') ?? '1');
-      const limit = Number(url.searchParams.get('limit') ?? '10');
-      const search = url.searchParams.get('search')?.toLowerCase() ?? '';
-
-      const filtered = search
-        ? mockUsers.filter(
-            (user) =>
-              user.name.toLowerCase().includes(search) || user.email.toLowerCase().includes(search),
-          )
-        : mockUsers;
-
-      return HttpResponse.json<Paginated<User>>(paginate(filtered, page, limit));
-    }),
-
-    http.get(path(`users/:id`), async ({ params }) => {
-      await delay(LATENCY_MS);
-
-      const user = mockUsers.find((candidate) => candidate.id === params.id);
-      if (!user) {
-        return HttpResponse.json({ message: 'Foydalanuvchi topilmadi' }, { status: 404 });
-      }
-
-      return HttpResponse.json<User>(user);
-    }),
   ];
 }
