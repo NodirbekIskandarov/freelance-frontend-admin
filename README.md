@@ -14,6 +14,27 @@ npm run dev
 
 `http://localhost:5173`
 
+## Docker
+
+```bash
+docker compose up --build          # dev server → http://localhost:8091
+docker compose --profile prod up --build   # build + nginx → http://localhost:8091
+```
+
+| Servis | Rejim | Izoh |
+|---|---|---|
+| `admin` (default) | Vite dev | HMR, MSW mock'lari ishlaydi |
+| `admin-prod` (`--profile prod`) | nginx + `dist/` | MSW yo'q — real backend kerak |
+
+`VITE_*` o'zgaruvchilar dev'da `environment` orqali, prod'da build arg orqali
+uzatiladi (Vite ularni build paytida bundle'ga yozadi, runtime'da o'qimaydi).
+Qiymatlarni o'zgartirish uchun repo ildizida `.env` fayl yarating:
+
+```
+VITE_API_URL=http://localhost:3000/api
+VITE_ENABLE_MOCKS=true
+```
+
 ## Skriptlar
 
 | Skript | Vazifasi |

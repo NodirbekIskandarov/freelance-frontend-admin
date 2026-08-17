@@ -1,0 +1,34 @@
+services:
+  # Default: dev server. Backend hali yo'q — MSW mock'lari faqat dev'da ishlaydi.
+  admin:
+    build:
+      context: .
+      target: dev
+    image: yopamiz-admin:dev
+    container_name: yopamiz-admin
+    ports:
+      - '8091:8091'
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3000/api}
+      VITE_ENABLE_MOCKS: ${VITE_ENABLE_MOCKS:-true}
+    volumes:
+      # Kod host'dan ulanadi — HMR ishlaydi.
+      - .:/app
+      # node_modules konteyner ichidagisi bo'lib qoladi — host papkasi uni bosmaydi.
+      - /app/node_modules
+    restart: unless-stopped
+
+  # Production build + nginx. `docker compose --profile prod up --build`
+  admin-prod:
+    profiles: ['prod']
+    build:
+      context: .
+      target: prod
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000/api}
+        VITE_ENABLE_MOCKS: 'false'
+    image: yopamiz-admin:prod
+    container_name: yopamiz-admin-prod
+    ports:
+      - '8091:8091'
+    restart: unless-stopped
