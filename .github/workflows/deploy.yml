@@ -4,33 +4,41 @@ on:
   push:
     branches:
       - main
+  # Kerak bo'lsa Actions sahifasidan qo'lda ham ishga tushirish mumkin.
+  workflow_dispatch:
+
+# Ketma-ket push'lar bir vaqtda deploy qilib, bir-birini buzmasligi uchun.
+concurrency:
+  group: deploy-admin
+  cancel-in-progress: false
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    # Runner serverning o'zida ishlaydi — GitHub Actions daqiqalari sarflanmaydi
+    # va SSH kerak emas. Runner o'rnatish: Settings -> Actions -> Runners.
+    runs-on: self-hosted
+
+    defaults:
+      run:
+        shell: bash
 
     steps:
-      # No checkout needed — the deploy pulls the code on the VPS itself.
-      - name: Deploying to VPS via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script: |
-            set -e
-            cd /var/www/yopamiz-front/freelance-frontend-admin
+      # Repo runner'ning ish katalogiga emas, /var/www dagi mavjud klonga
+      # tortiladi — konteyner va .env o'sha yerda turadi.
+      - name: Deploy
+        run: |
+          set -e
+          cd /var/www/yopamiz-front/freelance-frontend-admin
 
-            # Yangi kodni tortib olish
-            git pull origin main
+          # Yangi kodni tortib olish
+          git pull origin main
 
-            # Production compose bilan build qilib ishga tushirish.
-            # (VITE_* qiymatlari serverdagi .env dan build args sifatida olinadi)
-            docker compose -f docker-compose.prod.yml up -d --build
+          # Production compose bilan build qilib ishga tushirish.
+          # (VITE_* qiymatlari serverdagi .env dan build args sifatida olinadi)
+          docker compose -f docker-compose.prod.yml up -d --build
 
-            # Eski va keraksiz docker imijlarni tozalash (serverda joy qolishi uchun)
-            docker image prune -f
+          # Eski va keraksiz docker imijlarni tozalash (serverda joy qolishi uchun)
+          docker image prune -f
 
       # Deploy natijasini (muvaffaqiyat/xatolik) Telegram guruh mavzusiga yuborish.
       - name: Notify Telegram
@@ -63,6 +71,8 @@ jobs:
             -d disable_web_page_preview="true"
             --data-urlencode "text=${TEXT}")
           # Thread (forum mavzusi) id berilgan bo'lsagina qo'shiladi.
-          [ -n "${TG_THREAD:-}" ] && args+=(-d message_thread_id="${TG_THREAD}")
+          if [ -n "${TG_THREAD:-}" ]; then
+            args+=(-d message_thread_id="${TG_THREAD}")
+          fi
 
           curl "${args[@]}"

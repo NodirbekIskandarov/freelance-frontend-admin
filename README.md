@@ -109,8 +109,11 @@ vaqtinchalik qiymatlar, `design/tokens/tokens.md` to'lgach almashtiriladi.
 ## Deploy (CI/CD)
 
 `main` ga push bo'lishi bilan `.github/workflows/deploy.yml` ishga tushadi:
-SSH orqali serverga kiradi, kodni tortadi va konteynerni qayta quradi.
-Natija (muvaffaqiyat yoki xatolik) Telegram guruhiga yuboriladi.
+kodni tortadi va konteynerni qayta quradi. Natija (muvaffaqiyat yoki xatolik)
+Telegram guruhiga yuboriladi.
+
+Job **self-hosted runner** da, ya'ni serverning o'zida bajariladi — GitHub
+Actions daqiqalari sarflanmaydi va SSH kaliti kerak emas.
 
 Server manzili: `/var/www/yopamiz-front/freelance-frontend-admin`
 
@@ -118,9 +121,6 @@ GitHub repo secrets (Settings → Secrets and variables → Actions):
 
 | Secret | Nima |
 | --- | --- |
-| `SERVER_HOST` | VPS IP yoki domen |
-| `SERVER_USER` | SSH foydalanuvchi |
-| `SSH_PRIVATE_KEY` | SSH maxfiy kalit (to'liq, `-----BEGIN...` bilan) |
 | `TELEGRAM_BOT_TOKEN` | Bot tokeni |
 | `TELEGRAM_CHAT_ID` | Guruh/chat id |
 | `TELEGRAM_THREAD_ID` | Forum mavzusi id — ixtiyoriy, bo'sh qoldirilsa ishlatilmaydi |
@@ -130,11 +130,40 @@ Serverda bir martalik tayyorgarlik:
 ```bash
 mkdir -p /var/www/yopamiz-front
 cd /var/www/yopamiz-front
-git clone https://github.com/NodirbekIskandarov/freelance-frontend-admin.git
+git clone git@github-admin:NodirbekIskandarov/freelance-frontend-admin.git
 cd freelance-frontend-admin
 cp .env.prod.example .env   # qiymatlarni to'ldiring
 docker compose -f docker-compose.prod.yml up -d --build
 ```
+
+Bunga qo'shimcha ravishda self-hosted runner o'rnatiladi (Settings → Actions →
+Runners → New self-hosted runner), va `svc.sh install` bilan servis qilinadi.
+Runner ishlaydigan foydalanuvchi: `docker` guruhida bo'lishi, yuqoridagi
+katalogga yozish huquqiga va `git pull` uchun deploy key'ga (`~/.ssh/gh_admin`)
+ega bo'lishi kerak.
+
+### Zaxira deploy (cron)
+
+Actions ishlamay qolsa (billing bloki va h.k.) `scripts/autodeploy.sh` serverda
+cron orqali ishlaydi: `origin/main` da yangi commit bo'lsa deploy qiladi va
+natijani Telegram'ga yuboradi. Bir martalik sozlash:
+
+```bash
+# Telegram sozlamalari (repoga tushmaydi)
+cat > /etc/yopamiz-admin-deploy.env <<'EOF'
+TG_TOKEN=<bot tokeni>
+TG_CHAT=<chat id>
+TG_THREAD=<thread id yoki bo'sh>
+EOF
+chmod 600 /etc/yopamiz-admin-deploy.env
+
+# Har 2 daqiqada tekshirish
+( crontab -l 2>/dev/null
+  echo "*/2 * * * * /var/www/yopamiz-front/freelance-frontend-admin/scripts/autodeploy.sh" ) | crontab -
+```
+
+Log: `/var/log/yopamiz-admin-deploy.log`. Actions qayta ishlay boshlagach
+cron'ni `crontab -e` bilan o'chirib qo'ying.
 
 `.env` dagi `VITE_*` qiymatlari build paytida bundle'ga yoziladi —
 o'zgartirgandan keyin qayta build kerak (deploy `--build` bilan ishlaydi,
