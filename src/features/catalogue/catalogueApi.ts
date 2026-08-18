@@ -33,10 +33,7 @@ export const catalogueApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: 'Institute', id: 'LIST' }],
     }),
 
-    updateUniversity: build.mutation<
-      University,
-      { id: string } & Partial<UniversityWriteRequest>
-    >({
+    updateUniversity: build.mutation<University, { id: string } & Partial<UniversityWriteRequest>>({
       query: ({ id, ...body }) => ({ url: `/universities/${id}/`, method: 'PATCH', body }),
       invalidatesTags: (_result, _error, { id }) => [
         { type: 'Institute', id },

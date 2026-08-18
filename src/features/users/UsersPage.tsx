@@ -204,12 +204,7 @@ export function UsersPage() {
               icon={UserRoundCheck}
               tone="purple"
             />
-            <StatCard
-              label="Kutilmoqda"
-              value={statValue(pendingCount)}
-              icon={Clock}
-              tone="info"
-            />
+            <StatCard label="Kutilmoqda" value={statValue(pendingCount)} icon={Clock} tone="info" />
             <StatCard
               label="Bloklangan"
               value={statValue(blockedCount)}

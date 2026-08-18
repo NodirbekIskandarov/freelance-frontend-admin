@@ -78,10 +78,7 @@ export const adminFreelanceApi = baseApi.injectEndpoints({
       ],
     }),
 
-    rejectApplication: build.mutation<
-      AdminFreelancerApplication,
-      { id: string; reason: string }
-    >({
+    rejectApplication: build.mutation<AdminFreelancerApplication, { id: string; reason: string }>({
       query: ({ id, ...body }) => ({
         url: `/admin/freelance/applications/${id}/reject/`,
         method: 'POST',

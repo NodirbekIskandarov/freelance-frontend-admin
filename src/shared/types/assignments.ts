@@ -48,7 +48,7 @@ export interface VariantsQuery extends ApiListQuery {
 
 export const VARIANT_ORDERING_OPTIONS = [
   { value: 'number', label: "Raqami bo'yicha" },
-  { value: '-number', label: "Raqami (teskari)" },
+  { value: '-number', label: 'Raqami (teskari)' },
   { value: '-request_count', label: "Ko'p so'ralganlari" },
 ] as const;
 

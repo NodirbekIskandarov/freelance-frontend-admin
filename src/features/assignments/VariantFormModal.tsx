@@ -63,7 +63,7 @@ export function VariantFormModal({
   const parsedNumber = Number(number);
   const numberError =
     touched && (!number.trim() || Number.isNaN(parsedNumber) || parsedNumber < 1)
-      ? "Variant raqamini kiriting (1 dan boshlab)"
+      ? 'Variant raqamini kiriting (1 dan boshlab)'
       : undefined;
   const assignmentError = touched && !assignment ? 'Topshiriqni tanlang' : undefined;
 

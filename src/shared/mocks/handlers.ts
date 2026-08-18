@@ -1,10 +1,7 @@
 import { delay, http, HttpResponse } from 'msw';
 
 import type { ContentOverview } from '../types/content';
-import type {
-  InstituteRequest,
-  InstituteRequestsListResponse,
-} from '../types/institutes';
+import type { InstituteRequest, InstituteRequestsListResponse } from '../types/institutes';
 import { mockInstituteRequests, regions } from './institutes';
 import type {
   InstituteSubmissionsResponse,
@@ -21,7 +18,6 @@ import { mockContentOverview } from './content';
 
 /** Tarmoq kechikishini taqlid qiladi — loading holatlari real ko'rinsin. */
 const LATENCY_MS = 300;
-
 
 // Handler'lar API manziliga bog'lab yaratiladi.
 //

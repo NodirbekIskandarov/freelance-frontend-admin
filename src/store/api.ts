@@ -42,6 +42,10 @@ export const baseApi = createApi({
     'Freelancer',
     'Request',
     'Report',
+    'Appeal',
+    'Wallet',
+    'Withdrawal',
+    'ExchangeTask',
   ],
   endpoints: () => ({}),
 });

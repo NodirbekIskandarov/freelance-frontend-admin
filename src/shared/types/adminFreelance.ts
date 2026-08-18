@@ -14,13 +14,7 @@ export const REQUEST_STATUS_LABELS: Record<RequestStatus, string> = {
   rejected: 'Rad etilgan',
 };
 
-export const FREELANCER_STATUSES = [
-  'none',
-  'pending',
-  'active',
-  'suspended',
-  'rejected',
-] as const;
+export const FREELANCER_STATUSES = ['none', 'pending', 'active', 'suspended', 'rejected'] as const;
 export type FreelancerStatus = (typeof FREELANCER_STATUSES)[number];
 
 export const FREELANCER_STATUS_LABELS: Record<FreelancerStatus, string> = {
@@ -58,12 +52,7 @@ export const WORK_DIRECTION_LABELS: Record<WorkDirection, string> = {
   other: 'Boshqa',
 };
 
-export const EXPERIENCE_LEVELS = [
-  'beginner',
-  'intermediate',
-  'professional',
-  'expert',
-] as const;
+export const EXPERIENCE_LEVELS = ['beginner', 'intermediate', 'professional', 'expert'] as const;
 export type ExperienceLevel = (typeof EXPERIENCE_LEVELS)[number];
 
 export const EXPERIENCE_LEVEL_LABELS: Record<ExperienceLevel, string> = {

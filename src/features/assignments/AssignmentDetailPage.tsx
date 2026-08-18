@@ -20,7 +20,7 @@ const variantColumns: Column<Variant>[] = [
     key: 'number',
     header: '№',
     className: 'w-16',
-    cell: (row) => <span className="tabular-nums text-fg-soft">{row.number}</span>,
+    cell: (row) => <span className="text-fg-soft tabular-nums">{row.number}</span>,
   },
   {
     key: 'label',

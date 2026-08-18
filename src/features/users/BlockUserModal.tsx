@@ -22,7 +22,10 @@ export function BlockUserModal({
 
     try {
       // Sabab ixtiyoriy — bo'sh bo'lsa umuman yubormaymiz.
-      await blockUser({ id: user.id, ...(reason.trim() ? { reason: reason.trim() } : {}) }).unwrap();
+      await blockUser({
+        id: user.id,
+        ...(reason.trim() ? { reason: reason.trim() } : {}),
+      }).unwrap();
     } catch {
       // Xato quyida ko'rsatiladi.
       return;

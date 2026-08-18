@@ -37,7 +37,7 @@ export function PublishModal({
 
   const priceError =
     touched && !PRICE_PATTERN.test(price.trim())
-      ? "Narxni raqamda kiriting (masalan 25000 yoki 25000.50)"
+      ? 'Narxni raqamda kiriting (masalan 25000 yoki 25000.50)'
       : undefined;
 
   const commissionValue = Number(commission);

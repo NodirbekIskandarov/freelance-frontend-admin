@@ -85,6 +85,22 @@ const SolutionDetailPage = lazy(async () => ({
   default: (await import('@/features/solutions/SolutionDetailPage')).SolutionDetailPage,
 }));
 
+const ExchangeTasksPage = lazy(async () => ({
+  default: (await import('@/features/adminExchange/ExchangeTasksPage')).ExchangeTasksPage,
+}));
+
+const AppealsPage = lazy(async () => ({
+  default: (await import('@/features/adminAppeals/AppealsPage')).AppealsPage,
+}));
+
+const WalletsPage = lazy(async () => ({
+  default: (await import('@/features/adminWallet/WalletsPage')).WalletsPage,
+}));
+
+const WithdrawalsPage = lazy(async () => ({
+  default: (await import('@/features/adminWallet/WithdrawalsPage')).WithdrawalsPage,
+}));
+
 export const router = createBrowserRouter([
   {
     path: '/login',
@@ -101,6 +117,10 @@ export const router = createBrowserRouter([
       { path: 'foydalanuvchilar', element: <UsersPage /> },
       { path: 'freelancerlar', element: <FreelancersPage /> },
       { path: 'freelancer-arizalari', element: <ApplicationsPage /> },
+      { path: 'birja', element: <ExchangeTasksPage /> },
+      { path: 'murojaatlar', element: <AppealsPage /> },
+      { path: 'hamyonlar', element: <WalletsPage /> },
+      { path: 'pul-yechish', element: <WithdrawalsPage /> },
 
       { path: 'kontent', element: <ContentPage /> },
       { path: 'institutlar', element: <InstitutesPage /> },

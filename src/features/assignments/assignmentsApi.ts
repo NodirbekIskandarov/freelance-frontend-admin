@@ -37,10 +37,7 @@ export const assignmentsApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: 'Task', id: 'LIST' }],
     }),
 
-    updateAssignment: build.mutation<
-      Assignment,
-      { id: string } & Partial<AssignmentWriteRequest>
-    >({
+    updateAssignment: build.mutation<Assignment, { id: string } & Partial<AssignmentWriteRequest>>({
       query: ({ id, ...body }) => ({ url: `/assignments/${id}/`, method: 'PATCH', body }),
       invalidatesTags: (_result, _error, { id }) => [
         { type: 'Task', id },

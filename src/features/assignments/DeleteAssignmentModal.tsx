@@ -45,8 +45,8 @@ export function DeleteAssignmentModal({
       }
     >
       <p className="text-sm leading-relaxed text-fg-soft">
-        Topshiriq katalogdan yashiriladi, lekin bazadan butunlay o&apos;chmaydi — unga bog&apos;langan
-        variantlar va yechimlar tarixi saqlanib qoladi.
+        Topshiriq katalogdan yashiriladi, lekin bazadan butunlay o&apos;chmaydi — unga
+        bog&apos;langan variantlar va yechimlar tarixi saqlanib qoladi.
       </p>
 
       {error && (

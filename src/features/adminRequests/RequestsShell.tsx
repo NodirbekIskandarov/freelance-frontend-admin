@@ -54,14 +54,24 @@ export function RequestsShell<T extends RequestRow>({
   title: string;
   breadcrumbLabel: string;
   columns: Column<T>[];
-  useList: (args: { page: number; page_size: number; ordering: string; status?: RequestStatus; search?: string }) => {
+  useList: (args: {
+    page: number;
+    page_size: number;
+    ordering: string;
+    status?: RequestStatus;
+    search?: string;
+  }) => {
     data?: { results: T[]; count: number; total_pages: number };
     isLoading: boolean;
     isFetching: boolean;
     error?: unknown;
   };
   approve: { run: (id: string) => void; isLoading: boolean; error?: unknown };
-  reject: { run: (id: string, reason: string) => Promise<boolean>; isLoading: boolean; error?: unknown };
+  reject: {
+    run: (id: string, reason: string) => Promise<boolean>;
+    isLoading: boolean;
+    error?: unknown;
+  };
   rejectTitle: string;
   rowName: (row: T) => string;
   summaryLabel: string;

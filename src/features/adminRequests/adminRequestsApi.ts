@@ -51,17 +51,16 @@ export const adminRequestsApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: 'Request', id: 'ASSIGNMENT' }, 'Task', 'Variant', 'Dashboard'],
     }),
 
-    rejectAssignmentRequest: build.mutation<
-      AdminAssignmentRequest,
-      { id: string; reason: string }
-    >({
-      query: ({ id, ...body }) => ({
-        url: `/admin/assignment-requests/${id}/reject/`,
-        method: 'POST',
-        body,
-      }),
-      invalidatesTags: [{ type: 'Request', id: 'ASSIGNMENT' }, 'Dashboard'],
-    }),
+    rejectAssignmentRequest: build.mutation<AdminAssignmentRequest, { id: string; reason: string }>(
+      {
+        query: ({ id, ...body }) => ({
+          url: `/admin/assignment-requests/${id}/reject/`,
+          method: 'POST',
+          body,
+        }),
+        invalidatesTags: [{ type: 'Request', id: 'ASSIGNMENT' }, 'Dashboard'],
+      },
+    ),
 
     getSolutionReports: build.query<ApiPaginated<AdminSolutionReport>, ReportsQuery>({
       query: (params) => ({ url: '/admin/solution-reports/', params }),

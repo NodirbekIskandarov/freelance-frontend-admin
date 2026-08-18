@@ -1,4 +1,5 @@
 import {
+  BanknoteArrowDown,
   BarChart3,
   Building2,
   CheckSquare,
@@ -7,14 +8,17 @@ import {
   FileCheck2,
   FileText,
   House,
+  Handshake,
   Landmark,
   LayoutGrid,
+  LifeBuoy,
   LogOut,
   Settings,
   ShieldCheck,
   TriangleAlert,
   UserRound,
   Users,
+  Wallet as WalletIcon,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -50,6 +54,8 @@ export const navigation: NavGroup[] = [
       { label: 'Foydalanuvchilar', to: '/foydalanuvchilar', icon: Users },
       { label: 'Freelancerlar', to: '/freelancerlar', icon: UserRound },
       { label: 'Freelancer arizalari', to: '/freelancer-arizalari', icon: FileText },
+      { label: 'Birja nazorati', to: '/birja', icon: Handshake },
+      { label: 'Murojaatlar', to: '/murojaatlar', icon: LifeBuoy },
     ],
   },
   {
@@ -82,6 +88,13 @@ export const navigation: NavGroup[] = [
       { label: 'Shikoyatlar', to: '/shikoyatlar', icon: TriangleAlert },
       { label: 'Tasdiqlangan kontent', to: '/tasdiqlangan-kontent', icon: CheckSquare },
       { label: 'Sotuv statistikasi', to: '/sotuv-statistikasi', icon: BarChart3 },
+    ],
+  },
+  {
+    title: 'Moliya',
+    items: [
+      { label: 'Hamyonlar', to: '/hamyonlar', icon: WalletIcon },
+      { label: "Pul yechish so'rovlari", to: '/pul-yechish', icon: BanknoteArrowDown },
     ],
   },
   {

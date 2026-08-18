@@ -220,7 +220,7 @@ export function InstitutesPage() {
 
       <DeleteCatalogueModal
         title="Institutni o'chirish"
-        itemName={deleteTarget ? (deleteTarget.short_name || deleteTarget.name) : null}
+        itemName={deleteTarget ? deleteTarget.short_name || deleteTarget.name : null}
         description="Institut katalogdan yashiriladi, lekin bazadan butunlay o'chmaydi — unga bog'langan fanlar, topshiriqlar va yechimlar tarixi saqlanib qoladi."
         isLoading={deleteState.isLoading}
         error={deleteState.error}
