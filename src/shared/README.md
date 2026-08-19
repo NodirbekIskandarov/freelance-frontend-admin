@@ -24,7 +24,6 @@ Uch xil yechim bor edi:
 | `api/tokenStore.ts` | Token saqlash abstraksiyasi (localStorage / bo'sh) |
 | `api/errors.ts` | RTK Query xatosidan foydalanuvchiga matn ajratish |
 | `types/api.ts` | Backend DTO tiplari — **API shartnomasi kelgach birinchi shu yer o'zgaradi** |
-| `mocks/` | MSW handler'lari (backend tayyor bo'lgach o'chiriladi) |
 | `styles/tokens.css` | Tailwind v4 dizayn tokenlari |
 
 ## Sinxron saqlash
@@ -47,9 +46,9 @@ Faqat shu papkaga tegishli — loyihaga xos kod (`src/store/`, `src/app/`,
 | Fayl | Nega |
 |---|---|
 | `styles/tokens.css` | Admin va sayt dizayni butunlay boshqa |
-| `types/dashboard.ts`, `mocks/dashboard.ts` | Faqat adminda bor sahifaga tegishli |
+| `types/dashboard.ts` | Faqat adminda bor sahifaga tegishli |
 
-Ya'ni sinxronlash `api/` va umumiy `types/api.ts` + `mocks/data.ts` ga tegishli —
+Ya'ni sinxronlash `api/` va umumiy `types/api.ts` ga tegishli —
 ular ikkala loyiha uchun bir xil backend shartnomasini ifodalaydi.
 
 > Agar keyinchalik loyiha o'ssa va sinxronlash bezovta qila boshlasa,

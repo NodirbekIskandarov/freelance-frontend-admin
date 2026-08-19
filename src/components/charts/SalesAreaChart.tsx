@@ -16,11 +16,24 @@ const AXIS_COLOR = '#8B97A3';
 const GRID_COLOR = '#171F2D';
 const LINE_COLOR = '#22C55E';
 
-const Y_TICKS = [0, 1_000_000, 2_000_000, 3_000_000, 4_000_000, 5_000_000, 6_000_000];
+/**
+ * O'q qiymatlari MA'LUMOTDAN hisoblanadi.
+ *
+ * Ilgari ular qat'iy 0–6M edi (mock shunday edi). Haqiqiy sotuv bundan
+ * kichik bo'lsa grafik pastda yassi chiziq bo'lib qolardi.
+ */
+function ticksFor(max: number): { ticks: number[]; domain: [number, number] } {
+  const top = max > 0 ? Math.ceil(max * 1.2) : 100_000;
+  const step = Math.ceil(top / 5);
+  return { ticks: [0, step, step * 2, step * 3, step * 4, step * 5], domain: [0, step * 5] };
+}
 
-function formatMillions(value: number): string {
+/** 6 800 000 → "6M", 80 000 → "80K", nol esa shunchaki "0". */
+function formatAxis(value: number): string {
   if (value === 0) return '0';
-  return `${Math.round(value / 1_000_000)}M`;
+  if (value >= 1_000_000) return `${Math.round(value / 1_000_000)}M`;
+  if (value >= 1000) return `${Math.round(value / 1000)}K`;
+  return String(value);
 }
 
 function formatSom(value: number): string {
@@ -29,6 +42,8 @@ function formatSom(value: number): string {
 
 /** "Kundalik sotuvlar" katta grafigi (6-rasm). */
 export function SalesAreaChart({ data }: { data: SalesPoint[] }) {
+  const { ticks, domain } = ticksFor(Math.max(...data.map((point) => point.amount), 0));
+
   return (
     <ResponsiveContainer width="100%" height={260}>
       <AreaChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: -8 }}>
@@ -53,9 +68,9 @@ export function SalesAreaChart({ data }: { data: SalesPoint[] }) {
           fontSize={12}
           tickLine={false}
           axisLine={false}
-          tickFormatter={formatMillions}
-          ticks={Y_TICKS}
-          domain={[0, 6_000_000]}
+          tickFormatter={formatAxis}
+          ticks={ticks}
+          domain={domain}
           width={48}
         />
         <Tooltip

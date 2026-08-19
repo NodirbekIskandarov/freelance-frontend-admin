@@ -1,101 +1,119 @@
-/** 16–18-rasmlar — Yuborilgan javoblar. */
+/**
+ * Yuborilgan javoblar — HAQIQIY backend (`/admin/submissions/...`).
+ *
+ * Bo'lim to'rt bosqichli: institut → fan → topshiriq → variant → javoblar.
+ * Har bosqichda bir xil beshta sanoq (`*_count`) keladi, shuning uchun
+ * ular umumiy `SubmissionCounts` ichida.
+ */
 
-/** Chap paneldagi institut qatori (17, 18-rasm). */
-export interface SubmissionInstitute {
-  id: string;
-  short: string;
-  count: number;
-  /** "Barchasi" qatori — u institut emas, umumiy ko'rinish. */
-  isAll?: boolean;
-  /** "Boshqa institutlar" yig'ma qatori. */
-  isOther?: boolean;
+export const SOLUTION_STATUSES = [
+  'pending',
+  'approved',
+  'published',
+  'rejected',
+  'archived',
+] as const;
+export type SolutionStatus = (typeof SOLUTION_STATUSES)[number];
+
+export const SOLUTION_STATUS_LABELS: Record<SolutionStatus, string> = {
+  pending: 'Kutilmoqda',
+  approved: 'Tasdiqlangan',
+  published: 'Chop etilgan',
+  rejected: 'Rad etilgan',
+  archived: 'Arxivlangan',
+};
+
+export interface SubmissionCounts {
+  submitted_count: number;
+  pending_count: number;
+  approved_count: number;
+  rejected_count: number;
+  archived_count: number;
 }
 
-/** 18-rasmdagi jadval qatori. */
-export interface TodaySubmission {
-  id: string;
-  taskName: string;
-  taskType: string;
-  institute: string;
-  subject: string;
-  course: string;
-  variant: string;
-  sender: { name: string; username: string; avatarUrl?: string | null };
-  time: string;
-}
-
-export interface TodaySubmissionsResponse {
-  institutes: SubmissionInstitute[];
-  items: TodaySubmission[];
-  total: number;
-  /** "Yana N tasini ko'rish" tugmasi uchun. */
-  remaining: number;
-}
-
-/** 17-rasmdagi jadval qatori. */
-export interface InstituteSubjectSubmissions {
+export interface SubmissionUniversity extends SubmissionCounts {
   id: string;
   name: string;
-  course: string;
-  submitted: number;
-  approved: number;
-  reviewing: number;
-  rejected: number;
+  short_name: string;
 }
 
-export interface InstituteSubmissionsResponse {
-  institutes: SubmissionInstitute[];
-  instituteShort: string;
-  totalSubjects: number;
-  items: InstituteSubjectSubmissions[];
+export interface SubmissionSubject extends SubmissionCounts {
+  id: string;
+  name: string;
+  course: number | null;
+  university: string;
+  university_name: string;
 }
 
-/** 16-rasm — chap paneldagi topshiriq. */
-export interface SubmissionTask {
+export interface SubmissionAssignment extends SubmissionCounts {
   id: string;
   title: string;
-  answerCount: number;
+  type: string;
+  description: string;
+  subject: string;
+  subject_name: string;
 }
 
-export interface SubmissionVariant {
+export interface SubmissionVariant extends SubmissionCounts {
   id: string;
-  label: string;
-  answerCount: number;
+  number: number;
+  assignment: string;
+  /** Nechta foydalanuvchi shu variantga yechim so'ragan. */
+  request_count: number;
 }
 
-export type AnswerStatus = 'Yangi' | 'Tasdiqlangan' | 'Arxivlangan';
-
-/** 16-rasmdagi javoblar jadvali qatori. */
-export interface SubmittedAnswer {
+export interface SubmissionUploader {
   id: string;
-  submittedAt: string;
-  sender: { username: string; role: string; avatarUrl?: string | null };
-  fileName: string;
-  size: string;
-  comment: string;
-  status: AnswerStatus;
+  phone: string;
+  full_name: string;
 }
 
-export interface SubmissionDetailResponse {
-  subjectName: string;
-  instituteShort: string;
-  totalTasks: number;
-  tasks: SubmissionTask[];
+/** Yakuniy bosqich — yuklangan yechimning o'zi. */
+export interface Submission {
+  id: string;
+  title: string;
+  description: string;
+  status: SolutionStatus;
+  price: string;
+  file_name: string;
+  file_url: string;
+  uploader: SubmissionUploader | null;
+  variant: string;
+  variant_number: number;
+  assignment: string;
+  assignment_title: string;
+  assignment_type: string;
+  subject: string;
+  subject_name: string;
+  course: number | null;
+  university: string;
+  university_name: string;
+  university_short_name: string;
+  created_at: string;
+}
 
-  current: {
-    title: string;
-    type: string;
-    course: string;
-    subject: string;
-    uploadedAt: string;
-    uploader: string;
-    fileName: string;
-    pageCount: number;
-    /** Hujjat matni — haqiqiy PDF yo'qligi uchun ko'rinish uchun. */
-    previewLines: string[];
-  };
+interface ListQuery {
+  page?: number;
+  page_size?: number;
+  search?: string;
+}
 
-  variants: SubmissionVariant[];
-  selectedVariant: string;
-  answers: SubmittedAnswer[];
+export interface TodaySubmissionsQuery extends ListQuery {
+  status?: SolutionStatus;
+  university?: string;
+  variant?: string;
+}
+
+export interface SubmissionSubjectsQuery extends ListQuery {
+  id: string;
+}
+
+export interface SubmissionAssignmentsQuery extends ListQuery {
+  id: string;
+  type?: string;
+}
+
+export interface SubmissionAnswersQuery extends ListQuery {
+  id: string;
+  status?: SolutionStatus;
 }

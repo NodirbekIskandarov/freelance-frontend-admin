@@ -1,37 +1,7 @@
 /**
- * Bu faylda IKKI XIL shakl bor va ular ataylab aralashtirilmagan:
- *
- * 1. `Paginated`, `ListQuery`, `ApiErrorBody` — mock endpoint'lar uchun
- *    o'ylab topilgan konvensiya. Backendda hali bu bo'limlar yo'q.
- * 2. `DrfPaginated`, `TokenPair` va h.k. — haqiqiy backend shakli
- *    (`https://api.yopamiz.uz/api/schema/`). Yangi endpoint ulanganda
- *    aynan shular ishlatiladi.
- *
- * Mock bo'limlar haqiqiy API'ga ko'chgan sari birinchi guruh yo'qoladi.
+ * Backend shartnomasining umumiy shakllari
+ * (`https://api.yopamiz.uz/api/schema/`).
  */
-
-/** Ro'yxat endpoint'lari uchun sahifalash meta ma'lumoti. */
-export interface Pagination {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-}
-
-/** Sahifalangan javob. */
-export interface Paginated<T> {
-  items: T[];
-  pagination: Pagination;
-}
-
-/** Ro'yxat so'rovlarining umumiy query parametrlari. */
-export interface ListQuery {
-  page?: number;
-  limit?: number;
-  search?: string;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-}
 
 /** Backend qaytaradigan xato tanasi. */
 export interface ApiErrorBody {
@@ -90,24 +60,4 @@ export interface AuthTokens {
 
 export function toAuthTokens(pair: TokenPair): AuthTokens {
   return { accessToken: pair.access, refreshToken: pair.refresh };
-}
-
-export type UserRole = 'user' | 'admin';
-
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  avatarUrl?: string | null;
-  createdAt: string;
-}
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface LoginResponse extends AuthTokens {
-  user: User;
 }

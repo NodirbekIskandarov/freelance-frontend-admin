@@ -8,7 +8,6 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 # ─── dev ──────────────────────────────────────────────────────────────────────
-# Vite dev server. MSW mock'lari faqat shu rejimda ishlaydi (main.tsx: import.meta.env.DEV).
 FROM node:22-alpine AS dev
 WORKDIR /app
 ENV NODE_ENV=development
@@ -25,9 +24,7 @@ WORKDIR /app
 # Nisbiy manzil: so'rov admin domeniga ketadi va nginx uni backendga
 # uzatadi (docker/default.conf.template). Shunda CORS umuman kerak emas.
 ARG VITE_API_URL=/api/v1
-ARG VITE_ENABLE_MOCKS=false
 ENV VITE_API_URL=$VITE_API_URL
-ENV VITE_ENABLE_MOCKS=$VITE_ENABLE_MOCKS
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build

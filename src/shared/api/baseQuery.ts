@@ -47,8 +47,8 @@ function isTokenPair(value: unknown): value is TokenPair {
  * Shuning uchun ochish har bir endpoint'da emas, shu yerda bir marta
  * bajariladi — aks holda har `transformResponse` da takrorlanardi.
  *
- * MSW mock javoblari konvertsiz, shuning uchun tekshiruv qat'iy: faqat
- * `success` mantiqiy va `data` kaliti bor obyekt ochiladi.
+ * Tekshiruv qat'iy: faqat `success` mantiqiy va `data` kaliti bor
+ * obyekt ochiladi — boshqasiga tegilmaydi.
  */
 function isEnvelope(value: unknown): value is { success: boolean; data: unknown } {
   if (typeof value !== 'object' || value === null) return false;

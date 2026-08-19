@@ -1,11 +1,13 @@
 import type { ApiPaginated } from '@/shared/types/api';
 import type {
   AdminAssignmentRequest,
+  AdminUniversityRequest,
   AdminSolutionReport,
   AdminSubjectRequest,
   AssignmentRequestsQuery,
   ReportsQuery,
   SubjectRequestsQuery,
+  UniversityRequestsQuery,
 } from '@/shared/types/adminRequests';
 import { baseApi } from '@/store/api';
 
@@ -19,6 +21,31 @@ import { baseApi } from '@/store/api';
  */
 export const adminRequestsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
+    getUniversityRequestsList: build.query<
+      ApiPaginated<AdminUniversityRequest>,
+      UniversityRequestsQuery
+    >({
+      query: (params) => ({ url: '/admin/university-requests/', params }),
+      providesTags: [{ type: 'Request', id: 'UNIVERSITY' }],
+    }),
+
+    approveUniversityRequest: build.mutation<AdminUniversityRequest, string>({
+      query: (id) => ({ url: `/admin/university-requests/${id}/approve/`, method: 'POST' }),
+      // Tasdiqlash UNIVERSITET yaratadi — institutlar ro'yxati ham eskiradi.
+      invalidatesTags: [{ type: 'Request', id: 'UNIVERSITY' }, 'Institute', 'Dashboard'],
+    }),
+
+    rejectUniversityRequest: build.mutation<AdminUniversityRequest, { id: string; reason: string }>(
+      {
+        query: ({ id, ...body }) => ({
+          url: `/admin/university-requests/${id}/reject/`,
+          method: 'POST',
+          body,
+        }),
+        invalidatesTags: [{ type: 'Request', id: 'UNIVERSITY' }, 'Dashboard'],
+      },
+    ),
+
     getSubjectRequestsList: build.query<ApiPaginated<AdminSubjectRequest>, SubjectRequestsQuery>({
       query: (params) => ({ url: '/admin/subject-requests/', params }),
       providesTags: [{ type: 'Request', id: 'SUBJECT' }],
@@ -85,6 +112,9 @@ export const adminRequestsApi = baseApi.injectEndpoints({
 });
 
 export const {
+  useGetUniversityRequestsListQuery,
+  useApproveUniversityRequestMutation,
+  useRejectUniversityRequestMutation,
   useGetSubjectRequestsListQuery,
   useApproveSubjectRequestMutation,
   useRejectSubjectRequestMutation,

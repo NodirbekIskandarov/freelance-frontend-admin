@@ -1,5 +1,4 @@
 services:
-  # Default: dev server. Backend hali yo'q — MSW mock'lari faqat dev'da ishlaydi.
   admin:
     build:
       context: .
@@ -11,7 +10,6 @@ services:
     environment:
       # Nisbiy manzil — Vite dev proksisi orqali API_UPSTREAM'ga boradi.
       VITE_API_URL: ${VITE_API_URL:-/api/v1}
-      VITE_ENABLE_MOCKS: ${VITE_ENABLE_MOCKS:-true}
       API_UPSTREAM: ${API_UPSTREAM:-https://api.yopamiz.uz}
     volumes:
       # Kod host'dan ulanadi — HMR ishlaydi.
@@ -28,7 +26,6 @@ services:
       target: prod
       args:
         VITE_API_URL: ${VITE_API_URL:-/api/v1}
-        VITE_ENABLE_MOCKS: 'false'
     image: yopamiz-admin:prod
     container_name: yopamiz-admin-prod
     ports:

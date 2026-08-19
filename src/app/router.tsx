@@ -37,8 +37,8 @@ const InstitutesPage = lazy(async () => ({
   default: (await import('@/features/catalogue/InstitutesPage')).InstitutesPage,
 }));
 
-const InstituteRequestsPage = lazy(async () => ({
-  default: (await import('@/features/institutes/InstituteRequestsPage')).InstituteRequestsPage,
+const UniversityRequestsPage = lazy(async () => ({
+  default: (await import('@/features/adminRequests/UniversityRequestsPage')).UniversityRequestsPage,
 }));
 
 const SubjectsPage = lazy(async () => ({
@@ -101,6 +101,10 @@ const WithdrawalsPage = lazy(async () => ({
   default: (await import('@/features/adminWallet/WithdrawalsPage')).WithdrawalsPage,
 }));
 
+const AuditPage = lazy(async () => ({
+  default: (await import('@/features/adminAudit/AuditPage')).AuditPage,
+}));
+
 export const router = createBrowserRouter([
   {
     path: '/login',
@@ -124,7 +128,7 @@ export const router = createBrowserRouter([
 
       { path: 'kontent', element: <ContentPage /> },
       { path: 'institutlar', element: <InstitutesPage /> },
-      { path: 'institutlar/arizalar', element: <InstituteRequestsPage /> },
+      { path: 'institutlar/arizalar', element: <UniversityRequestsPage /> },
       { path: 'fanlar', element: <SubjectsPage /> },
       { path: 'fanlar/arizalar', element: <SubjectRequestsPage /> },
       { path: 'topshiriqlar', element: <AssignmentsPage /> },
@@ -138,10 +142,7 @@ export const router = createBrowserRouter([
       { path: 'yuborilgan/fanlar', element: <PlaceholderPage title="Yuborilgan fanlar" /> },
       { path: 'yuborilgan/topshiriqlar', element: <AssignmentRequestsPage /> },
       { path: 'yuborilgan/javoblar', element: <SubmissionsPage /> },
-      {
-        path: 'yuborilgan/javoblar/:instituteId/:subjectId',
-        element: <SubmissionDetailPage />,
-      },
+      { path: 'yuborilgan/javoblar/:subjectId', element: <SubmissionDetailPage /> },
 
       { path: 'shikoyatlar', element: <SolutionReportsPage /> },
 
@@ -150,6 +151,7 @@ export const router = createBrowserRouter([
 
       { path: 'tasdiqlangan-kontent', element: <PlaceholderPage title="Tasdiqlangan kontent" /> },
       { path: 'sotuv-statistikasi', element: <PlaceholderPage title="Sotuv statistikasi" /> },
+      { path: 'audit', element: <AuditPage /> },
       { path: 'sozlamalar', element: <PlaceholderPage title="Sozlamalar" /> },
     ],
   },

@@ -24,6 +24,33 @@ export interface AdminSubjectRequest {
   updated_at: string;
 }
 
+/** Arizachi va ko'rib chiqqan admin bir xil shaklda keladi. */
+export interface Requester {
+  id: string;
+  phone: string;
+  email: string;
+  full_name: string;
+  status: string;
+}
+
+export interface AdminUniversityRequest {
+  id: string;
+  user: Requester | null;
+  requester_phone: string;
+  name: string;
+  short_name: string;
+  city: string;
+  comment: string;
+  status: RequestStatus;
+  reject_reason: string;
+  reviewed_by: Requester | null;
+  /** Tasdiqlangach yaratilgan universitet. */
+  created_university: string | null;
+  reward_granted: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface AdminAssignmentRequest {
   id: string;
   user: string;
@@ -80,6 +107,10 @@ export interface AdminSolutionReport {
 
 export interface RequestsQuery extends ApiListQuery {
   status?: RequestStatus;
+}
+
+export interface UniversityRequestsQuery extends RequestsQuery {
+  city?: string;
 }
 
 export interface SubjectRequestsQuery extends RequestsQuery {

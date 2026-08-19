@@ -1,41 +1,53 @@
-import {
-  ArrowLeft,
-  ArrowRight,
-  Calendar,
-  ChevronDown,
-  ChevronRight,
-  CircleCheck,
-  CircleX,
-  Clock,
-  Eye,
-} from 'lucide-react';
+import { ArrowLeft, ChevronRight, CircleCheck, CircleX, Clock } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { Avatar } from '@/components/ui/Avatar';
-import { Badge } from '@/components/ui/Badge';
+import { Badge, type BadgeTone } from '@/components/ui/Badge';
 import { Button, IconButton } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { Pagination } from '@/components/ui/Pagination';
+import { SearchInput } from '@/components/ui/SearchInput';
 import { Select } from '@/components/ui/Select';
 import { Table, type Column } from '@/components/ui/Table';
+import { formatDateTime, formatSom } from '@/lib/format';
+import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { getApiErrorMessage } from '@/shared/api';
-import type { InstituteSubjectSubmissions, TodaySubmission } from '@/shared/types/submissions';
+import { assignmentTypeLabel } from '@/shared/types/assignments';
+import {
+  SOLUTION_STATUS_LABELS,
+  SOLUTION_STATUSES,
+  type SolutionStatus,
+  type Submission,
+  type SubmissionSubject,
+} from '@/shared/types/submissions';
 
-import { SubmissionInstitutePanel } from './SubmissionInstitutePanel';
-import { useGetInstituteSubmissionsQuery, useGetTodaySubmissionsQuery } from './submissionsApi';
+import { SubmissionUniversityPanel } from './SubmissionUniversityPanel';
+import {
+  useGetSubmissionSubjectsQuery,
+  useGetSubmissionUniversitiesQuery,
+  useGetTodaySubmissionsQuery,
+} from './submissionsApi';
 
-/** Rangli ikonka + son (17-rasmdagi holat ustunlari). */
-function CountCell({
-  value,
-  tone,
-}: {
-  value: number;
-  tone: 'approved' | 'reviewing' | 'rejected';
-}) {
+export const statusTones: Record<SolutionStatus, BadgeTone> = {
+  pending: 'warning',
+  approved: 'info',
+  published: 'success',
+  rejected: 'danger',
+  archived: 'neutral',
+};
+
+const statusOptions = [
+  { value: 'all', label: 'Barcha holatlar' },
+  ...SOLUTION_STATUSES.map((value) => ({ value, label: SOLUTION_STATUS_LABELS[value] })),
+];
+
+/** Rangli ikonka + son — fanlar jadvalidagi holat ustunlari. */
+function CountCell({ value, tone }: { value: number; tone: 'approved' | 'pending' | 'rejected' }) {
   const styles = {
     approved: { Icon: CircleCheck, className: 'text-success' },
-    reviewing: { Icon: Clock, className: 'text-warning' },
+    pending: { Icon: Clock, className: 'text-warning' },
     rejected: { Icon: CircleX, className: 'text-danger' },
   } as const;
 
@@ -51,95 +63,146 @@ function CountCell({
 
 export function SubmissionsPage() {
   const navigate = useNavigate();
-  const [instituteId, setInstituteId] = useState('all');
+  const [universityId, setUniversityId] = useState('all');
+  const [status, setStatus] = useState('all');
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(20);
 
-  const isAll = instituteId === 'all';
+  const debouncedSearch = useDebouncedValue(search, 350);
+  const isAll = universityId === 'all';
 
-  const todayQuery = useGetTodaySubmissionsQuery(undefined, { skip: !isAll });
-  const instituteQuery = useGetInstituteSubmissionsQuery(instituteId, { skip: isAll });
+  const universities = useGetSubmissionUniversitiesQuery();
 
-  const institutes = todayQuery.data?.institutes ?? instituteQuery.data?.institutes ?? [];
-  const error = todayQuery.error ?? instituteQuery.error;
-
-  const todayColumns: Column<TodaySubmission>[] = [
+  const todayQuery = useGetTodaySubmissionsQuery(
     {
-      key: 'index',
-      header: '#',
-      className: 'w-10 text-fg-dim',
-      cell: (_row, index) => index + 1,
+      page,
+      page_size: perPage,
+      ...(status !== 'all' ? { status: status as SolutionStatus } : {}),
+      ...(debouncedSearch ? { search: debouncedSearch } : {}),
     },
+    { skip: !isAll },
+  );
+
+  const subjectsQuery = useGetSubmissionSubjectsQuery(
     {
-      key: 'task',
-      header: 'Topshiriq nomi',
-      className: 'max-w-[190px]',
+      id: universityId,
+      page,
+      page_size: perPage,
+      ...(debouncedSearch ? { search: debouncedSearch } : {}),
+    },
+    { skip: isAll },
+  );
+
+  const error = universities.error ?? todayQuery.error ?? subjectsQuery.error;
+  const selected = universities.data?.find((item) => item.id === universityId);
+
+  function selectUniversity(id: string) {
+    setUniversityId(id);
+    setPage(1);
+    setSearch('');
+  }
+
+  const todayColumns: Column<Submission>[] = [
+    {
+      key: 'title',
+      header: 'Yechim',
+      className: 'max-w-[240px]',
       cell: (row) => (
         <span className="block leading-snug">
-          <span className="block text-fg">{row.taskName}</span>
-          <span className="block text-xs text-fg-muted">{row.taskType}</span>
-        </span>
-      ),
-    },
-    { key: 'institute', header: 'Institut', cell: (row) => row.institute },
-    { key: 'subject', header: 'Fan', cell: (row) => row.subject },
-    { key: 'course', header: 'Kurs', cell: (row) => row.course },
-    { key: 'variant', header: 'Variant', cell: (row) => row.variant },
-    {
-      key: 'sender',
-      header: 'Yuborgan',
-      cell: (row) => (
-        <span className="flex items-center gap-2.5">
-          <Avatar name={row.sender.name} src={row.sender.avatarUrl} size="sm" />
-          <span className="min-w-0 leading-snug">
-            <span className="block whitespace-nowrap text-fg">{row.sender.name}</span>
-            <span className="block text-xs text-fg-muted">{row.sender.username}</span>
+          <span className="block truncate text-fg" title={row.title}>
+            {row.title}
+          </span>
+          <span className="block truncate text-xs text-fg-muted">
+            {row.assignment_title} · {assignmentTypeLabel(row.assignment_type)}
           </span>
         </span>
       ),
     },
-    { key: 'time', header: 'Vaqt', cell: (row) => row.time },
     {
-      key: 'actions',
-      header: 'Amallar',
+      key: 'university',
+      header: 'Institut',
       cell: (row) => (
-        <IconButton
-          label={`${row.taskName} — ko'rish`}
-          size="sm"
-          onClick={() => navigate(`/yuborilgan/javoblar/${row.institute}/1`)}
-        >
-          <Eye className="size-4" strokeWidth={1.75} />
-        </IconButton>
+        <span className="whitespace-nowrap text-fg-soft">
+          {row.university_short_name || row.university_name}
+        </span>
+      ),
+    },
+    { key: 'subject', header: 'Fan', cell: (row) => row.subject_name },
+    {
+      key: 'course',
+      header: 'Kurs',
+      align: 'center',
+      cell: (row) => <span className="tabular-nums">{row.course ?? '—'}</span>,
+    },
+    {
+      key: 'variant',
+      header: 'Variant',
+      align: 'center',
+      cell: (row) => <span className="tabular-nums">{row.variant_number}</span>,
+    },
+    {
+      key: 'uploader',
+      header: 'Yuborgan',
+      cell: (row) => (
+        <span className="flex items-center gap-2.5">
+          <Avatar name={row.uploader?.full_name || row.uploader?.phone || '?'} size="sm" />
+          <span className="min-w-0 leading-snug">
+            <span className="block whitespace-nowrap text-fg">
+              {row.uploader?.full_name || '—'}
+            </span>
+            <span className="block text-xs text-fg-muted">{row.uploader?.phone}</span>
+          </span>
+        </span>
+      ),
+    },
+    {
+      key: 'created_at',
+      header: 'Vaqt',
+      cell: (row) => (
+        <span className="whitespace-nowrap text-fg-muted">{formatDateTime(row.created_at)}</span>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Holat',
+      cell: (row) => (
+        <Badge tone={statusTones[row.status]}>{SOLUTION_STATUS_LABELS[row.status]}</Badge>
       ),
     },
   ];
 
-  const subjectColumns: Column<InstituteSubjectSubmissions>[] = [
+  const subjectColumns: Column<SubmissionSubject>[] = [
     {
-      key: 'index',
-      header: '#',
-      className: 'w-10 text-fg-dim',
-      cell: (_row, index) => index + 1,
+      key: 'name',
+      header: 'Fan nomi',
+      cell: (row) => <span className="text-fg">{row.name}</span>,
     },
-    { key: 'name', header: 'Fan nomi', cell: (row) => <span className="text-fg">{row.name}</span> },
-    { key: 'course', header: 'Kurs', cell: (row) => row.course },
+    {
+      key: 'course',
+      header: 'Kurs',
+      align: 'center',
+      cell: (row) => <span className="tabular-nums">{row.course ?? '—'}</span>,
+    },
     {
       key: 'submitted',
-      header: 'Yuborilgan javoblar soni',
-      cell: (row) => <Badge tone="success">{row.submitted} ta</Badge>,
+      header: 'Yuborilgan',
+      cell: (row) => <Badge tone="success">{row.submitted_count} ta</Badge>,
     },
     {
       key: 'approved',
       header: 'Tasdiqlangan',
-      cell: (row) => <CountCell value={row.approved} tone="approved" />,
+      cell: (row) => <CountCell value={row.approved_count} tone="approved" />,
     },
     {
-      key: 'reviewing',
-      header: 'Tekshirilmoqda',
-      cell: (row) => <CountCell value={row.reviewing} tone="reviewing" />,
+      key: 'pending',
+      header: 'Kutilmoqda',
+      cell: (row) => <CountCell value={row.pending_count} tone="pending" />,
     },
     {
       key: 'rejected',
       header: 'Rad etilgan',
-      cell: (row) => <CountCell value={row.rejected} tone="rejected" />,
+      cell: (row) => <CountCell value={row.rejected_count} tone="rejected" />,
     },
     {
       key: 'actions',
@@ -149,7 +212,7 @@ export function SubmissionsPage() {
         <IconButton
           label={`${row.name} — ochish`}
           size="sm"
-          onClick={() => navigate(`/yuborilgan/javoblar/${instituteId}/${row.id}`)}
+          onClick={() => navigate(`/yuborilgan/javoblar/${row.id}`)}
         >
           <ChevronRight className="size-4" strokeWidth={2} />
         </IconButton>
@@ -157,21 +220,15 @@ export function SubmissionsPage() {
     },
   ];
 
+  const active = isAll ? todayQuery : subjectsQuery;
+
   return (
     <>
       <PageHeader
         breadcrumbsPosition="above"
         breadcrumbs={[{ label: 'Bosh sahifa', to: '/' }, { label: 'Yuborilgan javoblar' }]}
         title="Yuborilgan javoblar"
-        subtitle="Institutlar bo‘yicha yuborilgan topshiriq javoblarini ko‘rish va boshqarish."
-        actions={
-          <Select
-            aria-label="Sana"
-            options={[{ value: 'today', label: '07.05.2025' }]}
-            icon={<Calendar className="size-4" strokeWidth={1.75} />}
-            className="w-48"
-          />
-        }
+        subtitle="Institutlar bo'yicha yuborilgan topshiriq javoblarini ko'rish va boshqarish."
       />
 
       {error ? (
@@ -180,11 +237,11 @@ export function SubmissionsPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-4 xl:flex-row">
-          <SubmissionInstitutePanel
-            items={institutes}
-            selectedId={instituteId}
-            onSelect={setInstituteId}
-            isLoading={institutes.length === 0}
+          <SubmissionUniversityPanel
+            items={universities.data ?? []}
+            selectedId={universityId}
+            onSelect={selectUniversity}
+            isLoading={universities.isLoading}
           />
 
           <Card className="min-w-0 flex-1 overflow-hidden">
@@ -192,39 +249,53 @@ export function SubmissionsPage() {
               <h2 className="flex flex-wrap items-center gap-3 text-lg font-semibold text-fg">
                 {isAll
                   ? 'Bugun yuborilgan javoblar'
-                  : `${instituteQuery.data?.instituteShort ?? ''} institutidagi fanlar`}
-                <Badge tone="success">
-                  {isAll
-                    ? `Jami: ${todayQuery.data?.total ?? 0} ta`
-                    : `Jami fanlar: ${instituteQuery.data?.totalSubjects ?? 0}`}
-                </Badge>
+                  : `${selected?.short_name ?? ''} institutidagi fanlar`}
+                <Badge tone="success">Jami: {formatSom(active.data?.count ?? 0)} ta</Badge>
               </h2>
 
-              {isAll ? (
-                <Button
-                  variant="secondary"
-                  trailing={<ArrowRight className="size-4" strokeWidth={1.75} />}
-                >
-                  Barchasini ko‘rish
-                </Button>
-              ) : (
-                <Button
-                  variant="secondary"
-                  icon={<ArrowLeft className="size-4" strokeWidth={1.75} />}
-                  onClick={() => setInstituteId('all')}
-                >
-                  Orqaga qaytish
-                </Button>
-              )}
+              <div className="flex flex-wrap items-center gap-3">
+                {isAll && (
+                  <Select
+                    aria-label="Holat bo'yicha filtr"
+                    size="sm"
+                    options={statusOptions}
+                    value={status}
+                    onChange={(event) => {
+                      setStatus(event.target.value);
+                      setPage(1);
+                    }}
+                    className="w-44"
+                  />
+                )}
+
+                <SearchInput
+                  value={search}
+                  onChange={(event) => {
+                    setSearch(event.target.value);
+                    setPage(1);
+                  }}
+                  className="w-56"
+                />
+
+                {!isAll && (
+                  <Button
+                    variant="secondary"
+                    icon={<ArrowLeft className="size-4" strokeWidth={1.75} />}
+                    onClick={() => selectUniversity('all')}
+                  >
+                    Orqaga
+                  </Button>
+                )}
+              </div>
             </div>
 
             <div className="mt-4">
               {isAll ? (
                 <Table
                   columns={todayColumns}
-                  rows={todayQuery.data?.items ?? []}
+                  rows={todayQuery.data?.results ?? []}
                   rowKey={(row) => row.id}
-                  isLoading={todayQuery.isLoading}
+                  isLoading={todayQuery.isLoading || todayQuery.isFetching}
                   skeletonRows={8}
                   density="compact"
                   emptyMessage="Bugun javob yuborilmagan"
@@ -232,9 +303,9 @@ export function SubmissionsPage() {
               ) : (
                 <Table
                   columns={subjectColumns}
-                  rows={instituteQuery.data?.items ?? []}
+                  rows={subjectsQuery.data?.results ?? []}
                   rowKey={(row) => row.id}
-                  isLoading={instituteQuery.isLoading}
+                  isLoading={subjectsQuery.isLoading || subjectsQuery.isFetching}
                   skeletonRows={10}
                   density="compact"
                   emptyMessage="Bu institutda fan topilmadi"
@@ -242,16 +313,16 @@ export function SubmissionsPage() {
               )}
             </div>
 
-            <div className="flex justify-center border-t border-line py-4">
-              <Button
-                variant="secondary"
-                trailing={<ChevronDown className="size-4" strokeWidth={2} />}
-              >
-                {isAll
-                  ? `Yana ${todayQuery.data?.remaining ?? 0} tasini ko‘rish`
-                  : 'Yana fanlarni ko‘rish'}
-              </Button>
-            </div>
+            <Pagination
+              page={page}
+              totalPages={active.data?.total_pages ?? 1}
+              onPageChange={setPage}
+              perPage={perPage}
+              onPerPageChange={(value) => {
+                setPerPage(value);
+                setPage(1);
+              }}
+            />
           </Card>
         </div>
       )}

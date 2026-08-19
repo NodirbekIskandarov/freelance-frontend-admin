@@ -13,6 +13,7 @@ import {
   LayoutGrid,
   LifeBuoy,
   LogOut,
+  ScrollText,
   Settings,
   ShieldCheck,
   TriangleAlert,
@@ -100,6 +101,7 @@ export const navigation: NavGroup[] = [
   {
     title: 'Sozlamalar',
     items: [
+      { label: 'Audit jurnali', to: '/audit', icon: ScrollText },
       { label: 'Sozlamalar', to: '/sozlamalar', icon: Settings },
       { label: 'Chiqish', to: '/logout', icon: LogOut },
     ],

@@ -12,8 +12,6 @@ services:
       target: prod
       args:
         VITE_API_URL: ${VITE_API_URL:?.env da VITE_API_URL ko'rsatilmagan}
-        # Productionda mock API hech qachon yoqilmaydi.
-        VITE_ENABLE_MOCKS: 'false'
     image: yopamiz-admin:prod
     container_name: yopamiz-admin
     restart: unless-stopped

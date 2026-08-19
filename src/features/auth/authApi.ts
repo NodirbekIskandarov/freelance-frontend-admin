@@ -3,12 +3,10 @@ import type { AuthResponse, CurrentUser, LoginRequest } from '@/shared/types/aut
 import { baseApi, tokenStore } from '@/store/api';
 
 /**
- * Auth — MOCK EMAS, haqiqiy backend (`/api/v1/auth/login/`).
+ * Auth — haqiqiy backend (`/api/v1/auth/login/`).
  *
- * Yechim moderatsiyasi endpoint'lari `Admin/Moderator only` va JWT talab
- * qiladi, shuning uchun haqiqiy token'siz u bo'lim umuman ishlamaydi.
- * Qolgan sahifalar hozircha mock'da qolgani uchun MSW yoqiq turadi —
- * u faqat o'zi biladigan yo'llarni ushlaydi.
+ * Admin endpoint'lari `Admin/Moderator only` va JWT talab qiladi,
+ * shuning uchun haqiqiy token'siz panel umuman ishlamaydi.
  */
 
 const CURRENT_USER_KEY = 'admin.auth.user';

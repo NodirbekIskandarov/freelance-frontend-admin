@@ -7,11 +7,10 @@ import type {
 import { baseApi } from '@/store/api';
 
 /**
- * Yechim moderatsiyasi — HAQIQIY backend, mock emas.
+ * Yechim moderatsiyasi — haqiqiy backend.
  *
  * Yo'llar oxirida slash bor: Django `APPEND_SLASH` slashsiz manzilni 301
- * bilan qaytaradi va POST tanasi yo'lda yo'qoladi. Bu MSW handler'laridan
- * ham ajratib turadi — ular slashsiz yo'llarda ro'yxatdan o'tgan.
+ * bilan qaytaradi va POST tanasi yo'lda yo'qoladi.
  */
 export const solutionsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({

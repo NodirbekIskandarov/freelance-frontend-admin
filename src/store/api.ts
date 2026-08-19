@@ -46,6 +46,7 @@ export const baseApi = createApi({
     'Wallet',
     'Withdrawal',
     'ExchangeTask',
+    'Audit',
   ],
   endpoints: () => ({}),
 });

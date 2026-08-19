@@ -7,6 +7,32 @@ import type { ApiListQuery } from './api';
  * uchun `university` yozishga berilmaydi, serverning o'zi to'ldiradi.
  */
 
+export const ASSIGNMENT_TYPES = [
+  'practical',
+  'laboratory',
+  'independent',
+  'course_work',
+  'other',
+] as const;
+export type AssignmentType = (typeof ASSIGNMENT_TYPES)[number];
+
+/**
+ * Backend topshiriq turini INGLIZCHA yorliq bilan qaytaradi
+ * ("Practical work"), panel esa o'zbekcha. Tarjima shu yerda.
+ */
+export const ASSIGNMENT_TYPE_LABELS: Record<AssignmentType, string> = {
+  practical: 'Amaliy ish',
+  laboratory: 'Laboratoriya ishi',
+  independent: 'Mustaqil ish',
+  course_work: 'Kurs ishi',
+  other: 'Boshqa',
+};
+
+/** Noma'lum kalit kelsa backend yorlig'i saqlanadi — bo'sh joy qolmasin. */
+export function assignmentTypeLabel(type: string, fallback = ''): string {
+  return ASSIGNMENT_TYPE_LABELS[type as AssignmentType] ?? fallback ?? type;
+}
+
 export interface Assignment {
   id: string;
   subject: string;
