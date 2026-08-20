@@ -7,8 +7,9 @@ import {
   ClipboardList,
   FileCheck2,
   FileText,
-  House,
   Handshake,
+  House,
+  KeyRound,
   Landmark,
   LayoutGrid,
   LifeBuoy,
@@ -23,6 +24,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+import type { PermissionCode } from '@/shared/types/adminRoles';
+
 export interface NavItem {
   label: string;
   /** Yo'q bo'lsa — element faqat ochiladigan guruh (children bilan). */
@@ -30,7 +33,13 @@ export interface NavItem {
   icon: LucideIcon;
   /** O'ngdagi son (dizaynning 16–18-rasmlaridagi variantida ishlatiladi). */
   badge?: number;
-  children?: { label: string; to: string }[];
+  /**
+   * Shu band ko'rinishi uchun kerakli ruxsat. Ko'rsatilmagan band
+   * hammaga ochiq (masalan "Chiqish"). Kalitlar `/me/permissions/`
+   * dagilar bilan bir xil.
+   */
+  permission?: PermissionCode;
+  children?: { label: string; to: string; permission?: PermissionCode }[];
 }
 
 export interface NavGroup {
@@ -51,57 +60,121 @@ export const navigation: NavGroup[] = [
   {
     title: 'Bosh sahifa',
     items: [
-      { label: 'Dashboard', to: '/dashboard', icon: House },
-      { label: 'Foydalanuvchilar', to: '/foydalanuvchilar', icon: Users },
-      { label: 'Freelancerlar', to: '/freelancerlar', icon: UserRound },
-      { label: 'Freelancer arizalari', to: '/freelancer-arizalari', icon: FileText },
-      { label: 'Birja nazorati', to: '/birja', icon: Handshake },
-      { label: 'Murojaatlar', to: '/murojaatlar', icon: LifeBuoy },
+      { label: 'Dashboard', to: '/dashboard', icon: House, permission: 'dashboard.view' },
+      { label: 'Foydalanuvchilar', to: '/foydalanuvchilar', icon: Users, permission: 'users.view' },
+      {
+        label: 'Freelancerlar',
+        to: '/freelancerlar',
+        icon: UserRound,
+        permission: 'freelancers.view',
+      },
+      {
+        label: 'Freelancer arizalari',
+        to: '/freelancer-arizalari',
+        icon: FileText,
+        permission: 'applications.view',
+      },
+      { label: 'Birja nazorati', to: '/birja', icon: Handshake, permission: 'exchange.view' },
+      { label: 'Murojaatlar', to: '/murojaatlar', icon: LifeBuoy, permission: 'appeals.view' },
     ],
   },
   {
     title: 'Tayyor materiallar',
     items: [
-      { label: 'Kontent boshqaruvi', to: '/kontent', icon: Landmark },
+      { label: 'Kontent boshqaruvi', to: '/kontent', icon: Landmark, permission: 'content.view' },
       {
         label: 'Institutlar',
         icon: Building2,
         children: [
-          { label: "Institutlar ro'yxati", to: '/institutlar' },
-          { label: "Institut qo'shish arizalari", to: '/institutlar/arizalar' },
+          { label: "Institutlar ro'yxati", to: '/institutlar', permission: 'catalogue.view' },
+          {
+            label: "Institut qo'shish arizalari",
+            to: '/institutlar/arizalar',
+            permission: 'catalogue_requests.view',
+          },
         ],
       },
       {
         label: 'Fanlar',
         icon: LayoutGrid,
         children: [
-          { label: "Institutlar bo'yicha fanlar", to: '/fanlar' },
-          { label: "Fan qo'shish arizalari", to: '/fanlar/arizalar' },
+          { label: "Institutlar bo'yicha fanlar", to: '/fanlar', permission: 'catalogue.view' },
+          {
+            label: "Fan qo'shish arizalari",
+            to: '/fanlar/arizalar',
+            permission: 'catalogue_requests.view',
+          },
         ],
       },
-      { label: 'Topshiriqlar', to: '/topshiriqlar', icon: ClipboardList },
-      { label: 'Variantlar', to: '/variantlar', icon: ShieldCheck },
-      { label: 'Yuborilgan institutlar', to: '/yuborilgan/institutlar', icon: ClipboardCheck },
-      { label: 'Yuborilgan fanlar', to: '/yuborilgan/fanlar', icon: ClipboardCheck },
-      { label: 'Yuborilgan topshiriqlar', to: '/yuborilgan/topshiriqlar', icon: ClipboardCheck },
-      { label: 'Yuborilgan javoblar', to: '/yuborilgan/javoblar', icon: ClipboardCheck },
-      { label: 'Yechim moderatsiyasi', to: '/yechimlar', icon: FileCheck2 },
-      { label: 'Shikoyatlar', to: '/shikoyatlar', icon: TriangleAlert },
-      { label: 'Tasdiqlangan kontent', to: '/tasdiqlangan-kontent', icon: CheckSquare },
-      { label: 'Sotuv statistikasi', to: '/sotuv-statistikasi', icon: BarChart3 },
+      {
+        label: 'Topshiriqlar',
+        to: '/topshiriqlar',
+        icon: ClipboardList,
+        permission: 'catalogue.view',
+      },
+      { label: 'Variantlar', to: '/variantlar', icon: ShieldCheck, permission: 'catalogue.view' },
+      {
+        label: 'Yuborilgan institutlar',
+        to: '/yuborilgan/institutlar',
+        icon: ClipboardCheck,
+        permission: 'catalogue_requests.view',
+      },
+      {
+        label: 'Yuborilgan fanlar',
+        to: '/yuborilgan/fanlar',
+        icon: ClipboardCheck,
+        permission: 'catalogue_requests.view',
+      },
+      {
+        label: 'Yuborilgan topshiriqlar',
+        to: '/yuborilgan/topshiriqlar',
+        icon: ClipboardCheck,
+        permission: 'catalogue_requests.view',
+      },
+      {
+        label: 'Yuborilgan javoblar',
+        to: '/yuborilgan/javoblar',
+        icon: ClipboardCheck,
+        permission: 'solutions.view',
+      },
+      {
+        label: 'Yechim moderatsiyasi',
+        to: '/yechimlar',
+        icon: FileCheck2,
+        permission: 'solutions.view',
+      },
+      { label: 'Shikoyatlar', to: '/shikoyatlar', icon: TriangleAlert, permission: 'reports.view' },
+      {
+        label: 'Tasdiqlangan kontent',
+        to: '/tasdiqlangan-kontent',
+        icon: CheckSquare,
+        permission: 'solutions.view',
+      },
+      {
+        label: 'Sotuv statistikasi',
+        to: '/sotuv-statistikasi',
+        icon: BarChart3,
+        permission: 'content.view',
+      },
     ],
   },
   {
     title: 'Moliya',
     items: [
-      { label: 'Hamyonlar', to: '/hamyonlar', icon: WalletIcon },
-      { label: "Pul yechish so'rovlari", to: '/pul-yechish', icon: BanknoteArrowDown },
+      { label: 'Hamyonlar', to: '/hamyonlar', icon: WalletIcon, permission: 'wallets.view' },
+      {
+        label: "Pul yechish so'rovlari",
+        to: '/pul-yechish',
+        icon: BanknoteArrowDown,
+        permission: 'withdrawals.view',
+      },
     ],
   },
   {
     title: 'Sozlamalar',
     items: [
-      { label: 'Audit jurnali', to: '/audit', icon: ScrollText },
+      { label: 'Audit jurnali', to: '/audit', icon: ScrollText, permission: 'audit.view' },
+      { label: 'Rollar va ruxsatlar', to: '/rollar', icon: KeyRound, permission: 'roles.manage' },
       { label: 'Sozlamalar', to: '/sozlamalar', icon: Settings },
       { label: 'Chiqish', to: '/logout', icon: LogOut },
     ],

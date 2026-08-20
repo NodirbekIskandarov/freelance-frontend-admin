@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router';
 
 import { navigation, type NavItem } from '@/config/navigation';
+import { usePermissions } from '@/features/adminRoles/usePermissions';
 import { cn } from '@/lib/cn';
 
 function Logo() {
@@ -132,6 +133,27 @@ function SupportCard() {
 }
 
 export function Sidebar({ className }: { className?: string }) {
+  const { can, isError } = usePermissions();
+
+  /*
+   * Menyu ruxsatga qarab filtrlanadi. Guruh butunlay bo'shab qolsa
+   * uning SARLAVHASI ham chizilmaydi — aks holda ekranda ostida hech
+   * narsa yo'q "Moliya" yozuvi osilib qolardi.
+   */
+  const visible = navigation
+    .map((group) => ({
+      ...group,
+      items: group.items
+        .filter((item) => can(item.permission))
+        .map((item) =>
+          item.children
+            ? { ...item, children: item.children.filter((child) => can(child.permission)) }
+            : item,
+        )
+        .filter((item) => !item.children || item.children.length > 0),
+    }))
+    .filter((group) => group.items.length > 0);
+
   return (
     <aside
       className={cn('flex w-sidebar shrink-0 flex-col border-r border-line bg-sidebar', className)}
@@ -139,7 +161,17 @@ export function Sidebar({ className }: { className?: string }) {
       <Logo />
 
       <nav className="flex-1 overflow-y-auto px-3 pb-4">
-        {navigation.map((group) => (
+        {/*
+          Ruxsatlar kelmasa menyu bo'sh qoladi — sababini aytmasak,
+          panel buzilgandek ko'rinadi.
+        */}
+        {isError && (
+          <p className="mx-1 mt-4 rounded-control border border-danger/25 bg-danger/10 px-3 py-2.5 text-xs leading-relaxed text-danger">
+            Ruxsatlar yuklanmadi. Sahifani yangilang — muammo qolsa administratorga murojaat qiling.
+          </p>
+        )}
+
+        {visible.map((group) => (
           <div key={group.title} className="mb-2">
             <p className="px-3 pt-4 pb-2 text-[11px] font-medium tracking-wider text-fg-dim uppercase">
               {group.title}

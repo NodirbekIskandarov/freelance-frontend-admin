@@ -4,10 +4,8 @@ import type { UserStatus } from './auth';
 /**
  * Admin foydalanuvchilar ro'yxati — haqiqiy backend (`/admin/users/`).
  *
- * `types/users.ts` dagi `AdminUser` bilan ADASHTIRMANG: u mock uchun
- * o'ylab topilgan shakl (balans, avatar, o'zbekcha status matni) va
- * dizayn maketiga qarab yozilgan. Bu yerdagisi — serverdan keladigan
- * haqiqiy shakl. Mock ro'yxat butunlay ko'chib bo'lgach, u fayl o'chadi.
+ * `is_staff` — panelga kirish huquqi. Rollar aynan shu odamlarga
+ * beriladi (`PUT /admin/staff/{id}/roles/`).
  */
 export interface AdminUserAccount {
   id: string;

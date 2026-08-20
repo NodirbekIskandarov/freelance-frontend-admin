@@ -47,6 +47,8 @@ export const baseApi = createApi({
     'Withdrawal',
     'ExchangeTask',
     'Audit',
+    'Role',
+    'Permission',
   ],
   endpoints: () => ({}),
 });

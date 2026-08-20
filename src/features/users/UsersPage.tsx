@@ -1,4 +1,4 @@
-import { CircleCheck, CircleX, Clock, Lock, Users, UserRoundCheck } from 'lucide-react';
+import { CircleCheck, CircleX, Clock, KeyRound, Lock, Users, UserRoundCheck } from 'lucide-react';
 import { useState } from 'react';
 
 import { Avatar } from '@/components/ui/Avatar';
@@ -20,6 +20,9 @@ import {
   type AdminUserAccount,
 } from '@/shared/types/adminUsers';
 import type { UserStatus } from '@/shared/types/auth';
+
+import { StaffRolesModal } from '@/features/adminRoles/StaffRolesModal';
+import { usePermissions } from '@/features/adminRoles/usePermissions';
 
 import { useActivateUserMutation, useGetAdminUsersQuery } from './adminUsersApi';
 import { BlockUserModal } from './BlockUserModal';
@@ -59,6 +62,10 @@ export function UsersPage() {
   const [status, setStatus] = useState<UserStatus | 'all'>('all');
   const [ordering, setOrdering] = useState<string>('-created_at');
   const [search, setSearch] = useState('');
+  const { can } = usePermissions();
+  const canManageRoles = can('roles.manage');
+
+  const [rolesTarget, setRolesTarget] = useState<AdminUserAccount | null>(null);
   const [blockTarget, setBlockTarget] = useState<AdminUserAccount | null>(null);
 
   // Har harf uchun so'rov yubormaslik kerak — foydalanuvchi yozib
@@ -145,6 +152,18 @@ export function UsersPage() {
       align: 'right',
       cell: (row) => (
         <span className="flex items-center justify-end gap-2">
+          {/* Rol faqat xodimga beriladi — oddiy foydalanuvchi panelga kirmaydi. */}
+          {row.is_staff && canManageRoles && (
+            <IconButton
+              label={`${row.full_name || row.email} — rollari`}
+              tone="info"
+              size="sm"
+              onClick={() => setRolesTarget(row)}
+            >
+              <KeyRound className="size-4" strokeWidth={1.75} />
+            </IconButton>
+          )}
+
           {row.status !== 'active' && (
             <IconButton
               label={`${row.full_name || row.email} — faollashtirish`}
@@ -274,6 +293,7 @@ export function UsersPage() {
       )}
 
       <BlockUserModal user={blockTarget} onClose={() => setBlockTarget(null)} />
+      <StaffRolesModal user={rolesTarget} onClose={() => setRolesTarget(null)} />
     </>
   );
 }
