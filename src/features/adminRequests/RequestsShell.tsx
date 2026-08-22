@@ -177,7 +177,16 @@ export function RequestsShell<T extends RequestRow>({
               columns={[...columns, actionColumn]}
               rows={data?.results ?? []}
               rowKey={(row) => row.id}
-              isLoading={isLoading || isFetching}
+              /*
+                Skeleton faqat KO'RSATADIGAN narsa bo'lmaganda.
+
+                Sahifa yoki filtr almashsa RTK Query `data`ni bo'shatadi —
+                skeleton chiqadi, bu to'g'ri. Mutatsiyadan keyingi fon
+                yangilanishida esa `data` joyida qoladi, shuning uchun
+                jadval miltillamaydi: foydalanuvchi faqat o'zi tegan
+                qatorning yo'qolishini ko'radi.
+              */
+              isLoading={isLoading || (isFetching && !data)}
               skeletonRows={perPage > 20 ? 20 : perPage}
               emptyMessage={emptyMessage}
             />

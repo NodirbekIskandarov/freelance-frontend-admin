@@ -11,6 +11,8 @@ import type {
 } from '@/shared/types/adminRequests';
 import { baseApi } from '@/store/api';
 
+import { optimisticRemove } from './removeRowFromLists';
+
 /**
  * Fan/topshiriq qo'shish arizalari va yechim shikoyatlari — HAQIQIY
  * backend. Uchala bo'lim bir xil oqimga ega, shuning uchun endpoint'lar
@@ -31,6 +33,7 @@ export const adminRequestsApi = baseApi.injectEndpoints({
 
     approveUniversityRequest: build.mutation<AdminUniversityRequest, string>({
       query: (id) => ({ url: `/admin/university-requests/${id}/approve/`, method: 'POST' }),
+      onQueryStarted: optimisticRemove('getUniversityRequestsList'),
       // Tasdiqlash UNIVERSITET yaratadi — institutlar ro'yxati ham eskiradi.
       invalidatesTags: [{ type: 'Request', id: 'UNIVERSITY' }, 'Institute', 'Dashboard'],
     }),
@@ -42,6 +45,7 @@ export const adminRequestsApi = baseApi.injectEndpoints({
           method: 'POST',
           body,
         }),
+        onQueryStarted: optimisticRemove('getUniversityRequestsList'),
         invalidatesTags: [{ type: 'Request', id: 'UNIVERSITY' }, 'Dashboard'],
       },
     ),
@@ -53,6 +57,7 @@ export const adminRequestsApi = baseApi.injectEndpoints({
 
     approveSubjectRequest: build.mutation<AdminSubjectRequest, string>({
       query: (id) => ({ url: `/admin/subject-requests/${id}/approve/`, method: 'POST' }),
+      onQueryStarted: optimisticRemove('getSubjectRequestsList'),
       invalidatesTags: [{ type: 'Request', id: 'SUBJECT' }, 'Subject', 'Dashboard'],
     }),
 
@@ -62,6 +67,7 @@ export const adminRequestsApi = baseApi.injectEndpoints({
         method: 'POST',
         body,
       }),
+      onQueryStarted: optimisticRemove('getSubjectRequestsList'),
       invalidatesTags: [{ type: 'Request', id: 'SUBJECT' }, 'Dashboard'],
     }),
 
@@ -75,6 +81,7 @@ export const adminRequestsApi = baseApi.injectEndpoints({
 
     approveAssignmentRequest: build.mutation<AdminAssignmentRequest, string>({
       query: (id) => ({ url: `/admin/assignment-requests/${id}/approve/`, method: 'POST' }),
+      onQueryStarted: optimisticRemove('getAssignmentRequestsList'),
       invalidatesTags: [{ type: 'Request', id: 'ASSIGNMENT' }, 'Task', 'Variant', 'Dashboard'],
     }),
 
@@ -85,6 +92,7 @@ export const adminRequestsApi = baseApi.injectEndpoints({
           method: 'POST',
           body,
         }),
+        onQueryStarted: optimisticRemove('getAssignmentRequestsList'),
         invalidatesTags: [{ type: 'Request', id: 'ASSIGNMENT' }, 'Dashboard'],
       },
     ),
@@ -97,6 +105,7 @@ export const adminRequestsApi = baseApi.injectEndpoints({
     /** Shikoyat asosli — yechim moderatsiya holati o'zgarishi mumkin. */
     approveReport: build.mutation<AdminSolutionReport, string>({
       query: (id) => ({ url: `/admin/solution-reports/${id}/approve/`, method: 'POST' }),
+      onQueryStarted: optimisticRemove('getSolutionReports'),
       invalidatesTags: ['Report', 'Solution', 'Dashboard'],
     }),
 
@@ -106,6 +115,7 @@ export const adminRequestsApi = baseApi.injectEndpoints({
         method: 'POST',
         body,
       }),
+      onQueryStarted: optimisticRemove('getSolutionReports'),
       invalidatesTags: ['Report', 'Dashboard'],
     }),
   }),

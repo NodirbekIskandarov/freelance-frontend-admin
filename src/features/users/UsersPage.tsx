@@ -272,7 +272,12 @@ export function UsersPage() {
               columns={columns}
               rows={data?.results ?? []}
               rowKey={(row) => row.id}
-              isLoading={isLoading || isFetching}
+              /*
+                Skeleton faqat ko'rsatadigan narsa bo'lmaganda: sahifa yoki
+                filtr almashsa `data` bo'shaydi, mutatsiyadan keyingi fon
+                yangilanishida esa joyida qoladi va jadval miltillamaydi.
+              */
+              isLoading={isLoading || (isFetching && !data)}
               skeletonRows={perPage > 20 ? 20 : perPage}
               emptyMessage="Bunday foydalanuvchi topilmadi"
             />
