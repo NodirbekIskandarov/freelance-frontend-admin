@@ -133,6 +133,8 @@ export function SubjectRequestsPage() {
         <>
           <Select
             aria-label="Institut bo'yicha filtr"
+            searchable
+            searchPlaceholder="Institut nomi..."
             options={[
               { value: '', label: 'Barcha institutlar' },
               ...(universities?.results ?? []).map((item) => ({

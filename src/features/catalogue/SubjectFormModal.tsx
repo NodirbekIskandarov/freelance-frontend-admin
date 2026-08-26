@@ -161,6 +161,8 @@ export function SubjectFormModal({
           <Select
             aria-label="Institut"
             className="w-full"
+            searchable
+            searchPlaceholder="Institut nomi..."
             options={universityOptions}
             value={university}
             onChange={(event) => {
@@ -179,6 +181,8 @@ export function SubjectFormModal({
           <Select
             aria-label="Yo'nalish"
             className="w-full"
+            searchable={directionOptions.length > 8}
+            searchPlaceholder="Yo'nalish nomi..."
             options={directionOptions}
             value={direction}
             disabled={!university || directions.length === 0}

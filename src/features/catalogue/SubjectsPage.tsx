@@ -12,6 +12,7 @@ import { Select } from '@/components/ui/Select';
 import { Table, type Column } from '@/components/ui/Table';
 import { formatDateTime, formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
+import { useGetSubjectRequestsListQuery } from '@/features/adminRequests/adminRequestsApi';
 import { getApiErrorMessage } from '@/shared/api';
 import {
   COURSE_OPTIONS,
@@ -51,6 +52,21 @@ export function SubjectsPage() {
   const [deleteTarget, setDeleteTarget] = useState<Subject | null>(null);
 
   const debouncedSearch = useDebouncedValue(search, 350);
+
+  /*
+   * Tugmadagi kichik son — nechta ariza javob kutayotgani.
+   *
+   * Faqat SON kerak, shuning uchun `page_size: 1`: ro'yxatning o'zi
+   * arizalar sahifasida yuklanadi va uni bu yerda ikkinchi marta
+   * tortib olishning ma'nosi yo'q.
+   */
+  const { data: pendingRequests } = useGetSubjectRequestsListQuery({
+    status: 'pending',
+    page: 1,
+    page_size: 1,
+  });
+
+  const pendingCount = pendingRequests?.count ?? 0;
 
   /*
    * Institut almashganda filtrlar tozalanadi: oldingi institutda tanlangan
@@ -209,6 +225,14 @@ export function SubjectsPage() {
             <Link to="/fanlar/arizalar">
               <Button variant="secondary" icon={<FileText className="size-4" />}>
                 Fan qo&apos;shish arizalari
+                {pendingCount > 0 && (
+                  <span
+                    aria-label={`${pendingCount} ta ariza javob kutmoqda`}
+                    className="ml-1.5 inline-flex min-w-5 items-center justify-center rounded-full bg-warning/20 px-1.5 py-0.5 text-[11px] font-semibold text-warning tabular-nums"
+                  >
+                    {pendingCount}
+                  </span>
+                )}
               </Button>
             </Link>
 
@@ -294,6 +318,9 @@ export function SubjectsPage() {
 
                     <Select
                       aria-label="Yo'nalish bo'yicha filtr"
+                      /* Uzun ro'yxatda aylantirishdan ko'ra yozib topish tezroq. */
+                      searchable={directionOptions.length > 8}
+                      searchPlaceholder="Yo'nalish nomi..."
                       options={directionOptions}
                       value={direction}
                       onChange={(event) => {
