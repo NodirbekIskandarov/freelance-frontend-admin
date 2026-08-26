@@ -81,7 +81,16 @@ export function SubjectsPage() {
     setSearch('');
   }, [university?.id]);
 
-  const { data: directions } = useGetDirectionsQuery({ page_size: 200 }, { skip: !university });
+  /*
+   * Yo'nalishlar tanlangan institutniki: usiz ro'yxatda boshqa
+   * institutlarning yo'nalishlari ham chiqib, bir xil nom takrorlanardi.
+   * Ustiga, boshqa institutning yo'nalishi bo'yicha filtrlash hech
+   * qachon natija bermasdi.
+   */
+  const { data: directions } = useGetDirectionsQuery(
+    { page_size: 200, university: university?.id ?? '' },
+    { skip: !university },
+  );
 
   const { data, isLoading, isFetching, error } = useGetSubjectsQuery(
     {

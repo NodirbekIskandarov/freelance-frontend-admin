@@ -11,7 +11,6 @@ import { COURSE_OPTIONS, SEMESTER_OPTIONS, type Subject } from '@/shared/types/c
 import {
   useCreateSubjectMutation,
   useGetDirectionsQuery,
-  useGetFacultiesQuery,
   useGetUniversitiesQuery,
   useUpdateSubjectMutation,
 } from './catalogueApi';
@@ -19,26 +18,20 @@ import {
 /**
  * Yo'nalish universitetga BEVOSITA bog'lanmagan: universitet → fakultet
  * → yo'nalish. Backend "yo'nalish o'sha universitetga tegishli bo'lsin"
- * deb talab qiladi, shuning uchun ro'yxat ikki bosqichda yig'iladi:
- * avval universitetning fakultetlari, keyin ularning yo'nalishlari.
+ * deb talab qiladi.
+ *
+ * Oldin ro'yxat ikki bosqichda yig'ilardi (avval fakultetlar, keyin butun
+ * yo'nalishlar ro'yxati va uni qo'lda saralash). Endi `/directions/`
+ * `?university=` ni o'zi qabul qiladi — bitta so'rov, ortiqcha ma'lumot
+ * tortilmaydi.
  */
 function useDirectionsForUniversity(universityId: string, enabled: boolean) {
-  const { data: faculties } = useGetFacultiesQuery(
-    { university: universityId, page_size: 100 },
+  const { data, isLoading } = useGetDirectionsQuery(
+    { page_size: 200, university: universityId },
     { skip: !enabled || !universityId },
   );
 
-  const facultyIds = new Set((faculties?.results ?? []).map((item) => item.id));
-
-  const { data: directions, isLoading } = useGetDirectionsQuery(
-    { page_size: 200 },
-    { skip: !enabled || facultyIds.size === 0 },
-  );
-
-  return {
-    directions: (directions?.results ?? []).filter((item) => facultyIds.has(item.faculty)),
-    isLoading,
-  };
+  return { directions: data?.results ?? [], isLoading };
 }
 
 /** Izoh maydonining chegarasi — backend ham shu sonni tekshiradi. */

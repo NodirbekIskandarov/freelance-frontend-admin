@@ -82,7 +82,17 @@ export const catalogueApi = baseApi.injectEndpoints({
       query: (params) => ({ url: '/faculties/', params }),
     }),
 
-    getDirections: build.query<ApiPaginated<Direction>, ApiListQuery & { faculty?: string }>({
+    /**
+     * `university` — fakultetlar ustidagi daraja.
+     *
+     * Usiz filtr ekranlari barcha institutlarning yo'nalishlarini
+     * olardi va bir xil nom («Dasturiy injiniring») ro'yxatda necha
+     * institut bo'lsa shuncha marta chiqardi.
+     */
+    getDirections: build.query<
+      ApiPaginated<Direction>,
+      ApiListQuery & { faculty?: string; university?: string }
+    >({
       query: (params) => ({ url: '/directions/', params }),
     }),
   }),
