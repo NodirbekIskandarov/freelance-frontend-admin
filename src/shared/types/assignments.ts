@@ -118,10 +118,21 @@ export interface Variant {
   max_published_solutions: number;
   request_count: number;
   /**
-   * Bu variantga chop etilgan yechimlar soni. Noldan katta bo'lsa variantga
-   * javob berilgan — kelgan so'rovlar endi kutish emas.
+   * Yechim sanoqlari — holat bo'yicha taqsimot.
+   *
+   * `solution_count` taklifni, `request_count` esa talabni aytadi: beshta
+   * yechim kelgan variant bilan hech nima kelmagani ro'yxatda bir xil
+   * ko'rinmasligi kerak.
+   *
+   * `approved` chop etilganlarni ham qamraydi — moderator uchun ikkalasi
+   * ham «o'tkazildi», farqi sotuvga chiqqan-chiqmaganida.
    */
+  solution_count: number;
+  pending_solution_count: number;
+  approved_solution_count: number;
   published_solution_count: number;
+  rejected_solution_count: number;
+  archived_solution_count: number;
   /** Shu variantga yangi yechim qabul qilinadimi. */
   accepts_submissions: boolean;
   /** Topshiriq qavati ham hisobga olingan yakuniy javob. */

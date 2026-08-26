@@ -15,6 +15,20 @@ import { assignmentTypeLabel, type Variant } from '@/shared/types/assignments';
 import { AssignmentFormModal } from './AssignmentFormModal';
 import { useGetAssignmentQuery, useGetAssignmentVariantsQuery } from './assignmentsApi';
 
+/**
+ * Yechim holatlarining ekrandagi tartibi.
+ *
+ * Chop etilgan alohida chiqarilmaydi: u tasdiqlanganlar ichida va ikkalasini
+ * yonma-yon ko'rsatish bir yechimni ikki marta sanagandek ko'rinardi.
+ * Sotuvga chiqqani jadvalning «Yechilgan» ustunida ko'rinadi.
+ */
+const SOLUTION_BUCKETS = [
+  { key: 'pending_solution_count', label: 'kutilmoqda', tone: 'warning' },
+  { key: 'approved_solution_count', label: 'qabul qilindi', tone: 'success' },
+  { key: 'rejected_solution_count', label: 'rad etildi', tone: 'danger' },
+  { key: 'archived_solution_count', label: 'arxivlandi', tone: 'neutral' },
+] as const;
+
 const variantColumns: Column<Variant>[] = [
   {
     key: 'number',
@@ -44,6 +58,29 @@ const variantColumns: Column<Variant>[] = [
         <Badge tone="warning">{row.request_count} ta</Badge>
       ) : (
         <span className="text-fg-dim">—</span>
+      ),
+  },
+  {
+    key: 'solutions',
+    header: 'Yechimlar',
+    /*
+      Umumiy son bilan birga holat taqsimoti. Faqat umumiy son «5 ta keldi»
+      deb aytardi, lekin moderator uchun asosiy savol — nechtasi hali javob
+      kutyapti. Nol bo'lgan qutilar chizilmaydi: to'rtta nol qatorni
+      o'qishga yaroqsiz qilardi.
+    */
+    cell: (row) =>
+      row.solution_count === 0 ? (
+        <span className="text-fg-dim">—</span>
+      ) : (
+        <span className="flex flex-wrap items-center gap-1.5">
+          <span className="text-fg tabular-nums">{row.solution_count} ta</span>
+          {SOLUTION_BUCKETS.filter((bucket) => row[bucket.key] > 0).map((bucket) => (
+            <Badge key={bucket.key} tone={bucket.tone}>
+              {row[bucket.key]} {bucket.label}
+            </Badge>
+          ))}
+        </span>
       ),
   },
   {
