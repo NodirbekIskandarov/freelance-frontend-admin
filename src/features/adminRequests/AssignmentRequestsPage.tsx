@@ -1,8 +1,9 @@
-import { FileText } from 'lucide-react';
+import { ArrowLeft, FileText } from 'lucide-react';
+import { useState } from 'react';
+import { Link } from 'react-router';
 
 import { Badge } from '@/components/ui/Badge';
-import { useState } from 'react';
-
+import { Button } from '@/components/ui/Button';
 import type { Column } from '@/components/ui/Table';
 import { formatDateTime } from '@/lib/format';
 import type { AdminAssignmentRequest } from '@/shared/types/adminRequests';
@@ -97,6 +98,13 @@ export function AssignmentRequestsPage() {
     <RequestsShell<AdminAssignmentRequest>
       title="Topshiriq qo'shish arizalari"
       breadcrumbLabel="Topshiriq arizalari"
+      headerActions={
+        <Link to="/topshiriqlar">
+          <Button variant="secondary" icon={<ArrowLeft className="size-4" />}>
+            Topshiriqlar ro&apos;yxatiga qaytish
+          </Button>
+        </Link>
+      }
       columns={columns}
       useList={useGetAssignmentRequestsListQuery}
       approve={{
