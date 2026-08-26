@@ -400,6 +400,7 @@ export function AssignmentsPage() {
         open={formOpen}
         assignment={editTarget}
         defaultSubjectId={subject !== 'all' ? subject : null}
+        defaultUniversityId={university?.id ?? null}
         onClose={() => setFormOpen(false)}
       />
       <DeleteAssignmentModal assignment={deleteTarget} onClose={() => setDeleteTarget(null)} />

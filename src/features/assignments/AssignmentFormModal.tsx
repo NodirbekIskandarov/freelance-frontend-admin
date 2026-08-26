@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button';
 import { TextAreaField, TextField } from '@/components/ui/Field';
 import { Modal } from '@/components/ui/Modal';
 import { Select } from '@/components/ui/Select';
+import { useGetUniversitiesQuery } from '@/features/catalogue/catalogueApi';
 import { getApiErrorMessage } from '@/shared/api';
 import {
   ASSIGNMENT_TYPE_LABELS,
@@ -28,6 +29,7 @@ export function AssignmentFormModal({
   open,
   assignment,
   defaultSubjectId = null,
+  defaultUniversityId = null,
   onClose,
 }: {
   open: boolean;
@@ -35,6 +37,8 @@ export function AssignmentFormModal({
   assignment: Assignment | null;
   /** Ro'yxatda tanlab turilgan fan — yangi topshiriq uchun oldindan qo'yiladi. */
   defaultSubjectId?: string | null;
+  /** Filtrda tanlab turilgan institut — u ham oldindan qo'yiladi. */
+  defaultUniversityId?: string | null;
   onClose: () => void;
 }) {
   const isEdit = assignment !== null;
@@ -42,14 +46,23 @@ export function AssignmentFormModal({
   const [createAssignment, createState] = useCreateAssignmentMutation();
   const [updateAssignment, updateState] = useUpdateAssignmentMutation();
 
-  // Fanlar ro'yxati faqat modal ochilganda kerak — yopiq turganda
-  // so'rov yubormaymiz.
-  const { data: subjects, isLoading: isLoadingSubjects } = useGetSubjectsQuery(
-    { page_size: 200, ordering: 'name' },
+  const [university, setUniversity] = useState('');
+  const [subject, setSubject] = useState('');
+
+  // Institutlar ro'yxati faqat modal ochilganda kerak.
+  const { data: universities } = useGetUniversitiesQuery(
+    { page_size: 200, ordering: 'short_name' },
     { skip: !open },
   );
 
-  const [subject, setSubject] = useState('');
+  /*
+   * Fanlar tanlangan institutniki. Institut tanlanmagan bo'lsa hammasi —
+   * shunda tahrirlashda mavjud fan ro'yxatdan tushib qolmaydi.
+   */
+  const { data: subjects, isLoading: isLoadingSubjects } = useGetSubjectsQuery(
+    { page_size: 200, ordering: 'name', ...(university ? { university } : {}) },
+    { skip: !open },
+  );
   const [title, setTitle] = useState('');
   const [titleRu, setTitleRu] = useState('');
   const [type, setType] = useState<string>(ASSIGNMENT_TYPES[0]);
@@ -64,6 +77,7 @@ export function AssignmentFormModal({
   useEffect(() => {
     if (!open) return;
 
+    setUniversity(assignment?.university ?? defaultUniversityId ?? '');
     setSubject(assignment?.subject ?? defaultSubjectId ?? '');
     /*
      * `title` joriy tilga qarab yechilgan qiymat, `title_uz` esa ustunning
@@ -76,13 +90,26 @@ export function AssignmentFormModal({
     setDescription(assignment?.description ?? '');
     setIsActive(assignment?.is_active ?? true);
     setTouched(false);
-  }, [open, assignment]);
+  }, [open, assignment, defaultSubjectId, defaultUniversityId]);
 
+  const universityOptions = [
+    { value: '', label: 'Institutni tanlang' },
+    ...(universities?.results ?? []).map((item) => ({
+      value: item.id,
+      label: item.short_name ? `${item.short_name} — ${item.name}` : item.name,
+    })),
+  ];
+
+  /*
+   * Institut tanlangan bo'lsa fan nomi yolg'iz yetarli. Aks holda
+   * ro'yxatda «Falsafa» bir necha institutdan chiqib, qaysi biri
+   * ekanini ajratib bo'lmasdi.
+   */
   const subjectOptions = [
     { value: '', label: 'Fanni tanlang' },
     ...(subjects?.results ?? []).map((item) => ({
       value: item.id,
-      label: `${item.name} — ${item.university_name}`,
+      label: university ? item.name : `${item.name} — ${item.university_name}`,
     })),
   ];
 
@@ -135,6 +162,27 @@ export function AssignmentFormModal({
     >
       <div className="flex flex-col gap-4">
         <div>
+          <span className="mb-2 block text-sm font-medium text-fg-soft">Institut</span>
+          <Select
+            aria-label="Institut"
+            className="w-full"
+            searchable
+            searchPlaceholder="Institut nomi..."
+            options={universityOptions}
+            value={university}
+            onChange={(event) => {
+              setUniversity(event.target.value);
+              // Institut o'zgarsa eski fan endi unga tegishli emas.
+              setSubject('');
+            }}
+          />
+          <p className="mt-1.5 text-xs text-fg-muted">
+            Fanlar ro&apos;yxatini toraytiradi. Bo&apos;sh qoldirsangiz barcha fanlar
+            ko&apos;rinadi.
+          </p>
+        </div>
+
+        <div>
           <span className="mb-2 block text-sm font-medium text-fg-soft">
             Fan
             <span aria-hidden className="ml-0.5 text-danger">
@@ -143,6 +191,9 @@ export function AssignmentFormModal({
           </span>
           <Select
             aria-label="Fan"
+            className="w-full"
+            searchable={subjectOptions.length > 8}
+            searchPlaceholder="Fan nomi..."
             options={subjectOptions}
             value={subject}
             disabled={isLoadingSubjects}
