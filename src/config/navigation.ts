@@ -110,12 +110,6 @@ export const navigation: NavGroup[] = [
         permission: 'catalogue_requests.view',
       },
       {
-        label: 'Yuborilgan topshiriqlar',
-        to: '/yuborilgan/topshiriqlar',
-        icon: ClipboardCheck,
-        permission: 'catalogue_requests.view',
-      },
-      {
         label: 'Yuborilgan javoblar',
         to: '/yuborilgan/javoblar',
         icon: ClipboardCheck,

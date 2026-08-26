@@ -37,10 +37,20 @@ export interface Assignment {
   id: string;
   subject: string;
   subject_name: string;
+  /** Fanda saqlanadi — topshiriqda emas, lekin ro'yxatda kerak. */
+  subject_course: number | null;
+  subject_semester: number | null;
   university: string;
   university_name: string;
+  /** Joriy tilga qarab yechilgan nom. Tahrirlashda `title_uz` ishlatiladi. */
   title: string;
+  title_uz: string | null;
+  title_ru: string | null;
+  type: string;
   description: string;
+  /** Backend hisoblab beradi. `solved` — faqat chop etilgan yechimli variantlar. */
+  variant_count: number;
+  solved_variant_count: number;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -50,12 +60,20 @@ export interface Assignment {
 export interface AssignmentWriteRequest {
   subject: string;
   title: string;
+  /** Ixtiyoriy tarjima. Bo'sh qoldirilsa faqat o'zbekcha nom saqlanadi. */
+  title_ru?: string;
+  type?: string;
   description?: string;
   is_active?: boolean;
 }
 
 export interface AssignmentsQuery extends ApiListQuery {
   subject?: string;
+  /** Kurs, semestr va institut FANDA saqlanadi — shuning uchun `subject__*`. */
+  subject__university?: string;
+  subject__course?: number;
+  subject__semester?: number;
+  type?: string;
   is_active?: boolean;
 }
 

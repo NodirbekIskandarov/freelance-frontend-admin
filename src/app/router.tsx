@@ -146,6 +146,10 @@ export const router = createBrowserRouter([
         element: gated('catalogue_requests.view', <SubjectRequestsPage />),
       },
       { path: 'topshiriqlar', element: gated('catalogue.view', <AssignmentsPage />) },
+      {
+        path: 'topshiriqlar/arizalar',
+        element: gated('catalogue_requests.view', <AssignmentRequestsPage />),
+      },
       { path: 'topshiriqlar/:id', element: gated('catalogue.view', <AssignmentDetailPage />) },
       { path: 'variantlar', element: gated('catalogue.view', <VariantsPage />) },
 
@@ -154,10 +158,6 @@ export const router = createBrowserRouter([
         element: <PlaceholderPage title="Yuborilgan institutlar" />,
       },
       { path: 'yuborilgan/fanlar', element: <PlaceholderPage title="Yuborilgan fanlar" /> },
-      {
-        path: 'yuborilgan/topshiriqlar',
-        element: gated('catalogue_requests.view', <AssignmentRequestsPage />),
-      },
       { path: 'yuborilgan/javoblar', element: gated('solutions.view', <SubmissionsPage />) },
       {
         path: 'yuborilgan/javoblar/:subjectId',

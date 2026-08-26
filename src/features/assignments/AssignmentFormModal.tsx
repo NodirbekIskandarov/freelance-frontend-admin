@@ -5,7 +5,11 @@ import { TextAreaField, TextField } from '@/components/ui/Field';
 import { Modal } from '@/components/ui/Modal';
 import { Select } from '@/components/ui/Select';
 import { getApiErrorMessage } from '@/shared/api';
-import type { Assignment } from '@/shared/types/assignments';
+import {
+  ASSIGNMENT_TYPE_LABELS,
+  ASSIGNMENT_TYPES,
+  type Assignment,
+} from '@/shared/types/assignments';
 
 import {
   useCreateAssignmentMutation,
@@ -23,11 +27,14 @@ import {
 export function AssignmentFormModal({
   open,
   assignment,
+  defaultSubjectId = null,
   onClose,
 }: {
   open: boolean;
   /** `null` — yangi topshiriq yaratiladi. */
   assignment: Assignment | null;
+  /** Ro'yxatda tanlab turilgan fan — yangi topshiriq uchun oldindan qo'yiladi. */
+  defaultSubjectId?: string | null;
   onClose: () => void;
 }) {
   const isEdit = assignment !== null;
@@ -44,6 +51,8 @@ export function AssignmentFormModal({
 
   const [subject, setSubject] = useState('');
   const [title, setTitle] = useState('');
+  const [titleRu, setTitleRu] = useState('');
+  const [type, setType] = useState<string>(ASSIGNMENT_TYPES[0]);
   const [description, setDescription] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [touched, setTouched] = useState(false);
@@ -55,8 +64,15 @@ export function AssignmentFormModal({
   useEffect(() => {
     if (!open) return;
 
-    setSubject(assignment?.subject ?? '');
-    setTitle(assignment?.title ?? '');
+    setSubject(assignment?.subject ?? defaultSubjectId ?? '');
+    /*
+     * `title` joriy tilga qarab yechilgan qiymat, `title_uz` esa ustunning
+     * o'zi — ruscha interfeysda o'zbekcha maydonga ruscha nom tushib
+     * qolmasligi uchun ustun o'qiladi.
+     */
+    setTitle(assignment?.title_uz ?? assignment?.title ?? '');
+    setTitleRu(assignment?.title_ru ?? '');
+    setType(assignment?.type ?? ASSIGNMENT_TYPES[0]);
     setDescription(assignment?.description ?? '');
     setIsActive(assignment?.is_active ?? true);
     setTouched(false);
@@ -83,6 +99,8 @@ export function AssignmentFormModal({
     const body = {
       subject,
       title: title.trim(),
+      title_ru: titleRu.trim(),
+      type,
       description: description.trim(),
       is_active: isActive,
     };
@@ -102,7 +120,7 @@ export function AssignmentFormModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={isEdit ? 'Topshiriqni tahrirlash' : 'Yangi topshiriq'}
+      title={isEdit ? 'Topshiriqni tahrirlash' : "Yangi topshiriq qo'shish"}
       description={isEdit ? assignment.subject_name : 'Topshiriq fanga biriktiriladi.'}
       footer={
         <>
@@ -133,14 +151,42 @@ export function AssignmentFormModal({
           {subjectError && <p className="mt-1.5 text-xs text-danger">{subjectError}</p>}
         </div>
 
+        <div>
+          <span className="mb-2 block text-sm font-medium text-fg-soft">
+            Ish turi
+            <span aria-hidden className="ml-0.5 text-danger">
+              *
+            </span>
+          </span>
+          <Select
+            aria-label="Ish turi"
+            className="w-full"
+            options={ASSIGNMENT_TYPES.map((item) => ({
+              value: item,
+              label: ASSIGNMENT_TYPE_LABELS[item],
+            }))}
+            value={type}
+            onChange={(event) => setType(event.target.value)}
+          />
+        </div>
+
         <TextField
-          label="Sarlavha"
+          label="Topshiriq nomi (o'zbekcha)"
           required
           maxLength={255}
-          placeholder="Masalan: Mustaqil ish №3"
+          placeholder="Masalan: Mustaqil ish 12-variant"
           value={title}
           error={titleError}
           onChange={(event) => setTitle(event.target.value)}
+        />
+
+        <TextField
+          label="Topshiriq nomi (ruscha)"
+          maxLength={255}
+          placeholder="Например: Самостоятельная работа 12"
+          value={titleRu}
+          hint="Ixtiyoriy — bo'sh qoldirilsa faqat o'zbekcha nom saqlanadi."
+          onChange={(event) => setTitleRu(event.target.value)}
         />
 
         <TextAreaField

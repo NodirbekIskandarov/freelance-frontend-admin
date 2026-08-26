@@ -94,8 +94,16 @@ export const adminRequestsApi = baseApi.injectEndpoints({
       providesTags: [{ type: 'Request', id: 'ASSIGNMENT' }],
     }),
 
-    approveAssignmentRequest: build.mutation<AdminAssignmentRequest, string>({
-      query: (id) => ({ url: `/admin/assignment-requests/${id}/approve/`, method: 'POST' }),
+    /** Tasdiqlashda nomni ikki tilda berish mumkin — fan arizasidagi kabi. */
+    approveAssignmentRequest: build.mutation<
+      AdminAssignmentRequest,
+      { id: string; title?: string; title_ru?: string }
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/admin/assignment-requests/${id}/approve/`,
+        method: 'POST',
+        body,
+      }),
       onQueryStarted: optimisticRemove('getAssignmentRequestsList'),
       invalidatesTags: [{ type: 'Request', id: 'ASSIGNMENT' }, 'Task', 'Variant', 'Dashboard'],
     }),

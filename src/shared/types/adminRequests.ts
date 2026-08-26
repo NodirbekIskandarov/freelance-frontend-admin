@@ -59,18 +59,21 @@ export interface AdminUniversityRequest {
 
 export interface AdminAssignmentRequest {
   id: string;
-  user: string;
+  /** Backend to'liq obyekt qaytaradi, faqat ID emas. */
+  user: Requester;
   subject: string;
   subject_name: string;
   university: string;
   university_name: string;
   title: string;
+  /** `independent` | `practical` | `laboratory` | `course_work` | `other`. */
+  type: string;
   description: string;
   file: string | null;
   variant_count: number | null;
   status: RequestStatus;
   reject_reason: string;
-  reviewed_by: string | null;
+  reviewed_by: Requester | null;
   created_assignment: string | null;
   reward_granted: boolean;
   created_at: string;

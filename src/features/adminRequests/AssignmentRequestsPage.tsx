@@ -1,6 +1,8 @@
 import { FileText } from 'lucide-react';
 
 import { Badge } from '@/components/ui/Badge';
+import { useState } from 'react';
+
 import type { Column } from '@/components/ui/Table';
 import { formatDateTime } from '@/lib/format';
 import type { AdminAssignmentRequest } from '@/shared/types/adminRequests';
@@ -10,6 +12,7 @@ import {
   useGetAssignmentRequestsListQuery,
   useRejectAssignmentRequestMutation,
 } from './adminRequestsApi';
+import { ApproveAssignmentModal } from './ApproveAssignmentModal';
 import { RequestsShell, StatusBadge } from './RequestsShell';
 
 const columns: Column<AdminAssignmentRequest>[] = [
@@ -84,6 +87,9 @@ const columns: Column<AdminAssignmentRequest>[] = [
 ];
 
 export function AssignmentRequestsPage() {
+  /* `null` — tasdiqlash oynasi yopiq. */
+  const [approveTarget, setApproveTarget] = useState<AdminAssignmentRequest | null>(null);
+
   const [approve, approveState] = useApproveAssignmentRequestMutation();
   const [reject, rejectState] = useRejectAssignmentRequestMutation();
 
@@ -94,7 +100,8 @@ export function AssignmentRequestsPage() {
       columns={columns}
       useList={useGetAssignmentRequestsListQuery}
       approve={{
-        run: (id) => void approve(id),
+        // To'g'ridan-to'g'ri tasdiqlamaymiz: avval nomni ikki tilda so'raymiz.
+        run: (_id, row) => setApproveTarget(row),
         isLoading: approveState.isLoading,
         error: approveState.error,
       }}
@@ -114,6 +121,25 @@ export function AssignmentRequestsPage() {
       rowName={(row) => row.title}
       summaryLabel="ariza"
       emptyMessage="Bunday ariza topilmadi"
+      afterContent={
+        <ApproveAssignmentModal
+          request={approveTarget}
+          isLoading={approveState.isLoading}
+          error={approveState.error}
+          onClose={() => setApproveTarget(null)}
+          onConfirm={async (titles) => {
+            if (!approveTarget) return;
+
+            try {
+              await approve({ id: approveTarget.id, ...titles }).unwrap();
+            } catch {
+              return;
+            }
+
+            setApproveTarget(null);
+          }}
+        />
+      }
     />
   );
 }
