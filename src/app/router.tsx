@@ -39,10 +39,6 @@ const InstitutesPage = lazy(async () => ({
   default: (await import('@/features/catalogue/InstitutesPage')).InstitutesPage,
 }));
 
-const UniversityRequestsPage = lazy(async () => ({
-  default: (await import('@/features/adminRequests/UniversityRequestsPage')).UniversityRequestsPage,
-}));
-
 const SubjectsPage = lazy(async () => ({
   default: (await import('@/features/catalogue/SubjectsPage')).SubjectsPage,
 }));
@@ -144,10 +140,6 @@ export const router = createBrowserRouter([
 
       { path: 'kontent', element: gated('content.view', <ContentPage />) },
       { path: 'institutlar', element: gated('catalogue.view', <InstitutesPage />) },
-      {
-        path: 'institutlar/arizalar',
-        element: gated('catalogue_requests.view', <UniversityRequestsPage />),
-      },
       { path: 'fanlar', element: gated('catalogue.view', <SubjectsPage />) },
       {
         path: 'fanlar/arizalar',

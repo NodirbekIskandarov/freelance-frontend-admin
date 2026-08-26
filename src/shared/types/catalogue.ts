@@ -18,6 +18,8 @@ export interface University {
   /** Berilmasa `short_name` dan avtomatik yasaladi. */
   code: string;
   city: string;
+  /** Yuklangan logotip manzili. Bo'lmasa bosh harflar chiziladi. */
+  logo: string | null;
   /** Ro'yxat ekranlari uchun backend hisoblab beradi. */
   subject_count: number;
   assignment_count: number;
@@ -32,6 +34,8 @@ export interface UniversityWriteRequest {
   short_name?: string;
   code?: string;
   city?: string;
+  /** Fayl yuborilsa `FormData` ishlatiladi; `null` — logotipni olib tashlash. */
+  logo?: File | null;
   is_active?: boolean;
 }
 

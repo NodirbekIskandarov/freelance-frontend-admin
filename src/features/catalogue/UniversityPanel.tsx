@@ -32,18 +32,34 @@ const TONES = [
 export function UniversityBadge({
   university,
   size = 'sm',
+  logo,
 }: {
   university: Pick<University, 'id' | 'short_name' | 'name'>;
   size?: 'sm' | 'lg';
+  /** Berilsa rasm chiziladi, aks holda bosh harflar. */
+  logo?: string | null;
 }) {
   const seed = [...university.id].reduce((total, char) => total + char.charCodeAt(0), 0);
   const initials = (university.short_name || university.name).slice(0, 2).toUpperCase();
+  const sizeClass = size === 'lg' ? 'size-11' : 'size-9';
+
+  if (logo) {
+    return (
+      <img
+        src={logo}
+        alt=""
+        className={cn('shrink-0 rounded-full object-cover', sizeClass)}
+        loading="lazy"
+      />
+    );
+  }
 
   return (
     <span
       className={cn(
         'grid shrink-0 place-items-center rounded-full font-semibold',
-        size === 'lg' ? 'size-11 text-sm' : 'size-9 text-xs',
+        sizeClass,
+        size === 'lg' ? 'text-sm' : 'text-xs',
         TONES[seed % TONES.length],
       )}
     >
@@ -153,7 +169,7 @@ export function UniversityPanel({
                     : 'border-transparent hover:border-line hover:bg-elevated/60',
                 )}
               >
-                <UniversityBadge university={university} />
+                <UniversityBadge university={university} logo={university.logo} />
 
                 <span className="min-w-0 flex-1">
                   <span

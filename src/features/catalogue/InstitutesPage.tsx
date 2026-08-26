@@ -16,6 +16,7 @@ import { CATALOGUE_ORDERING_OPTIONS, type University } from '@/shared/types/cata
 
 import { useDeleteUniversityMutation, useGetUniversitiesQuery } from './catalogueApi';
 import { DeleteCatalogueModal } from './DeleteCatalogueModal';
+import { UniversityBadge } from './UniversityPanel';
 import { UniversityFormModal } from './UniversityFormModal';
 
 const activeOptions = [
@@ -27,6 +28,7 @@ const activeOptions = [
 export function InstitutesPage() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
+  const [city, setCity] = useState('all');
   const [active, setActive] = useState('all');
   const [ordering, setOrdering] = useState<string>('name');
   const [search, setSearch] = useState('');
@@ -41,9 +43,25 @@ export function InstitutesPage() {
     page,
     page_size: perPage,
     ordering,
+    ...(city !== 'all' ? { city } : {}),
     ...(active !== 'all' ? { is_active: active === 'true' } : {}),
     ...(debouncedSearch ? { search: debouncedSearch } : {}),
   });
+
+  /*
+   * Viloyatlar ro'yxati institutlarning o'zidan yig'iladi — backendda
+   * alohida "viloyatlar" ma'lumotnomasi yo'q. Joriy sahifadan olish
+   * yaramaydi: u faqat 10-20 qatorni ko'radi va ro'yxat sahifa
+   * almashgani sayin o'zgarib turardi.
+   */
+  const { data: allUniversities } = useGetUniversitiesQuery({ page: 1, page_size: 200 });
+
+  const cityOptions = [
+    { value: 'all', label: 'Barcha viloyatlar' },
+    ...[...new Set((allUniversities?.results ?? []).map((item) => item.city).filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b, 'uz'))
+      .map((item) => ({ value: item, label: item })),
+  ];
 
   const [deleteUniversity, deleteState] = useDeleteUniversityMutation();
 
@@ -61,31 +79,51 @@ export function InstitutesPage() {
 
   const columns: Column<University>[] = [
     {
-      key: 'short_name',
-      header: 'Institut',
-      className: 'max-w-[320px]',
+      key: 'index',
+      header: '#',
+      className: 'w-12 tabular-nums text-fg-dim',
+      cell: (_row, index) => (page - 1) * perPage + index + 1,
+    },
+    {
+      key: 'name',
+      header: 'Institut nomi',
+      className: 'max-w-[280px]',
       cell: (row) => (
-        <span className="block">
-          <span className="block font-medium text-fg">{row.short_name || row.name}</span>
-          <span className="mt-0.5 block truncate text-xs text-fg-muted" title={row.name}>
+        <span className="flex items-center gap-2.5">
+          <UniversityBadge university={row} logo={row.logo} />
+          <span className="block min-w-0 truncate font-medium text-fg" title={row.name}>
             {row.name}
           </span>
         </span>
       ),
     },
     {
+      key: 'short_name',
+      header: 'Qisqartma',
+      cell: (row) => (
+        <span className="whitespace-nowrap text-fg-soft">{row.short_name || '—'}</span>
+      ),
+    },
+    {
       key: 'city',
-      header: 'Shahar',
+      header: 'Viloyat',
       cell: (row) => <span className="whitespace-nowrap text-fg-soft">{row.city || '—'}</span>,
     },
     {
-      key: 'code',
-      header: 'Kod',
-      cell: (row) => <span className="font-mono text-xs text-fg-muted">{row.code}</span>,
+      key: 'subject_count',
+      header: 'Fanlar soni',
+      align: 'center',
+      cell: (row) => <span className="tabular-nums">{formatSom(row.subject_count)}</span>,
+    },
+    {
+      key: 'assignment_count',
+      header: 'Topshiriqlar',
+      align: 'center',
+      cell: (row) => <span className="tabular-nums">{formatSom(row.assignment_count)}</span>,
     },
     {
       key: 'is_active',
-      header: 'Holat',
+      header: 'Status',
       cell: (row) => (
         <Badge tone={row.is_active ? 'success' : 'neutral'}>
           {row.is_active ? 'Faol' : 'Nofaol'}
@@ -94,7 +132,7 @@ export function InstitutesPage() {
     },
     {
       key: 'created_at',
-      header: 'Yaratilgan',
+      header: "Qo'shilgan sana",
       cell: (row) => (
         <span className="whitespace-nowrap text-fg-muted">{formatDateTime(row.created_at)}</span>
       ),
@@ -142,7 +180,7 @@ export function InstitutesPage() {
               setFormOpen(true);
             }}
           >
-            Yangi institut
+            Yangi institut qo&apos;shish
           </Button>
         }
       />
@@ -154,35 +192,51 @@ export function InstitutesPage() {
       ) : (
         <>
           <section className="flex flex-wrap items-center gap-3">
+            <SearchInput
+              value={search}
+              onChange={(event) => {
+                setSearch(event.target.value);
+                setPage(1);
+              }}
+              placeholder="Qidirish (nom, qisqartma...)"
+              className="w-full sm:w-72"
+            />
+
             <Select
-              aria-label="Holat bo'yicha filtr"
+              aria-label="Viloyat bo'yicha filtr"
+              options={cityOptions}
+              value={city}
+              onChange={(event) => {
+                setCity(event.target.value);
+                setPage(1);
+              }}
+              /* Viloyatlar ko'p — aylantirishdan ko'ra yozib topish tezroq. */
+              searchable={cityOptions.length > 8}
+              searchPlaceholder="Viloyat nomi..."
+              className="w-52"
+            />
+
+            <Select
+              aria-label="Status bo'yicha filtr"
               options={activeOptions}
               value={active}
               onChange={(event) => {
                 setActive(event.target.value);
                 setPage(1);
               }}
-              className="w-40"
-            />
-            <Select
-              aria-label="Saralash"
-              options={[...CATALOGUE_ORDERING_OPTIONS]}
-              value={ordering}
-              onChange={(event) => {
-                setOrdering(event.target.value);
-                setPage(1);
-              }}
-              className="w-52"
+              className="w-44"
             />
 
             <div className="ml-auto">
-              <SearchInput
-                value={search}
+              <Select
+                aria-label="Saralash"
+                options={[...CATALOGUE_ORDERING_OPTIONS]}
+                value={ordering}
                 onChange={(event) => {
-                  setSearch(event.target.value);
+                  setOrdering(event.target.value);
                   setPage(1);
                 }}
-                className="w-72"
+                className="w-52"
               />
             </div>
           </section>

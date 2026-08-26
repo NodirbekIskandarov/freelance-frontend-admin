@@ -12,6 +12,26 @@ import type {
 import { baseApi } from '@/store/api';
 
 /**
+ * Fayl biriktirilgan bo'lsa `FormData`, aks holda oddiy JSON.
+ *
+ * Har doim `FormData` yuborib bo'lmaydi: undagi hamma narsa matnga
+ * aylanadi va `is_active: false` "false" satriga, `undefined` esa
+ * "undefined" ga aylanib ketardi. `fetchBaseQuery` `FormData` ni ko'rsa
+ * `Content-Type` ni o'zi qo'ymaydi — chegarani brauzer qo'shadi.
+ */
+function toBody<T extends object>(input: T): T | FormData {
+  const values = input as Record<string, unknown>;
+  if (!(values.logo instanceof File)) return input;
+
+  const form = new FormData();
+  for (const [key, value] of Object.entries(values)) {
+    if (value === undefined) continue;
+    form.append(key, value instanceof File ? value : String(value));
+  }
+  return form;
+}
+
+/**
  * Katalog CRUD — HAQIQIY backend.
  *
  * Yangilash uchun `PATCH` (`PUT` emas): o'zgarmagan maydonlarni qayta
@@ -29,12 +49,16 @@ export const catalogueApi = baseApi.injectEndpoints({
     }),
 
     createUniversity: build.mutation<University, UniversityWriteRequest>({
-      query: (body) => ({ url: '/universities/', method: 'POST', body }),
+      query: (body) => ({ url: '/universities/', method: 'POST', body: toBody(body) }),
       invalidatesTags: [{ type: 'Institute', id: 'LIST' }],
     }),
 
     updateUniversity: build.mutation<University, { id: string } & Partial<UniversityWriteRequest>>({
-      query: ({ id, ...body }) => ({ url: `/universities/${id}/`, method: 'PATCH', body }),
+      query: ({ id, ...body }) => ({
+        url: `/universities/${id}/`,
+        method: 'PATCH',
+        body: toBody(body),
+      }),
       invalidatesTags: (_result, _error, { id }) => [
         { type: 'Institute', id },
         { type: 'Institute', id: 'LIST' },

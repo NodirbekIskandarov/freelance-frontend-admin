@@ -82,18 +82,7 @@ export const navigation: NavGroup[] = [
     title: 'Tayyor materiallar',
     items: [
       { label: 'Kontent boshqaruvi', to: '/kontent', icon: Landmark, permission: 'content.view' },
-      {
-        label: 'Institutlar',
-        icon: Building2,
-        children: [
-          { label: "Institutlar ro'yxati", to: '/institutlar', permission: 'catalogue.view' },
-          {
-            label: "Institut qo'shish arizalari",
-            to: '/institutlar/arizalar',
-            permission: 'catalogue_requests.view',
-          },
-        ],
-      },
+      { label: 'Institutlar', to: '/institutlar', icon: Building2, permission: 'catalogue.view' },
       /*
        * Bitta element: arizalar sahifasiga fanlar ekranining o'zidagi
        * tugma orqali o'tiladi. Menyuda ikkiga bo'lish ularni bir-biridan
