@@ -3,19 +3,20 @@ import type { ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
 /**
- * Dizaynda badge foni — accent rangning ~12% shaffofligi karta ustida
- * (o'lchangan: `Faol` = #0E2224, `Kutilmoqda` = #242018, `Bloklangan` = #2B1921).
- * Shuning uchun to'q fon emas, `/12` opacity ishlatilgan.
+ * Badge foni — accent rangning 15% shaffofligi karta ustida, chegarasiz.
+ *
+ * Shablondagi admin panelda shunday: dumaloq, chegarasiz, ozgina fonli.
+ * Chegara qo'shilsa qatorlar ichida u ikkinchi ramka bo'lib ko'rinardi.
  */
 const tones = {
-  success: 'border-success/25 bg-success/12 text-success',
-  warning: 'border-warning/25 bg-warning/12 text-warning',
-  danger: 'border-danger/25 bg-danger/12 text-danger',
-  info: 'border-info/25 bg-info/12 text-info',
-  purple: 'border-purple/25 bg-purple/12 text-purple',
-  orange: 'border-orange/25 bg-orange/12 text-orange',
-  neutral: 'border-line bg-elevated text-fg-muted',
-  primary: 'border-primary/25 bg-primary/12 text-primary',
+  success: 'bg-success/15 text-success',
+  warning: 'bg-warning/15 text-warning',
+  danger: 'bg-danger/15 text-danger',
+  info: 'bg-info/15 text-info',
+  purple: 'bg-purple/15 text-purple',
+  orange: 'bg-orange/15 text-orange',
+  neutral: 'bg-fg/10 text-fg-muted',
+  primary: 'bg-primary/15 text-primary',
 } as const;
 
 export type BadgeTone = keyof typeof tones;
@@ -32,7 +33,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-badge border px-2 py-0.5 text-xs font-medium whitespace-nowrap',
+        'inline-flex items-center rounded-badge px-2.5 py-0.5 text-[11px] font-medium whitespace-nowrap',
         tones[tone],
         className,
       )}

@@ -78,7 +78,12 @@ export function Table<T>({
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse">
-        <thead>
+        {/*
+          Sarlavha qatori fonli va katta harflarda — shablondagi admin
+          jadvalida shunday. Bu ustun nomlarini ma'lumotdan ajratadi,
+          faqat chegara bilan ajratishdan ko'ra aniqroq.
+        */}
+        <thead className="bg-fg/[0.04]">
           <tr className="border-b border-line">
             {columns.map((column) => {
               const isSorted = sort?.key === column.key;
@@ -92,7 +97,7 @@ export function Table<T>({
                   }
                   className={cn(
                     // Sarlavhalar bir qatorda qoladi — dizaynda ham shunday.
-                    'font-medium whitespace-nowrap text-fg-muted',
+                    'font-semibold tracking-wider whitespace-nowrap text-fg-dim uppercase',
                     spacing.head,
                     alignClass[column.align ?? 'left'],
                     column.headerClassName,
@@ -152,8 +157,11 @@ export function Table<T>({
                 key={rowKey(row)}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
                 className={cn(
-                  'border-b border-line transition-colors last:border-b-0',
-                  onRowClick && 'cursor-pointer hover:bg-elevated/40',
+                  // Hover har qatorda, bosiladiganida ham, bosilmaydiganida
+                  // ham: shablonda u ko'zni qatorda ushlab turadi, «bu qator
+                  // bosiladi» degani emas.
+                  'border-b border-line transition-colors last:border-b-0 hover:bg-fg/[0.02]',
+                  onRowClick && 'cursor-pointer',
                 )}
               >
                 {columns.map((column) => (

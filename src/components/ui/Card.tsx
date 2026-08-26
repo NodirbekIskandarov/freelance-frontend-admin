@@ -2,8 +2,19 @@ import type { ReactNode } from 'react';
 
 import { cn } from '@/lib/cn';
 
+/**
+ * Yuqori qirradagi ingichka yorug' chiziq — shablondagi admin kartasida
+ * shunday. U kartani fondan ajratib, «ko'tarilgan» ko'rinish beradi;
+ * faqat chegara bilan karta tekis qog'ozdek turardi.
+ */
+const cardSheen = 'shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset]';
+
 export function Card({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cn('rounded-card border border-line bg-card', className)}>{children}</div>;
+  return (
+    <div className={cn('rounded-card border border-line bg-card', cardSheen, className)}>
+      {children}
+    </div>
+  );
 }
 
 /**

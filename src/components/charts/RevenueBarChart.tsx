@@ -1,12 +1,9 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
+import { AXIS_COLOR, GRID_COLOR, SERIES_COLOR } from './chartTheme';
 import type { RevenuePoint } from '@/shared/types/dashboard';
 
 import { ChartTooltip } from './ChartTooltip';
-
-const AXIS_COLOR = '#8B97A3';
-const GRID_COLOR = '#171F2D';
-const BAR_COLOR = '#22C55E';
 
 /**
  * Y o'qi ma'lumotdan hisoblanadi.
@@ -43,7 +40,11 @@ export function RevenueBarChart({ data }: { data: RevenuePoint[] }) {
   return (
     <div>
       <div className="mb-4 flex items-center gap-2 px-1 text-[13px] text-fg-soft">
-        <span aria-hidden className="h-[3px] w-4 rounded-full" style={{ background: BAR_COLOR }} />
+        <span
+          aria-hidden
+          className="h-[3px] w-4 rounded-full"
+          style={{ background: SERIES_COLOR }}
+        />
         Kunlik daromad (so‘m)
       </div>
 
@@ -80,7 +81,7 @@ export function RevenueBarChart({ data }: { data: RevenuePoint[] }) {
             content={<ChartTooltip formatter={formatSom} />}
             isAnimationActive={false}
           />
-          <Bar dataKey="amount" name="Kunlik daromad" fill={BAR_COLOR} radius={[2, 2, 0, 0]} />
+          <Bar dataKey="amount" name="Kunlik daromad" fill={SERIES_COLOR} radius={[2, 2, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

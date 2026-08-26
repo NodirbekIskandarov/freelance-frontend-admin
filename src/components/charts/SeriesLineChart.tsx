@@ -8,13 +8,12 @@ import {
   YAxis,
 } from 'recharts';
 
+import { AXIS_COLOR, GRID_COLOR } from './chartTheme';
 import type { SeriesPoint } from '@/shared/types/dashboard';
 
 import { ChartTooltip } from './ChartTooltip';
 
 /** Dizayndagi o'q va tur ranglari — tokenlar bilan bir xil. */
-const AXIS_COLOR = '#8B97A3';
-const GRID_COLOR = '#171F2D';
 
 const axisProps = {
   stroke: AXIS_COLOR,
