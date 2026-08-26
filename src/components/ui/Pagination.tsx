@@ -8,8 +8,13 @@ interface PaginationProps {
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-  perPage: number;
-  onPerPageChange: (perPage: number) => void;
+  /**
+   * Qatorlar soni tanlagichi. Ikkalasi ham berilmasa tanlagich umuman
+   * chizilmaydi — tor panellarda (masalan institutlar ro'yxati) u faqat
+   * joy egallaydi va u yerda sahifa hajmi qat'iy.
+   */
+  perPage?: number;
+  onPerPageChange?: (perPage: number) => void;
   perPageOptions?: number[];
   /** Chapda turadigan matn: "Jami 12 482 ta foydalanuvchi". */
   summary?: string;
@@ -113,16 +118,18 @@ export function Pagination({
           </button>
         </nav>
 
-        <Select
-          aria-label="Sahifadagi qatorlar soni"
-          size="sm"
-          value={String(perPage)}
-          onChange={(event) => onPerPageChange(Number(event.target.value))}
-          options={perPageOptions.map((option) => ({
-            value: String(option),
-            label: `${option} / sahifa`,
-          }))}
-        />
+        {perPage !== undefined && onPerPageChange ? (
+          <Select
+            aria-label="Sahifadagi qatorlar soni"
+            size="sm"
+            value={String(perPage)}
+            onChange={(event) => onPerPageChange(Number(event.target.value))}
+            options={perPageOptions.map((option) => ({
+              value: String(option),
+              label: `${option} / sahifa`,
+            }))}
+          />
+        ) : null}
       </div>
     </div>
   );

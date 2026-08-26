@@ -8,15 +8,19 @@ import type { RequestStatus } from './adminFreelance';
 
 export interface AdminSubjectRequest {
   id: string;
-  user: string;
+  /** Backend to'liq obyekt qaytaradi, faqat ID emas. */
+  user: Requester;
   university: string;
   university_name: string;
   university_short_name: string;
   name: string;
   course: number | null;
+  semester: number | null;
+  /** Arizachining o'z izohi — moderator uchun kontekst. */
+  note: string;
   status: RequestStatus;
   reject_reason: string;
-  reviewed_by: string | null;
+  reviewed_by: Requester | null;
   /** Tasdiqlangach yaratilgan fan. */
   created_subject: string | null;
   reward_granted: boolean;

@@ -94,18 +94,13 @@ export const navigation: NavGroup[] = [
           },
         ],
       },
-      {
-        label: 'Fanlar',
-        icon: LayoutGrid,
-        children: [
-          { label: "Institutlar bo'yicha fanlar", to: '/fanlar', permission: 'catalogue.view' },
-          {
-            label: "Fan qo'shish arizalari",
-            to: '/fanlar/arizalar',
-            permission: 'catalogue_requests.view',
-          },
-        ],
-      },
+      /*
+       * Bitta element: arizalar sahifasiga fanlar ekranining o'zidagi
+       * tugma orqali o'tiladi. Menyuda ikkiga bo'lish ularni bir-biridan
+       * uzoq ko'rsatardi, aslida esa bu bitta ish oqimi — fanni ko'rish,
+       * yangisini qo'shish, kelgan arizani ko'rib chiqish.
+       */
+      { label: 'Fanlar', to: '/fanlar', icon: LayoutGrid, permission: 'catalogue.view' },
       {
         label: 'Topshiriqlar',
         to: '/topshiriqlar',

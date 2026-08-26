@@ -1,3 +1,4 @@
+import { CheckCircle2, Clock, FileStack, XCircle } from 'lucide-react';
 import { Check, X } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 
@@ -7,12 +8,11 @@ import { Card } from '@/components/ui/Card';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
-import { Select } from '@/components/ui/Select';
 import { Table, type Column } from '@/components/ui/Table';
+import { Tabs } from '@/components/ui/Tabs';
 import { formatSom } from '@/lib/format';
 import { getApiErrorMessage } from '@/shared/api';
 import { REQUEST_STATUS_LABELS, type RequestStatus } from '@/shared/types/adminFreelance';
-import { REQUEST_STATUS_FILTER_OPTIONS } from '@/shared/types/adminRequests';
 
 import { RejectReasonModal } from './RejectReasonModal';
 
@@ -25,6 +25,13 @@ const statusTones: Record<RequestStatus, BadgeTone> = {
 export function StatusBadge({ status }: { status: RequestStatus }) {
   return <Badge tone={statusTones[status]}>{REQUEST_STATUS_LABELS[status]}</Badge>;
 }
+
+const STATUS_TABS = [
+  { id: 'all', label: 'Barcha arizalar', icon: FileStack },
+  { id: 'pending', label: 'Kutilayotgan arizalar', icon: Clock },
+  { id: 'approved', label: 'Tasdiqlangan arizalar', icon: CheckCircle2 },
+  { id: 'rejected', label: 'Rad etilgan arizalar', icon: XCircle },
+];
 
 /** Uchala arizalar sahifasi bir xil holatga ega. */
 interface RequestRow {
@@ -50,6 +57,7 @@ export function RequestsShell<T extends RequestRow>({
   summaryLabel,
   emptyMessage,
   extraFilter,
+  headerActions,
 }: {
   title: string;
   breadcrumbLabel: string;
@@ -77,6 +85,8 @@ export function RequestsShell<T extends RequestRow>({
   summaryLabel: string;
   emptyMessage: string;
   extraFilter?: ReactNode;
+  /** Sarlavha yonidagi tugmalar — masalan "ro'yxatga qaytish". */
+  headerActions?: ReactNode;
 }) {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
@@ -97,6 +107,18 @@ export function RequestsShell<T extends RequestRow>({
     const ok = await reject.run(rejectTarget.id, reason);
     if (ok) setRejectTarget(null);
   }
+
+  /*
+   * Tartib raqami shell'da: u sahifa va sahifa hajmiga bog'liq, ular esa
+   * shu yerda. Har bir sahifada alohida yozilsa, 2-sahifada raqamlar
+   * yana 1 dan boshlanardi.
+   */
+  const indexColumn: Column<T> = {
+    key: 'index',
+    header: '#',
+    className: 'w-12 tabular-nums text-fg-dim',
+    cell: (_row, index) => (page - 1) * perPage + index + 1,
+  };
 
   const actionColumn: Column<T> = {
     key: 'actions',
@@ -133,6 +155,7 @@ export function RequestsShell<T extends RequestRow>({
       <PageHeader
         title={title}
         breadcrumbs={[{ label: 'Bosh sahifa', to: '/' }, { label: breadcrumbLabel }]}
+        actions={headerActions}
       />
 
       {error !== undefined && error !== null ? (
@@ -147,17 +170,24 @@ export function RequestsShell<T extends RequestRow>({
             </div>
           )}
 
+          {/*
+            Holat tanlagichi o'rniga tablar: bu ekranning ASOSIY bo'linishi
+            aynan holat bo'yicha va uni ochilib-yopiladigan ro'yxat ortiga
+            yashirish qidiruvni ham, filtrni ham bir xil darajaga qo'yardi.
+            «Tasdiqlangan» ham qoldirildi — dizaynda uchta tab bor, lekin
+            uni olib tashlash mavjud imkoniyatni yo'qotardi.
+          */}
+          <Tabs
+            className="mb-4"
+            items={STATUS_TABS}
+            active={status}
+            onChange={(next) => {
+              setStatus(next);
+              setPage(1);
+            }}
+          />
+
           <section className="flex flex-wrap items-center gap-3">
-            <Select
-              aria-label="Holat bo'yicha filtr"
-              options={REQUEST_STATUS_FILTER_OPTIONS}
-              value={status}
-              onChange={(event) => {
-                setStatus(event.target.value);
-                setPage(1);
-              }}
-              className="w-48"
-            />
             {extraFilter}
 
             <div className="ml-auto">
@@ -174,7 +204,7 @@ export function RequestsShell<T extends RequestRow>({
 
           <Card className="mt-4 overflow-hidden">
             <Table
-              columns={[...columns, actionColumn]}
+              columns={[indexColumn, ...columns, actionColumn]}
               rows={data?.results ?? []}
               rowKey={(row) => row.id}
               /*

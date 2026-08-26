@@ -1,11 +1,12 @@
+import { Info } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
-import { TextField } from '@/components/ui/Field';
+import { TextAreaField, TextField } from '@/components/ui/Field';
 import { Modal } from '@/components/ui/Modal';
 import { Select } from '@/components/ui/Select';
 import { getApiErrorMessage } from '@/shared/api';
-import type { Subject } from '@/shared/types/catalogue';
+import { COURSE_OPTIONS, SEMESTER_OPTIONS, type Subject } from '@/shared/types/catalogue';
 
 import {
   useCreateSubjectMutation,
@@ -40,14 +41,20 @@ function useDirectionsForUniversity(universityId: string, enabled: boolean) {
   };
 }
 
+/** Izoh maydonining chegarasi — backend ham shu sonni tekshiradi. */
+const MAX_DESCRIPTION = 300;
+
 export function SubjectFormModal({
   open,
   subject,
+  defaultUniversityId = null,
   onClose,
 }: {
   open: boolean;
   /** `null` — yangi fan yaratiladi. */
   subject: Subject | null;
+  /** Ro'yxatda tanlab turilgan institut — yangi fan uchun oldindan qo'yiladi. */
+  defaultUniversityId?: string | null;
   onClose: () => void;
 }) {
   const [createSubject, createState] = useCreateSubjectMutation();
@@ -62,6 +69,8 @@ export function SubjectFormModal({
   const [direction, setDirection] = useState('');
   const [name, setName] = useState('');
   const [course, setCourse] = useState('');
+  const [semester, setSemester] = useState('');
+  const [description, setDescription] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [touched, setTouched] = useState(false);
 
@@ -70,13 +79,15 @@ export function SubjectFormModal({
   useEffect(() => {
     if (!open) return;
 
-    setUniversity(subject?.university ?? '');
+    setUniversity(subject?.university ?? defaultUniversityId ?? '');
     setDirection(subject?.direction ?? '');
     setName(subject?.name ?? '');
-    setCourse(subject?.course === null || subject === null ? '' : String(subject.course));
+    setCourse(subject?.course ? String(subject.course) : '');
+    setSemester(subject?.semester ? String(subject.semester) : '');
+    setDescription(subject?.description ?? '');
     setIsActive(subject?.is_active ?? true);
     setTouched(false);
-  }, [open, subject]);
+  }, [open, subject, defaultUniversityId]);
 
   const universityOptions = [
     { value: '', label: 'Institutni tanlang' },
@@ -101,15 +112,15 @@ export function SubjectFormModal({
     setTouched(true);
     if (!university || !name.trim()) return;
 
-    const parsedCourse = course.trim() === '' ? null : Number(course);
-
     const body = {
       university,
       name: name.trim(),
       // Bo'sh tanlov `null` bo'lib ketadi — backend `direction` ni
       // ixtiyoriy deb belgilagan, bo'sh SATR esa UUID sifatida rad etilardi.
       direction: direction || null,
-      course: Number.isNaN(parsedCourse) ? null : parsedCourse,
+      course: course ? Number(course) : null,
+      semester: semester ? Number(semester) : null,
+      description: description.trim(),
       is_active: isActive,
     };
 
@@ -127,7 +138,7 @@ export function SubjectFormModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={subject ? 'Fanni tahrirlash' : 'Yangi fan'}
+      title={subject ? 'Fanni tahrirlash' : "Yangi fan qo'shish"}
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>
@@ -187,15 +198,43 @@ export function SubjectFormModal({
           onChange={(event) => setName(event.target.value)}
         />
 
-        <TextField
-          label="Kurs"
-          type="number"
-          min={1}
-          max={6}
-          placeholder="2"
-          value={course}
-          onChange={(event) => setCourse(event.target.value)}
-        />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <span className="mb-2 block text-sm font-medium text-fg-soft">
+              Kurs (nechinchi kurs)
+            </span>
+            <Select
+              aria-label="Kurs"
+              options={[{ value: '', label: 'Kursni tanlang' }, ...COURSE_OPTIONS]}
+              value={course}
+              onChange={(event) => setCourse(event.target.value)}
+            />
+          </div>
+
+          <div>
+            <span className="mb-2 block text-sm font-medium text-fg-soft">Semestr</span>
+            <Select
+              aria-label="Semestr"
+              options={[{ value: '', label: 'Semestrni tanlang' }, ...SEMESTER_OPTIONS]}
+              value={semester}
+              onChange={(event) => setSemester(event.target.value)}
+            />
+          </div>
+        </div>
+
+        <div>
+          <TextAreaField
+            label="Qisqacha izoh"
+            rows={4}
+            maxLength={MAX_DESCRIPTION}
+            placeholder="Fan haqida qisqacha ma'lumot kiriting..."
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+          />
+          <p className="mt-1 text-right text-xs text-fg-dim tabular-nums">
+            {description.length} / {MAX_DESCRIPTION}
+          </p>
+        </div>
 
         <label className="flex cursor-pointer items-center gap-2.5">
           <input
@@ -214,6 +253,19 @@ export function SubjectFormModal({
           >
             {getApiErrorMessage(error)}
           </p>
+        )}
+
+        {!subject && (
+          <div className="flex gap-2.5 rounded-control border border-primary/25 bg-primary/5 px-3.5 py-3">
+            <Info className="mt-0.5 size-4 shrink-0 text-primary" strokeWidth={2} />
+            <div>
+              <p className="text-[13px] font-medium text-fg">Ma&apos;lumot</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-fg-muted">
+                Fan qo&apos;shilgandan so&apos;ng, unga topshiriqlar va variantlar qo&apos;shish
+                imkoniyati yaratiladi.
+              </p>
+            </div>
+          </div>
         )}
       </div>
     </Modal>
