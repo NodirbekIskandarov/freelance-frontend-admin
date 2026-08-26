@@ -98,7 +98,16 @@ export function VariantsPage() {
       key: 'request_count',
       header: "So'rovlar",
       align: 'right',
-      cell: (row) => <span className="tabular-nums">{row.request_count}</span>,
+      /* Javob chop etilgan variantda so'rov kutish emas — topshiriqlar
+         ro'yxatidagi «So'rovlar» ustuni bilan bir qoida. */
+      cell: (row) =>
+        row.published_solution_count > 0 ? (
+          <Badge tone="success">Javob bor</Badge>
+        ) : row.request_count > 0 ? (
+          <Badge tone="warning">{row.request_count} ta</Badge>
+        ) : (
+          <span className="text-fg-dim">—</span>
+        ),
     },
     {
       key: 'max_published_solutions',

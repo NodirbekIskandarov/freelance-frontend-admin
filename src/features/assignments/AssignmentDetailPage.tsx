@@ -10,7 +10,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Table, type Column } from '@/components/ui/Table';
 import { formatDateTime } from '@/lib/format';
 import { getApiErrorMessage } from '@/shared/api';
-import type { Variant } from '@/shared/types/assignments';
+import { assignmentTypeLabel, type Variant } from '@/shared/types/assignments';
 
 import { AssignmentFormModal } from './AssignmentFormModal';
 import { useGetAssignmentQuery, useGetAssignmentVariantsQuery } from './assignmentsApi';
@@ -31,7 +31,20 @@ const variantColumns: Column<Variant>[] = [
     key: 'request_count',
     header: "So'rovlar",
     align: 'right',
-    cell: (row) => <span className="tabular-nums">{row.request_count}</span>,
+    /*
+      Javob chop etilgan variantda so'rov soni ko'rsatilmaydi: talab
+      qondirilgan, raqamni qoldirish hali kutilayotgan variantlar orasida
+      uni ajratib bo'lmas qilardi. Topshiriqlar ro'yxatidagi «So'rovlar»
+      ustuni ham xuddi shu qoida bo'yicha hisoblanadi.
+    */
+    cell: (row) =>
+      row.published_solution_count > 0 ? (
+        <Badge tone="success">Javob bor</Badge>
+      ) : row.request_count > 0 ? (
+        <Badge tone="warning">{row.request_count} ta</Badge>
+      ) : (
+        <span className="text-fg-dim">—</span>
+      ),
   },
   {
     key: 'max_published_solutions',
@@ -133,7 +146,35 @@ export function AssignmentDetailPage() {
 
           <InfoList className="mt-4">
             <InfoRow label="Fan" value={data.subject_name} />
+            {/*
+              Kurs va semestr fanda saqlanadi, topshiriqda emas — lekin
+              topshiriq qaysi bosqichga tegishli ekanini shu ikki qator
+              aytadi. Fanda ko'rsatilmagan bo'lsa chiziqcha: nol yoki bo'sh
+              qator «1-kurs» degan noto'g'ri taxminni tug'dirardi.
+            */}
+            <InfoRow
+              label="Kurs"
+              value={data.subject_course ? `${data.subject_course}-kurs` : '—'}
+            />
+            <InfoRow
+              label="Semestr"
+              value={data.subject_semester ? `${data.subject_semester}-semestr` : '—'}
+            />
             <InfoRow label="Universitet" value={data.university_name} />
+            <InfoRow
+              label="Topshiriq turi"
+              value={<Badge tone="info">{assignmentTypeLabel(data.type, 'Boshqa')}</Badge>}
+            />
+            <InfoRow
+              label="Javob kutilyapti"
+              value={
+                data.open_request_count > 0 ? (
+                  <Badge tone="warning">{data.open_request_count} ta so&apos;rov</Badge>
+                ) : (
+                  <span className="text-fg-dim">—</span>
+                )
+              }
+            />
             <InfoRow label="Yaratilgan" value={formatDateTime(data.created_at)} />
             <InfoRow label="Yangilangan" value={formatDateTime(data.updated_at)} />
           </InfoList>

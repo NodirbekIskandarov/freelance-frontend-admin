@@ -1,6 +1,6 @@
 import { Eye, FileText, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 
 import { Badge } from '@/components/ui/Badge';
 import { Button, IconButton } from '@/components/ui/Button';
@@ -13,7 +13,8 @@ import { Table, type Column } from '@/components/ui/Table';
 import { formatDateTime, formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { useGetAssignmentRequestsListQuery } from '@/features/adminRequests/adminRequestsApi';
-import { UniversityPanel } from '@/features/catalogue/UniversityPanel';
+import { CatalogueNavPanel } from '@/features/catalogue/CatalogueNavPanel';
+import { useGetUniversityQuery } from '@/features/catalogue/catalogueApi';
 import { getApiErrorMessage } from '@/shared/api';
 import {
   ASSIGNMENT_ORDERING_OPTIONS,
@@ -25,7 +26,7 @@ import {
 import { COURSE_OPTIONS, SEMESTER_OPTIONS, type University } from '@/shared/types/catalogue';
 
 import { AssignmentFormModal } from './AssignmentFormModal';
-import { useGetAssignmentsQuery, useGetSubjectsQuery } from './assignmentsApi';
+import { useGetAssignmentsQuery } from './assignmentsApi';
 import { DeleteAssignmentModal } from './DeleteAssignmentModal';
 
 const activeOptions = [
@@ -37,11 +38,31 @@ const activeOptions = [
 export function AssignmentsPage() {
   const navigate = useNavigate();
 
+  /*
+   * Boshlang'ich filtr manzildan olinadi: fanlar bo'limidagi «Topshiriqlar»
+   * tugmasi shu yerga `?university=..&subject=..` bilan olib keladi.
+   */
+  const [searchParams, setSearchParams] = useSearchParams();
+  const universityParam = searchParams.get('university');
+  const subjectParam = searchParams.get('subject');
+
   const [university, setUniversity] = useState<University | null>(null);
+
+  /*
+   * Manzilda ID bor, panelga esa to'liq obyekt kerak (nom, logotip,
+   * sanoqlar) — shuning uchun bitta institut alohida so'raladi.
+   */
+  const { data: universityFromUrl } = useGetUniversityQuery(universityParam ?? '', {
+    skip: !universityParam,
+  });
+
+  useEffect(() => {
+    if (universityFromUrl) setUniversity(universityFromUrl);
+  }, [universityFromUrl]);
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
-  const [subject, setSubject] = useState('all');
+  const [subject, setSubject] = useState(subjectParam ?? 'all');
   const [course, setCourse] = useState('all');
   const [semester, setSemester] = useState('all');
   const [type, setType] = useState('all');
@@ -54,22 +75,6 @@ export function AssignmentsPage() {
   const [deleteTarget, setDeleteTarget] = useState<Assignment | null>(null);
 
   const debouncedSearch = useDebouncedValue(search, 350);
-
-  /*
-   * Institut almashganda fan filtri tozalanadi: oldingi institutning fani
-   * yangisida yo'q va jadval sababsiz bo'sh chiqardi.
-   */
-  useEffect(() => {
-    setSubject('all');
-    setPage(1);
-  }, [university?.id]);
-
-  // Fanlar ro'yxati tanlangan institutniki; institut tanlanmasa hammasi.
-  const { data: subjects } = useGetSubjectsQuery({
-    page_size: 200,
-    ordering: 'name',
-    ...(university ? { university: university.id } : {}),
-  });
 
   /*
    * Tugmadagi son — nechta ariza javob kutayotgani. Faqat SON kerak,
@@ -101,15 +106,22 @@ export function AssignmentsPage() {
     ...(debouncedSearch ? { search: debouncedSearch } : {}),
   });
 
-  const subjectOptions = [
-    { value: 'all', label: 'Barcha fanlar' },
-    ...(subjects?.results ?? []).map((item) => ({ value: item.id, label: item.name })),
-  ];
-
   const typeOptions = [
     { value: 'all', label: 'Barcha turlar' },
     ...ASSIGNMENT_TYPES.map((item) => ({ value: item, label: ASSIGNMENT_TYPE_LABELS[item] })),
   ];
+
+  /*
+   * Filtr manzilda ham saqlanadi: sahifani yangilaganda yoki havolani
+   * ulashganda o'sha ko'rinish qaytadi. `replace` — har filtr o'zgarishi
+   * brauzer tarixiga yozilmasligi uchun.
+   */
+  function syncUrl(universityId: string | null, subjectId: string | null) {
+    const next = new URLSearchParams();
+    if (universityId) next.set('university', universityId);
+    if (subjectId) next.set('subject', subjectId);
+    setSearchParams(next, { replace: true });
+  }
 
   function openCreate() {
     setEditTarget(null);
@@ -188,6 +200,22 @@ export function AssignmentsPage() {
       cell: (row) =>
         row.variant_count > 0 ? (
           <span className="tabular-nums">{formatSom(row.solved_variant_count)} ta</span>
+        ) : (
+          <span className="text-fg-dim">—</span>
+        ),
+    },
+    {
+      key: 'open_request_count',
+      header: "So'rovlar",
+      align: 'center',
+      cell: (row) =>
+        row.open_request_count > 0 ? (
+          /*
+            Faqat javobi yo'q variantlarning so'rovi. Nol bo'lsa chiziqcha:
+            «0 ta so'rov» bilan «so'rov yopilgan» bir xil ko'rinardi, holbuki
+            bu yerda muhimi — nimadir kutilyaptimi, yo'qmi.
+          */
+          <Badge tone="warning">{formatSom(row.open_request_count)} ta</Badge>
         ) : (
           <span className="text-fg-dim">—</span>
         ),
@@ -272,7 +300,25 @@ export function AssignmentsPage() {
       />
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-        <UniversityPanel selectedId={university?.id ?? null} onSelect={setUniversity} />
+        {/*
+          Fan filtri shu panelda — tepadagi tanlagichdan olib tashlandi.
+          Panel institut va fan qavatlari orasida almashadi.
+        */}
+        <CatalogueNavPanel
+          university={university}
+          subjectId={subject !== 'all' ? subject : null}
+          onSelectUniversity={(next) => {
+            setUniversity(next);
+            setSubject('all');
+            setPage(1);
+            syncUrl(next?.id ?? null, null);
+          }}
+          onSelectSubject={(next) => {
+            setSubject(next?.id ?? 'all');
+            setPage(1);
+            syncUrl(university?.id ?? null, next?.id ?? null);
+          }}
+        />
 
         <div className="min-w-0 flex-1">
           {error ? (
@@ -290,20 +336,6 @@ export function AssignmentsPage() {
                   }}
                   placeholder="Topshiriq nomini qidirish..."
                   className="w-full sm:w-64"
-                />
-
-                <Select
-                  aria-label="Fan bo'yicha filtr"
-                  options={subjectOptions}
-                  value={subject}
-                  onChange={(event) => {
-                    setSubject(event.target.value);
-                    setPage(1);
-                  }}
-                  /* Fanlar ko'p — aylantirishdan ko'ra yozib topish tezroq. */
-                  searchable={subjectOptions.length > 8}
-                  searchPlaceholder="Fan nomi..."
-                  className="w-56"
                 />
 
                 <Select

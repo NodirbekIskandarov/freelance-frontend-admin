@@ -1,6 +1,6 @@
-import { FileText, Library, Pencil, Plus, Trash2 } from 'lucide-react';
+import { ClipboardList, FileText, Library, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 
 import { Badge } from '@/components/ui/Badge';
 import { Button, IconButton } from '@/components/ui/Button';
@@ -38,6 +38,8 @@ const SOURCE_TONES = {
 } as const;
 
 export function SubjectsPage() {
+  const navigate = useNavigate();
+
   const [university, setUniversity] = useState<University | null>(null);
 
   const [page, setPage] = useState(1);
@@ -213,6 +215,21 @@ export function SubjectsPage() {
       align: 'right',
       cell: (row) => (
         <span className="flex items-center justify-end gap-2">
+          {/*
+            Topshiriqlar ro'yxatiga o'tadi va shu fan bo'yicha filtrlaydi.
+            Filtr manzilda uzatiladi, shunda havola ulashilsa ham o'sha
+            ko'rinish ochiladi.
+          */}
+          <IconButton
+            label={`${row.name} — topshiriqlari`}
+            tone="success"
+            size="sm"
+            onClick={() =>
+              void navigate(`/topshiriqlar?university=${row.university}&subject=${row.id}`)
+            }
+          >
+            <ClipboardList className="size-4" strokeWidth={1.75} />
+          </IconButton>
           <IconButton
             label={`${row.name} — tahrirlash`}
             tone="warning"

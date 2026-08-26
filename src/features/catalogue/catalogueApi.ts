@@ -48,6 +48,17 @@ export const catalogueApi = baseApi.injectEndpoints({
       ],
     }),
 
+    /**
+     * Bitta institut — manzildagi `?university=` bo'yicha tiklash uchun.
+     *
+     * Ro'yxat so'rovi ID bo'yicha filtrlay olmaydi, sahifa esa panelga
+     * to'liq obyektni berishi kerak (nom, logotip, sanoqlar).
+     */
+    getUniversity: build.query<University, string>({
+      query: (id) => ({ url: `/universities/${id}/` }),
+      providesTags: (_result, _error, id) => [{ type: 'Institute', id }],
+    }),
+
     createUniversity: build.mutation<University, UniversityWriteRequest>({
       query: (body) => ({ url: '/universities/', method: 'POST', body: toBody(body) }),
       invalidatesTags: [{ type: 'Institute', id: 'LIST' }],
@@ -124,6 +135,7 @@ export const catalogueApi = baseApi.injectEndpoints({
 
 export const {
   useGetUniversitiesQuery,
+  useGetUniversityQuery,
   useCreateUniversityMutation,
   useUpdateUniversityMutation,
   useDeleteUniversityMutation,

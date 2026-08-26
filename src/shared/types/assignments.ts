@@ -51,6 +51,12 @@ export interface Assignment {
   /** Backend hisoblab beradi. `solved` — faqat chop etilgan yechimli variantlar. */
   variant_count: number;
   solved_variant_count: number;
+  /**
+   * Javob kutayotgan so'rovlar: yechimi chop etilmagan variantlarga tushgan
+   * talablar. Variantga yechim chop etilishi bilan uning so'rovlari bu
+   * sanoqdan chiqadi.
+   */
+  open_request_count: number;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -107,6 +113,11 @@ export interface Variant {
   /** Bitta variantga nechta yechim e'lon qilinishi mumkinligi. */
   max_published_solutions: number;
   request_count: number;
+  /**
+   * Bu variantga chop etilgan yechimlar soni. Noldan katta bo'lsa variantga
+   * javob berilgan — kelgan so'rovlar endi kutish emas.
+   */
+  published_solution_count: number;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -133,4 +144,6 @@ export const ASSIGNMENT_ORDERING_OPTIONS = [
   { value: 'created_at', label: 'Avval eskilari' },
   { value: 'title', label: 'Sarlavha (A–Z)' },
   { value: '-title', label: 'Sarlavha (Z–A)' },
+  /* Ishni rejalashtirish uchun: eng ko'p javob kutilayotgani tepada. */
+  { value: '-open_request_count', label: "Ko'p so'ralganlari" },
 ] as const;
