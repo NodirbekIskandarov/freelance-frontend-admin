@@ -1,11 +1,15 @@
 import { ArrowLeft } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from 'react-router';
 
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
 import type { Column } from '@/components/ui/Table';
 import { formatDateTime } from '@/lib/format';
+import { useGetUniversitiesQuery } from '@/features/catalogue/catalogueApi';
 import type { AdminSubjectRequest } from '@/shared/types/adminRequests';
+import { COURSE_OPTIONS } from '@/shared/types/catalogue';
 
 import {
   useApproveSubjectRequestMutation,
@@ -100,14 +104,56 @@ const columns: Column<AdminSubjectRequest>[] = [
   },
 ];
 
+const ORDERING_OPTIONS = [
+  { value: '-created_at', label: 'Avval yangi arizalar' },
+  { value: 'created_at', label: 'Avval eski arizalar' },
+  { value: '-reviewed_at', label: "Avval yangi ko'rib chiqilgan" },
+  { value: 'reviewed_at', label: "Avval eski ko'rib chiqilgan" },
+];
+
 export function SubjectRequestsPage() {
   const [approve, approveState] = useApproveSubjectRequestMutation();
   const [reject, rejectState] = useRejectSubjectRequestMutation();
+
+  const [university, setUniversity] = useState('');
+  const [course, setCourse] = useState('');
+
+  const { data: universities } = useGetUniversitiesQuery({
+    page_size: 200,
+    ordering: 'short_name',
+  });
 
   return (
     <RequestsShell<AdminSubjectRequest>
       title="Fan qo'shish arizalari"
       breadcrumbLabel="Fan arizalari"
+      orderingOptions={ORDERING_OPTIONS}
+      extraParams={{ university, course }}
+      extraFilter={
+        <>
+          <Select
+            aria-label="Institut bo'yicha filtr"
+            options={[
+              { value: '', label: 'Barcha institutlar' },
+              ...(universities?.results ?? []).map((item) => ({
+                value: item.id,
+                label: item.short_name || item.name,
+              })),
+            ]}
+            value={university}
+            onChange={(event) => setUniversity(event.target.value)}
+            className="w-56"
+          />
+
+          <Select
+            aria-label="Kurs bo'yicha filtr"
+            options={[{ value: '', label: 'Barcha kurslar' }, ...COURSE_OPTIONS]}
+            value={course}
+            onChange={(event) => setCourse(event.target.value)}
+            className="w-44"
+          />
+        </>
+      }
       headerActions={
         <Link to="/fanlar">
           <Button variant="secondary" icon={<ArrowLeft className="size-4" />}>

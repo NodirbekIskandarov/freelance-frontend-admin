@@ -195,9 +195,34 @@ export function SubjectsPage() {
 
   return (
     <>
+      {/*
+        Tugmalar sarlavhada, institut kartasi ichida emas: ikkalasi ham
+        BUTUN fanlar bo'limiga tegishli. Kartaning ichida turganda ular
+        tanlangan institutga tegishlidek ko'rinardi — arizalar esa
+        hammasiga umumiy, fan qo'shishda ham institutni tanlash mumkin.
+      */}
       <PageHeader
         title="Fanlar"
         breadcrumbs={[{ label: 'Bosh sahifa', to: '/' }, { label: 'Fanlar' }]}
+        actions={
+          <>
+            <Link to="/fanlar/arizalar">
+              <Button variant="secondary" icon={<FileText className="size-4" />}>
+                Fan qo&apos;shish arizalari
+              </Button>
+            </Link>
+
+            <Button
+              icon={<Plus className="size-4" strokeWidth={2} />}
+              onClick={() => {
+                setEditTarget(null);
+                setFormOpen(true);
+              }}
+            >
+              Yangi fan qo&apos;shish
+            </Button>
+          </>
+        }
       />
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
@@ -225,24 +250,6 @@ export function SubjectsPage() {
                   <p className="mt-0.5 text-[13px] text-fg-muted">
                     {universitySummary(university)}
                   </p>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <Link to="/fanlar/arizalar">
-                    <Button variant="secondary" icon={<FileText className="size-4" />}>
-                      Fan qo&apos;shish arizalari
-                    </Button>
-                  </Link>
-
-                  <Button
-                    icon={<Plus className="size-4" strokeWidth={2} />}
-                    onClick={() => {
-                      setEditTarget(null);
-                      setFormOpen(true);
-                    }}
-                  >
-                    Yangi fan qo&apos;shish
-                  </Button>
                 </div>
               </Card>
 

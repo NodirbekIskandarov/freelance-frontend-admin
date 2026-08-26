@@ -160,6 +160,7 @@ export function SubjectFormModal({
           </span>
           <Select
             aria-label="Institut"
+            className="w-full"
             options={universityOptions}
             value={university}
             onChange={(event) => {
@@ -177,6 +178,7 @@ export function SubjectFormModal({
           </span>
           <Select
             aria-label="Yo'nalish"
+            className="w-full"
             options={directionOptions}
             value={direction}
             disabled={!university || directions.length === 0}
@@ -205,6 +207,7 @@ export function SubjectFormModal({
             </span>
             <Select
               aria-label="Kurs"
+              className="w-full"
               options={[{ value: '', label: 'Kursni tanlang' }, ...COURSE_OPTIONS]}
               value={course}
               onChange={(event) => setCourse(event.target.value)}
@@ -215,6 +218,7 @@ export function SubjectFormModal({
             <span className="mb-2 block text-sm font-medium text-fg-soft">Semestr</span>
             <Select
               aria-label="Semestr"
+              className="w-full"
               options={[{ value: '', label: 'Semestrni tanlang' }, ...SEMESTER_OPTIONS]}
               value={semester}
               onChange={(event) => setSemester(event.target.value)}
@@ -222,19 +226,15 @@ export function SubjectFormModal({
           </div>
         </div>
 
-        <div>
-          <TextAreaField
-            label="Qisqacha izoh"
-            rows={4}
-            maxLength={MAX_DESCRIPTION}
-            placeholder="Fan haqida qisqacha ma'lumot kiriting..."
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-          />
-          <p className="mt-1 text-right text-xs text-fg-dim tabular-nums">
-            {description.length} / {MAX_DESCRIPTION}
-          </p>
-        </div>
+        {/* Hisoblagichni `TextAreaField` ning o'zi chizadi — `maxLength` yetarli. */}
+        <TextAreaField
+          label="Qisqacha izoh"
+          rows={4}
+          maxLength={MAX_DESCRIPTION}
+          placeholder="Fan haqida qisqacha ma'lumot kiriting..."
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
+        />
 
         <label className="flex cursor-pointer items-center gap-2.5">
           <input

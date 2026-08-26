@@ -1,4 +1,4 @@
-import { CheckCircle2, Clock, FileStack, XCircle } from 'lucide-react';
+import { ArrowUpDown, CheckCircle2, Clock, FileStack, XCircle } from 'lucide-react';
 import { Check, X } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 
@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/Card';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
+import { Select } from '@/components/ui/Select';
 import { Table, type Column } from '@/components/ui/Table';
 import { Tabs } from '@/components/ui/Tabs';
 import { formatSom } from '@/lib/format';
@@ -57,6 +58,8 @@ export function RequestsShell<T extends RequestRow>({
   summaryLabel,
   emptyMessage,
   extraFilter,
+  extraParams,
+  orderingOptions,
   headerActions,
 }: {
   title: string;
@@ -68,6 +71,7 @@ export function RequestsShell<T extends RequestRow>({
     ordering: string;
     status?: RequestStatus;
     search?: string;
+    [key: string]: unknown;
   }) => {
     data?: { results: T[]; count: number; total_pages: number };
     isLoading: boolean;
@@ -85,6 +89,16 @@ export function RequestsShell<T extends RequestRow>({
   summaryLabel: string;
   emptyMessage: string;
   extraFilter?: ReactNode;
+  /**
+   * `extraFilter` dagi tanlagichlarning QIYMATLARI.
+   *
+   * Filtrlar tashqarida chiziladi, lekin so'rov shu yerda yuboriladi —
+   * shuning uchun qiymatlar alohida beriladi. Bo'sh qiymatlar
+   * tashlanadi, aks holda `?university=` kabi ma'nosiz parametr ketardi.
+   */
+  extraParams?: Record<string, string | number | undefined>;
+  /** Berilsa saralash tanlagichi chiziladi; birinchisi sukut bo'yicha. */
+  orderingOptions?: { value: string; label: string }[];
   /** Sarlavha yonidagi tugmalar — masalan "ro'yxatga qaytish". */
   headerActions?: ReactNode;
 }) {
@@ -92,14 +106,21 @@ export function RequestsShell<T extends RequestRow>({
   const [perPage, setPerPage] = useState(20);
   const [status, setStatus] = useState('pending');
   const [search, setSearch] = useState('');
+  const [ordering, setOrdering] = useState(orderingOptions?.[0]?.value ?? '-created_at');
   const [rejectTarget, setRejectTarget] = useState<T | null>(null);
+
+  // Bo'sh qiymatli filtrlar so'rovga umuman qo'shilmaydi.
+  const cleanExtras = Object.fromEntries(
+    Object.entries(extraParams ?? {}).filter(([, value]) => value !== undefined && value !== ''),
+  );
 
   const { data, isLoading, isFetching, error } = useList({
     page,
     page_size: perPage,
-    ordering: '-created_at',
+    ordering,
     ...(status !== 'all' ? { status: status as RequestStatus } : {}),
     ...(search ? { search } : {}),
+    ...cleanExtras,
   });
 
   async function confirmReject(reason: string) {
@@ -189,6 +210,20 @@ export function RequestsShell<T extends RequestRow>({
 
           <section className="flex flex-wrap items-center gap-3">
             {extraFilter}
+
+            {orderingOptions && orderingOptions.length > 0 ? (
+              <Select
+                aria-label="Saralash"
+                icon={<ArrowUpDown className="size-4" />}
+                options={orderingOptions}
+                value={ordering}
+                onChange={(event) => {
+                  setOrdering(event.target.value);
+                  setPage(1);
+                }}
+                className="w-56"
+              />
+            ) : null}
 
             <div className="ml-auto">
               <SearchInput

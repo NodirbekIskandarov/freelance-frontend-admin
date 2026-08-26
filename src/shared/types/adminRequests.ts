@@ -21,6 +21,8 @@ export interface AdminSubjectRequest {
   status: RequestStatus;
   reject_reason: string;
   reviewed_by: Requester | null;
+  /** Ko'rib chiqilgan payt. Hali ko'rilmagan arizada `null`. */
+  reviewed_at: string | null;
   /** Tasdiqlangach yaratilgan fan. */
   created_subject: string | null;
   reward_granted: boolean;
