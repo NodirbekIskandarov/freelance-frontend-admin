@@ -1,4 +1,4 @@
-import { FileText, Pencil, Plus, Trash2 } from 'lucide-react';
+import { FileText, Library, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 
@@ -92,19 +92,20 @@ export function SubjectsPage() {
     { skip: !university },
   );
 
-  const { data, isLoading, isFetching, error } = useGetSubjectsQuery(
-    {
-      page,
-      page_size: perPage,
-      ordering: 'name',
-      university: university?.id ?? '',
-      ...(debouncedSearch ? { search: debouncedSearch } : {}),
-      ...(course !== 'all' ? { course: Number(course) } : {}),
-      ...(semester !== 'all' ? { semester: Number(semester) } : {}),
-      ...(direction !== 'all' ? { direction } : {}),
-    },
-    { skip: !university },
-  );
+  /*
+   * Institut tanlanmagan bo'lsa ham so'raladi — u shu yerda FILTR, majburiy
+   * qadam emas. Tanlanmaganda barcha institutlarning fanlari ko'rinadi.
+   */
+  const { data, isLoading, isFetching, error } = useGetSubjectsQuery({
+    page,
+    page_size: perPage,
+    ordering: 'name',
+    ...(university ? { university: university.id } : {}),
+    ...(debouncedSearch ? { search: debouncedSearch } : {}),
+    ...(course !== 'all' ? { course: Number(course) } : {}),
+    ...(semester !== 'all' ? { semester: Number(semester) } : {}),
+    ...(direction !== 'all' ? { direction } : {}),
+  });
 
   const [deleteSubject, deleteState] = useDeleteSubjectMutation();
 
@@ -142,6 +143,24 @@ export function SubjectsPage() {
         </span>
       ),
     },
+    /*
+     * Institut ustuni faqat filtr qo'yilmaganda: tanlangan institut
+     * ichida har qatorda o'sha nomni takrorlash bo'sh joy sarfi.
+     */
+    ...(university
+      ? []
+      : [
+          {
+            key: 'university',
+            header: 'Institut',
+            className: 'max-w-[200px]',
+            cell: (row: Subject) => (
+              <span className="block truncate text-fg-soft" title={row.university_name}>
+                {row.university_name}
+              </span>
+            ),
+          },
+        ]),
     {
       key: 'course',
       header: 'Kurs',
@@ -262,17 +281,14 @@ export function SubjectsPage() {
         <UniversityPanel selectedId={university?.id ?? null} onSelect={setUniversity} />
 
         <div className="min-w-0 flex-1">
-          {!university ? (
-            <Card className="grid place-items-center px-6 py-20 text-center">
-              <p className="text-sm font-medium text-fg">Institut tanlanmagan</p>
-              <p className="mt-1 max-w-sm text-[13px] text-fg-muted">
-                Chapdagi ro&apos;yxatdan institutni tanlang — uning fanlari shu yerda
-                ko&apos;rinadi.
-              </p>
-            </Card>
-          ) : (
-            <>
-              <Card className="flex flex-wrap items-center gap-4 p-5">
+          {/*
+                Institut TANLANISHI SHART EMAS — u shu yerda filtr. Tanlanmagan
+                holatda barcha institutlarning fanlari ko'rinadi, sarlavha esa
+                shuni aytib turadi.
+              */}
+          <Card className="flex flex-wrap items-center gap-4 p-5">
+            {university ? (
+              <>
                 <UniversityBadge university={university} size="lg" />
 
                 <div className="min-w-0 flex-1">
@@ -284,92 +300,117 @@ export function SubjectsPage() {
                     {universitySummary(university)}
                   </p>
                 </div>
-              </Card>
 
-              {error ? (
-                <div className="mt-4 rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-                  {getApiErrorMessage(error)}
+                <Button variant="secondary" size="sm" onClick={() => setUniversity(null)}>
+                  Filtrni olib tashlash
+                </Button>
+              </>
+            ) : (
+              <>
+                <span className="grid size-11 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
+                  <Library className="size-5" strokeWidth={1.75} />
+                </span>
+
+                <div className="min-w-0 flex-1">
+                  <p className="text-[15px] font-semibold text-fg">Barcha institutlar</p>
+                  <p className="mt-0.5 text-[13px] text-fg-muted">
+                    {data ? `${formatSom(data.count)} ta fan` : 'Fanlar yuklanmoqda…'} · chapdan
+                    institutni tanlab toraytiring
+                  </p>
                 </div>
-              ) : (
-                <>
-                  <section className="mt-4 flex flex-wrap items-center gap-3">
-                    <SearchInput
-                      value={search}
-                      onChange={(event) => {
-                        setSearch(event.target.value);
-                        setPage(1);
-                      }}
-                      placeholder="Fan nomini qidirish..."
-                      className="w-full sm:w-64"
-                    />
+              </>
+            )}
+          </Card>
 
-                    <Select
-                      aria-label="Kurs bo'yicha filtr"
-                      options={[{ value: 'all', label: 'Barcha kurslar' }, ...COURSE_OPTIONS]}
-                      value={course}
-                      onChange={(event) => {
-                        setCourse(event.target.value);
-                        setPage(1);
-                      }}
-                      className="w-44"
-                    />
+          {error ? (
+            <div className="mt-4 rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
+              {getApiErrorMessage(error)}
+            </div>
+          ) : (
+            <>
+              <section className="mt-4 flex flex-wrap items-center gap-3">
+                <SearchInput
+                  value={search}
+                  onChange={(event) => {
+                    setSearch(event.target.value);
+                    setPage(1);
+                  }}
+                  placeholder="Fan nomini qidirish..."
+                  className="w-full sm:w-64"
+                />
 
-                    <Select
-                      aria-label="Semestr bo'yicha filtr"
-                      options={[{ value: 'all', label: 'Barcha semestrlar' }, ...SEMESTER_OPTIONS]}
-                      value={semester}
-                      onChange={(event) => {
-                        setSemester(event.target.value);
-                        setPage(1);
-                      }}
-                      className="w-48"
-                    />
+                <Select
+                  aria-label="Kurs bo'yicha filtr"
+                  options={[{ value: 'all', label: 'Barcha kurslar' }, ...COURSE_OPTIONS]}
+                  value={course}
+                  onChange={(event) => {
+                    setCourse(event.target.value);
+                    setPage(1);
+                  }}
+                  className="w-44"
+                />
 
-                    <Select
-                      aria-label="Yo'nalish bo'yicha filtr"
-                      /* Uzun ro'yxatda aylantirishdan ko'ra yozib topish tezroq. */
-                      searchable={directionOptions.length > 8}
-                      searchPlaceholder="Yo'nalish nomi..."
-                      options={directionOptions}
-                      value={direction}
-                      onChange={(event) => {
-                        setDirection(event.target.value);
-                        setPage(1);
-                      }}
-                      className="w-52"
-                    />
-                  </section>
+                <Select
+                  aria-label="Semestr bo'yicha filtr"
+                  options={[{ value: 'all', label: 'Barcha semestrlar' }, ...SEMESTER_OPTIONS]}
+                  value={semester}
+                  onChange={(event) => {
+                    setSemester(event.target.value);
+                    setPage(1);
+                  }}
+                  className="w-48"
+                />
 
-                  <Card className="mt-4 overflow-hidden">
-                    <Table
-                      columns={columns}
-                      rows={data?.results ?? []}
-                      rowKey={(row) => row.id}
-                      /*
+                {/*
+                      Yo'nalish faqat institut tanlanganda: usiz ro'yxatda
+                      barcha institutlarning yo'nalishlari chiqib, bir xil nom
+                      takrorlanardi.
+                    */}
+                {university && directionOptions.length > 1 ? (
+                  <Select
+                    aria-label="Yo'nalish bo'yicha filtr"
+                    /* Uzun ro'yxatda aylantirishdan ko'ra yozib topish tezroq. */
+                    searchable={directionOptions.length > 8}
+                    searchPlaceholder="Yo'nalish nomi..."
+                    options={directionOptions}
+                    value={direction}
+                    onChange={(event) => {
+                      setDirection(event.target.value);
+                      setPage(1);
+                    }}
+                    className="w-52"
+                  />
+                ) : null}
+              </section>
+
+              <Card className="mt-4 overflow-hidden">
+                <Table
+                  columns={columns}
+                  rows={data?.results ?? []}
+                  rowKey={(row) => row.id}
+                  /*
                         Skeleton faqat ko'rsatadigan narsa bo'lmaganda: sahifa
                         yoki filtr almashsa `data` bo'shaydi, mutatsiyadan
                         keyingi fon yangilanishida esa joyida qoladi va jadval
                         miltillamaydi.
                       */
-                      isLoading={isLoading || (isFetching && !data)}
-                      skeletonRows={perPage > 20 ? 20 : perPage}
-                      emptyMessage="Bunday fan topilmadi"
-                    />
+                  isLoading={isLoading || (isFetching && !data)}
+                  skeletonRows={perPage > 20 ? 20 : perPage}
+                  emptyMessage="Bunday fan topilmadi"
+                />
 
-                    <Pagination
-                      page={page}
-                      totalPages={data?.total_pages ?? 1}
-                      onPageChange={setPage}
-                      perPage={perPage}
-                      onPerPageChange={(value) => {
-                        setPerPage(value);
-                        setPage(1);
-                      }}
-                      summary={data ? `Jami ${formatSom(data.count)} fan` : undefined}
-                    />
-                  </Card>
-                </>
-              )}
+                <Pagination
+                  page={page}
+                  totalPages={data?.total_pages ?? 1}
+                  onPageChange={setPage}
+                  perPage={perPage}
+                  onPerPageChange={(value) => {
+                    setPerPage(value);
+                    setPage(1);
+                  }}
+                  summary={data ? `Jami ${formatSom(data.count)} fan` : undefined}
+                />
+              </Card>
             </>
           )}
         </div>

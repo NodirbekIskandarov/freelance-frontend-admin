@@ -1,3 +1,4 @@
+import { Library } from 'lucide-react';
 import { useState } from 'react';
 
 import { Card } from '@/components/ui/Card';
@@ -67,7 +68,8 @@ export function UniversityPanel({
   onSelect,
 }: {
   selectedId: string | null;
-  onSelect: (university: University) => void;
+  /** `null` — filtr olib tashlanadi, barcha institutlarning fanlari ko'rinadi. */
+  onSelect: (university: University | null) => void;
 }) {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -97,6 +99,37 @@ export function UniversityPanel({
       </div>
 
       <div className="min-h-0 flex-1 space-y-1 overflow-y-auto p-2">
+        {/*
+          «Barcha institutlar» — filtrni olib tashlash. Qidiruv yozilganda
+          chizilmaydi: u paytda foydalanuvchi aniq institut qidiryapti va
+          bu qator faqat natijalarni surib yuborardi.
+        */}
+        {!debouncedSearch && (
+          <button
+            type="button"
+            onClick={() => onSelect(null)}
+            aria-current={selectedId === null}
+            className={cn(
+              'flex w-full items-center gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-colors',
+              selectedId === null
+                ? 'border-primary/50 bg-primary/10'
+                : 'border-transparent hover:border-line hover:bg-elevated/60',
+            )}
+          >
+            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
+              <Library className="size-4" strokeWidth={1.75} />
+            </span>
+            <span
+              className={cn(
+                'text-[13px] font-semibold',
+                selectedId === null ? 'text-primary' : 'text-fg',
+              )}
+            >
+              Barcha institutlar
+            </span>
+          </button>
+        )}
+
         {isLoading ? (
           Array.from({ length: 5 }, (_, index) => (
             <div key={index} className="h-[68px] animate-pulse rounded-lg bg-elevated/60" />
