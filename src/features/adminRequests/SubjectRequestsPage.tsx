@@ -93,6 +93,38 @@ const columns: Column<AdminSubjectRequest>[] = [
     ),
   },
   {
+    key: 'reviewed',
+    header: "Ko'rib chiqdi",
+    className: 'max-w-[190px]',
+    cell: (row) => {
+      /*
+       * Hali ko'rilmagan ariza uchun chiziqcha: bo'sh katak «ma'lumot
+       * yo'q» bilan «hali bo'lmagan» ni farqlamasdi.
+       */
+      if (row.status === 'pending') {
+        return <span className="text-fg-dim">—</span>;
+      }
+
+      const reviewer = row.reviewed_by?.full_name?.trim() || row.reviewed_by?.phone;
+
+      return (
+        <span className="block min-w-0">
+          <span className="block truncate text-[13px] text-fg-soft" title={reviewer ?? undefined}>
+            {reviewer ?? "Noma'lum admin"}
+          </span>
+          {/*
+            `reviewed_at` maydoni keyin qo'shilgan — undan oldin ko'rib
+            chiqilgan arizalarda u bo'sh. Sana o'rniga taxmin yozgandan
+            ko'ra, ochiq aytgan ma'qul.
+          */}
+          <span className="mt-0.5 block truncate text-[11px] text-fg-dim">
+            {row.reviewed_at ? formatDateTime(row.reviewed_at) : 'sana qayd etilmagan'}
+          </span>
+        </span>
+      );
+    },
+  },
+  {
     key: 'status',
     header: 'Status',
     cell: (row) => (
