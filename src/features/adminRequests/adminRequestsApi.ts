@@ -55,8 +55,23 @@ export const adminRequestsApi = baseApi.injectEndpoints({
       providesTags: [{ type: 'Request', id: 'SUBJECT' }],
     }),
 
-    approveSubjectRequest: build.mutation<AdminSubjectRequest, string>({
-      query: (id) => ({ url: `/admin/subject-requests/${id}/approve/`, method: 'POST' }),
+    /**
+     * Tasdiqlashda fan nomini ikki tilda berish mumkin.
+     *
+     * Arizachi bitta tilda yozadi, katalog esa ikkitasini saqlaydi —
+     * shuning uchun moderator ko'rib chiqayotgan paytda to'ldiradi.
+     * Ikkalasi ham ixtiyoriy: berilmasa ariza qanday bo'lsa shunday
+     * tasdiqlanadi.
+     */
+    approveSubjectRequest: build.mutation<
+      AdminSubjectRequest,
+      { id: string; name?: string; name_ru?: string }
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/admin/subject-requests/${id}/approve/`,
+        method: 'POST',
+        body,
+      }),
       onQueryStarted: optimisticRemove('getSubjectRequestsList'),
       invalidatesTags: [{ type: 'Request', id: 'SUBJECT' }, 'Subject', 'Dashboard'],
     }),

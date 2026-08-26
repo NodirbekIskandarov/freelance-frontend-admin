@@ -68,6 +68,7 @@ export function SubjectFormModal({
   const [university, setUniversity] = useState('');
   const [direction, setDirection] = useState('');
   const [name, setName] = useState('');
+  const [nameRu, setNameRu] = useState('');
   const [course, setCourse] = useState('');
   const [semester, setSemester] = useState('');
   const [description, setDescription] = useState('');
@@ -81,7 +82,13 @@ export function SubjectFormModal({
 
     setUniversity(subject?.university ?? defaultUniversityId ?? '');
     setDirection(subject?.direction ?? '');
-    setName(subject?.name ?? '');
+    /*
+     * `name` joriy tilga qarab yechilgan qiymat, `name_uz` esa ustunning
+     * o'zi. Tahrirlashda ustun kerak: aks holda ruscha interfeysda
+     * o'zbekcha maydonga ruscha nom tushib qolardi.
+     */
+    setName(subject?.name_uz ?? subject?.name ?? '');
+    setNameRu(subject?.name_ru ?? '');
     setCourse(subject?.course ? String(subject.course) : '');
     setSemester(subject?.semester ? String(subject.semester) : '');
     setDescription(subject?.description ?? '');
@@ -115,6 +122,7 @@ export function SubjectFormModal({
     const body = {
       university,
       name: name.trim(),
+      name_ru: nameRu.trim(),
       // Bo'sh tanlov `null` bo'lib ketadi — backend `direction` ni
       // ixtiyoriy deb belgilagan, bo'sh SATR esa UUID sifatida rad etilardi.
       direction: direction || null,
@@ -196,12 +204,20 @@ export function SubjectFormModal({
         </div>
 
         <TextField
-          label="Fan nomi"
+          label="Fan nomi (o'zbekcha)"
           required
           placeholder="Ma'lumotlar bazasi"
           value={name}
           error={nameError}
           onChange={(event) => setName(event.target.value)}
+        />
+
+        <TextField
+          label="Fan nomi (ruscha)"
+          placeholder="Базы данных"
+          value={nameRu}
+          hint="Ixtiyoriy — bo'sh qoldirilsa faqat o'zbekcha nom saqlanadi."
+          onChange={(event) => setNameRu(event.target.value)}
         />
 
         <div className="grid gap-4 sm:grid-cols-2">

@@ -61,6 +61,7 @@ export function RequestsShell<T extends RequestRow>({
   extraParams,
   orderingOptions,
   headerActions,
+  afterContent,
 }: {
   title: string;
   breadcrumbLabel: string;
@@ -78,7 +79,8 @@ export function RequestsShell<T extends RequestRow>({
     isFetching: boolean;
     error?: unknown;
   };
-  approve: { run: (id: string) => void; isLoading: boolean; error?: unknown };
+  /** `row` ham beriladi: ba'zi navbatlar tasdiqlashdan oldin oyna ochadi. */
+  approve: { run: (id: string, row: T) => void; isLoading: boolean; error?: unknown };
   reject: {
     run: (id: string, reason: string) => Promise<boolean>;
     isLoading: boolean;
@@ -101,6 +103,8 @@ export function RequestsShell<T extends RequestRow>({
   orderingOptions?: { value: string; label: string }[];
   /** Sarlavha yonidagi tugmalar — masalan "ro'yxatga qaytish". */
   headerActions?: ReactNode;
+  /** Sahifaga tegishli qo'shimcha oynalar (masalan tasdiqlash oynasi). */
+  afterContent?: ReactNode;
 }) {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
@@ -153,7 +157,7 @@ export function RequestsShell<T extends RequestRow>({
             tone="success"
             size="sm"
             disabled={approve.isLoading}
-            onClick={() => approve.run(row.id)}
+            onClick={() => approve.run(row.id, row)}
           >
             <Check className="size-4" strokeWidth={2} />
           </IconButton>
@@ -270,6 +274,8 @@ export function RequestsShell<T extends RequestRow>({
           </Card>
         </>
       )}
+
+      {afterContent}
 
       <RejectReasonModal
         open={rejectTarget !== null}

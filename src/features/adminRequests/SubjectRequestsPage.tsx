@@ -16,6 +16,7 @@ import {
   useGetSubjectRequestsListQuery,
   useRejectSubjectRequestMutation,
 } from './adminRequestsApi';
+import { ApproveSubjectModal } from './ApproveSubjectModal';
 import { RequestsShell, StatusBadge } from './RequestsShell';
 
 /** «2-kurs · 4-semestr» — ikkalasi ham bo'lmasa qator umuman chizilmaydi. */
@@ -117,6 +118,8 @@ export function SubjectRequestsPage() {
 
   const [university, setUniversity] = useState('');
   const [course, setCourse] = useState('');
+  /* `null` — tasdiqlash oynasi yopiq. */
+  const [approveTarget, setApproveTarget] = useState<AdminSubjectRequest | null>(null);
 
   const { data: universities } = useGetUniversitiesQuery({
     page_size: 200,
@@ -166,7 +169,8 @@ export function SubjectRequestsPage() {
       columns={columns}
       useList={useGetSubjectRequestsListQuery}
       approve={{
-        run: (id) => void approve(id),
+        // To'g'ridan-to'g'ri tasdiqlamaymiz: avval nomni ikki tilda so'raymiz.
+        run: (_id, row) => setApproveTarget(row),
         isLoading: approveState.isLoading,
         error: approveState.error,
       }}
@@ -186,6 +190,25 @@ export function SubjectRequestsPage() {
       rowName={(row) => row.name}
       summaryLabel="ariza"
       emptyMessage="Bunday ariza topilmadi"
+      afterContent={
+        <ApproveSubjectModal
+          request={approveTarget}
+          isLoading={approveState.isLoading}
+          error={approveState.error}
+          onClose={() => setApproveTarget(null)}
+          onConfirm={async (names) => {
+            if (!approveTarget) return;
+
+            try {
+              await approve({ id: approveTarget.id, ...names }).unwrap();
+            } catch {
+              return;
+            }
+
+            setApproveTarget(null);
+          }}
+        />
+      }
     />
   );
 }
