@@ -18,20 +18,43 @@ import { usePublishSolutionMutation } from './solutionsApi';
 const PRICE_PATTERN = /^\d{1,10}(\.\d{1,2})?$/;
 const PERCENT_PATTERN = /^\d{1,3}(\.\d{1,2})?$/;
 
+/**
+ * `15000.00` → `15000`.
+ *
+ * Backend `DecimalField` ni doim ikki xonali kasr bilan qaytaradi. Uni
+ * o'zgarishsiz maydonga qo'yish narxni tahrirlashni noqulay qilardi:
+ * odam butun songa qaytish uchun avval `.00` ni o'chirishi kerak bo'lardi.
+ */
+function trimTrailingZeros(value: string): string {
+  return value.includes('.') ? value.replace(/\.?0+$/, '') : value;
+}
+
 export function PublishModal({
   solutionId,
   open,
   onClose,
   onPublished,
+  defaultPrice,
 }: {
   solutionId: string;
   open: boolean;
   onClose: () => void;
   onPublished: () => void;
+  /**
+   * Yuklovchi so'ragan narx — maydonga oldindan qo'yiladi.
+   *
+   * Bo'sh maydondan ko'ra shu yaxshi: admin ko'p hollarda so'ralgan narxni
+   * tasdiqlaydi, o'zgartirmoqchi bo'lsa ustiga yozadi. Raqamni ko'chirib
+   * yozish esa xatoga yo'l ochardi.
+   */
+  defaultPrice?: string;
 }) {
   const [publish, { isLoading, error }] = usePublishSolutionMutation();
 
-  const [price, setPrice] = useState('');
+  // Modal har javob uchun qayta yaratiladi (chaqiruvchi uni shartli
+  // chizadi), shuning uchun boshlang'ich qiymat holatga bir marta tushadi
+  // va effekt bilan sinxronlash kerak emas.
+  const [price, setPrice] = useState(() => trimTrailingZeros(defaultPrice ?? ''));
   const [commission, setCommission] = useState('10');
   const [touched, setTouched] = useState(false);
 

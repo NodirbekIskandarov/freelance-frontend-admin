@@ -57,6 +57,8 @@ export interface Assignment {
    * sanoqdan chiqadi.
    */
   open_request_count: number;
+  /** Yangi yechim qabul qilinadimi. Yopilsa chop etilganlari sotuvda qoladi. */
+  accepts_submissions: boolean;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -70,6 +72,7 @@ export interface AssignmentWriteRequest {
   title_ru?: string;
   type?: string;
   description?: string;
+  accepts_submissions?: boolean;
   is_active?: boolean;
 }
 
@@ -88,6 +91,7 @@ export interface VariantWriteRequest {
   number: number;
   /** Bitta variantga nechta yechim e'lon qilinishi mumkinligi. */
   max_published_solutions?: number;
+  accepts_submissions?: boolean;
   is_active?: boolean;
 }
 
@@ -118,6 +122,10 @@ export interface Variant {
    * javob berilgan — kelgan so'rovlar endi kutish emas.
    */
   published_solution_count: number;
+  /** Shu variantga yangi yechim qabul qilinadimi. */
+  accepts_submissions: boolean;
+  /** Topshiriq qavati ham hisobga olingan yakuniy javob. */
+  submissions_open: boolean;
   is_active: boolean;
   created_at: string;
   updated_at: string;

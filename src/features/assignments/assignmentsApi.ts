@@ -42,6 +42,8 @@ export const assignmentsApi = baseApi.injectEndpoints({
       invalidatesTags: (_result, _error, { id }) => [
         { type: 'Task', id },
         { type: 'Task', id: 'LIST' },
+        // Javoblar ekrani topshiriqning qabul holatini ko'rsatadi.
+        { type: 'Solution', id: 'SUBMISSIONS' },
       ],
     }),
 
@@ -80,6 +82,7 @@ export const assignmentsApi = baseApi.injectEndpoints({
       invalidatesTags: (_result, _error, { id }) => [
         { type: 'Variant', id },
         { type: 'Variant', id: 'LIST' },
+        { type: 'Solution', id: 'SUBMISSIONS' },
       ],
     }),
 

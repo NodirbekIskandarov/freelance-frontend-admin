@@ -52,6 +52,8 @@ export interface SubmissionAssignment extends SubmissionCounts {
   description: string;
   subject: string;
   subject_name: string;
+  /** Topshiriq qavatida qabul ochiqmi — yopilsa barcha variantlari yopiladi. */
+  accepts_submissions: boolean;
 }
 
 export interface SubmissionVariant extends SubmissionCounts {
@@ -60,6 +62,10 @@ export interface SubmissionVariant extends SubmissionCounts {
   assignment: string;
   /** Nechta foydalanuvchi shu variantga yechim so'ragan. */
   request_count: number;
+  /** Yangi yechim qabul qilinadimi. Topshiriq qavati ham yopishi mumkin. */
+  accepts_submissions: boolean;
+  /** Bu variantga nechta yechim chop etilishi mumkin. */
+  max_published_solutions: number;
 }
 
 export interface SubmissionUploader {
@@ -74,7 +80,10 @@ export interface Submission {
   title: string;
   description: string;
   status: SolutionStatus;
+  /** Joriy narx — chop etilgandan keyin admin belgilagani. */
   price: string;
+  /** Yuklovchi so'ragan narx. Hech qachon o'zgarmaydi. */
+  asking_price: string;
   file_name: string;
   file_url: string;
   uploader: SubmissionUploader | null;
@@ -116,4 +125,29 @@ export interface SubmissionAssignmentsQuery extends ListQuery {
 export interface SubmissionAnswersQuery extends ListQuery {
   id: string;
   status?: SolutionStatus;
+}
+
+/**
+ * Faylni brauzerda ko'rsatib bo'ladimi.
+ *
+ * PDF va rasmlar — ha, brauzerning o'zi chizadi. Office hujjatlari va
+ * arxivlar uchun konvertor kerak, u yo'q: ularni «ko'rib chiqish» deb
+ * ko'rsatib, keyin bo'sh oyna chiqargandan ko'ra ochiq aytgan yaxshi.
+ */
+export type PreviewKind = 'pdf' | 'image' | 'none';
+
+const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'];
+
+export function previewKindOf(fileName: string): PreviewKind {
+  const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
+  if (extension === 'pdf') return 'pdf';
+  if (IMAGE_EXTENSIONS.includes(extension)) return 'image';
+  return 'none';
+}
+
+/** Kengaytma — jadvalda fayl turini bir qarashda ko'rsatish uchun. */
+export function fileExtensionOf(fileName: string): string {
+  const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
+  // Nuqtasiz nom bo'lsa `pop()` butun nomni qaytaradi — u kengaytma emas.
+  return extension && extension !== fileName.toLowerCase() ? extension : '';
 }

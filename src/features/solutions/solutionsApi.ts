@@ -32,6 +32,7 @@ export const solutionsApi = baseApi.injectEndpoints({
       invalidatesTags: (_result, _error, id) => [
         { type: 'Solution', id },
         { type: 'Solution', id: 'PENDING' },
+        { type: 'Solution', id: 'SUBMISSIONS' },
       ],
     }),
 
@@ -44,6 +45,7 @@ export const solutionsApi = baseApi.injectEndpoints({
       invalidatesTags: (_result, _error, { id }) => [
         { type: 'Solution', id },
         { type: 'Solution', id: 'PENDING' },
+        { type: 'Solution', id: 'SUBMISSIONS' },
       ],
     }),
 
@@ -56,6 +58,7 @@ export const solutionsApi = baseApi.injectEndpoints({
       invalidatesTags: (_result, _error, { id }) => [
         { type: 'Solution', id },
         { type: 'Solution', id: 'PENDING' },
+        { type: 'Solution', id: 'SUBMISSIONS' },
       ],
     }),
 
@@ -64,6 +67,7 @@ export const solutionsApi = baseApi.injectEndpoints({
       invalidatesTags: (_result, _error, id) => [
         { type: 'Solution', id },
         { type: 'Solution', id: 'PENDING' },
+        { type: 'Solution', id: 'SUBMISSIONS' },
       ],
     }),
   }),
