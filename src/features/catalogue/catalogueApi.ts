@@ -38,6 +38,9 @@ function toBody<T extends object>(input: T): T | FormData {
  * yubormaymiz va boshqa moderator bir vaqtda kiritgan o'zgarishni
  * tasodifan bosib ketmaymiz.
  */
+/** Ma'lumotnoma ro'yxatlari uchun kesh muddati (soniya). */
+const REFERENCE_CACHE_SECONDS = 600;
+
 export const catalogueApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     getUniversities: build.query<ApiPaginated<University>, UniversitiesQuery>({
@@ -113,8 +116,18 @@ export const catalogueApi = baseApi.injectEndpoints({
      * ochmagan, shuning uchun admin panelda ular tanlov ro'yxati
      * sifatida ishlatiladi, tahrirlanmaydi.
      */
+    /*
+     * Fakultet va yo'nalish — ma'lumotnoma ro'yxatlari.
+     *
+     * Ular deyarli o'zgarmaydi, lekin har modal ochilishida qaytadan
+     * so'ralardi va tanlagichlar yarim soniya bo'sh turardi. Kesh
+     * standart 60 soniyadan 10 daqiqaga uzaytirildi: bu vaqt ichida
+     * qayta ochilgan modal darhol to'ladi. Tahrirlash baribir tegishli
+     * teglarni bekor qiladi, ya'ni yangi yozuv kutib qolmaydi.
+     */
     getFaculties: build.query<ApiPaginated<Faculty>, ApiListQuery & { university?: string }>({
       query: (params) => ({ url: '/faculties/', params }),
+      keepUnusedDataFor: REFERENCE_CACHE_SECONDS,
     }),
 
     /**
@@ -129,6 +142,7 @@ export const catalogueApi = baseApi.injectEndpoints({
       ApiListQuery & { faculty?: string; university?: string }
     >({
       query: (params) => ({ url: '/directions/', params }),
+      keepUnusedDataFor: REFERENCE_CACHE_SECONDS,
     }),
   }),
 });

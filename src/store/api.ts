@@ -11,6 +11,15 @@ export const tokenStore = createLocalStorageTokenStore('admin.auth');
  */
 export const baseApi = createApi({
   reducerPath: 'api',
+  /*
+   * Ulanish tiklanganda qayta so'ralsin.
+   *
+   * Admin panelida noutbuk yopib-ochiladi, wifi uziladi. Standart holatda
+   * kesh eskirgan holida qolib, moderator allaqachon ko'rib chiqilgan
+   * navbatga qarab o'tirardi. Fokus bo'yicha qayta so'rash YOQILMADI: har
+   * oyna almashishda o'nlab so'rov ketardi va bu foydadan ko'ra shovqin.
+   */
+  refetchOnReconnect: true,
   baseQuery: createAppBaseQuery({
     baseUrl: env.apiUrl,
     tokens: tokenStore,
