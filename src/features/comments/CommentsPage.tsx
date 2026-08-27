@@ -1,5 +1,6 @@
 import { MessageSquare, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router';
 
 import { Avatar } from '@/components/ui/Avatar';
 import { IconButton } from '@/components/ui/Button';
@@ -85,11 +86,20 @@ export function CommentsPage() {
       key: 'assignment',
       header: 'Topshiriq',
       className: 'max-w-[220px]',
+      /*
+        Nomi havola: moderator izohni o'qib, u nima haqida ekanini
+        tushunish uchun topshiriqqa qarashi kerak bo'ladi. Havolasiz uni
+        boshqa bo'limdan qidirib topishga majbur bo'lardi.
+      */
       cell: (row) => (
         <span className="block leading-snug">
-          <span className="block truncate text-fg" title={row.assignment_title}>
+          <Link
+            to={`/topshiriqlar/${row.assignment}`}
+            className="block truncate text-fg transition-colors hover:text-primary hover:underline"
+            title={row.assignment_title}
+          >
             {row.assignment_title}
-          </span>
+          </Link>
           <span className="block truncate text-xs text-fg-muted">
             {row.subject_name} · {row.university_name}
           </span>
