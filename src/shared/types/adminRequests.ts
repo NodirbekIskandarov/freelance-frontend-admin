@@ -74,6 +74,8 @@ export interface AdminAssignmentRequest {
   status: RequestStatus;
   reject_reason: string;
   reviewed_by: Requester | null;
+  /** Qaror qachon qabul qilingan. `updated_at` bu savolga javob bermaydi. */
+  reviewed_at: string | null;
   created_assignment: string | null;
   reward_granted: boolean;
   created_at: string;

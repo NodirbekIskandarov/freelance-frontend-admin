@@ -120,6 +120,17 @@ const columns: Column<AdminSubjectRequest>[] = [
           <span className="mt-0.5 block truncate text-[11px] text-fg-dim">
             {row.reviewed_at ? formatDateTime(row.reviewed_at) : 'sana qayd etilmagan'}
           </span>
+
+          {/*
+            Rad etish sababi qaror bilan bir ustunda: u qarorning bir qismi,
+            alohida ustun esa jadvalni kengaytirib, sabab yo'q qatorlarda
+            bo'sh turardi. To'liq matn `title` da.
+          */}
+          {row.status === 'rejected' && row.reject_reason && (
+            <span className="mt-1 block truncate text-[11px] text-danger" title={row.reject_reason}>
+              {row.reject_reason}
+            </span>
+          )}
         </span>
       );
     },

@@ -76,6 +76,47 @@ const columns: Column<AdminAssignmentRequest>[] = [
     ),
   },
   {
+    key: 'reviewed',
+    header: "Ko'rib chiqdi",
+    className: 'max-w-[220px]',
+    cell: (row) => {
+      /*
+       * Hali ko'rilmagan ariza uchun chiziqcha: bo'sh katak «ma'lumot yo'q»
+       * bilan «hali bo'lmagan»ni farqlamasdi.
+       */
+      if (row.status === 'pending') return <span className="text-fg-dim">—</span>;
+
+      const reviewer = row.reviewed_by?.full_name?.trim() || row.reviewed_by?.phone;
+
+      return (
+        <span className="block min-w-0">
+          <span className="block truncate text-[13px] text-fg-soft" title={reviewer ?? undefined}>
+            {reviewer ?? "Noma'lum admin"}
+          </span>
+          {/*
+            `reviewed_at` maydoni keyin qo'shilgan — undan oldin ko'rib
+            chiqilgan arizalarda u bo'sh. Sana o'rniga taxmin yozgandan ko'ra
+            ochiq aytgan ma'qul.
+          */}
+          <span className="mt-0.5 block truncate text-[11px] text-fg-dim">
+            {row.reviewed_at ? formatDateTime(row.reviewed_at) : 'sana qayd etilmagan'}
+          </span>
+
+          {/*
+            Rad etish sababi qaror bilan bir ustunda: u qarorning bir qismi,
+            alohida ustun esa jadvalni kengaytirib, sabab yo'q qatorlarda
+            bo'sh turardi. To'liq matn `title` da.
+          */}
+          {row.status === 'rejected' && row.reject_reason && (
+            <span className="mt-1 block truncate text-[11px] text-danger" title={row.reject_reason}>
+              {row.reject_reason}
+            </span>
+          )}
+        </span>
+      );
+    },
+  },
+  {
     key: 'status',
     header: 'Holat',
     cell: (row) => (
@@ -85,6 +126,13 @@ const columns: Column<AdminAssignmentRequest>[] = [
       </span>
     ),
   },
+];
+
+const ORDERING_OPTIONS = [
+  { value: '-created_at', label: 'Avval yangi arizalar' },
+  { value: 'created_at', label: 'Avval eski arizalar' },
+  { value: '-reviewed_at', label: "Avval yangi ko'rib chiqilgan" },
+  { value: 'reviewed_at', label: "Avval eski ko'rib chiqilgan" },
 ];
 
 export function AssignmentRequestsPage() {
@@ -106,6 +154,7 @@ export function AssignmentRequestsPage() {
         </Link>
       }
       columns={columns}
+      orderingOptions={ORDERING_OPTIONS}
       useList={useGetAssignmentRequestsListQuery}
       approve={{
         // To'g'ridan-to'g'ri tasdiqlamaymiz: avval nomni ikki tilda so'raymiz.
