@@ -185,6 +185,11 @@ export function MonitoringPage() {
   const system = data?.system;
   const summary = data?.summary;
 
+  const systemChart = (data?.system_history.series ?? []).map((point) => ({
+    ...point,
+    label: minuteLabel(point.minute),
+  }));
+
   return (
     <>
       <PageHeader
@@ -377,6 +382,133 @@ export function MonitoringPage() {
                 </AreaChart>
               </ResponsiveContainer>
             </div>
+          </Card>
+
+          <Card className="p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-base font-semibold text-fg">
+                Protsessor va xotira (vaqt bo&apos;yicha)
+              </h2>
+
+              {/*
+                Cho'qqi — bu grafikning butun ma'nosi: ikki soat oldingi
+                ko'tarilish jonli ko'rsatkichda ko'rinmaydi va aynan
+                keyinroq kelgan odam shuni qidiradi.
+              */}
+              <span className="flex flex-wrap items-center gap-2 text-xs text-fg-muted">
+                {data.system_history.peak_cpu && (
+                  <Badge tone="warning">
+                    Eng yuqori CPU: {data.system_history.peak_cpu.value}% ·{' '}
+                    {minuteLabel(data.system_history.peak_cpu.minute)}
+                  </Badge>
+                )}
+                {data.system_history.peak_memory && (
+                  <Badge tone="info">
+                    Eng yuqori RAM: {data.system_history.peak_memory.value}% ·{' '}
+                    {minuteLabel(data.system_history.peak_memory.minute)}
+                  </Badge>
+                )}
+              </span>
+            </div>
+
+            {data.system_history.samples === 0 ? (
+              <p className="py-12 text-center text-sm text-fg-muted">
+                Bu oynada namuna olinmagan. Namuna so&apos;rov kelganda olinadi — trafik
+                bo&apos;lgach grafik to&apos;la boshlaydi.
+              </p>
+            ) : (
+              <>
+                <div className="mt-4 h-56">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={systemChart}
+                      margin={{ top: 4, right: 8, left: -16, bottom: 0 }}
+                    >
+                      <defs>
+                        <linearGradient id="cpuFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#38BDF8" stopOpacity={0.3} />
+                          <stop offset="100%" stopColor="#38BDF8" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="memFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#A78BFA" stopOpacity={0.25} />
+                          <stop offset="100%" stopColor="#A78BFA" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid stroke={GRID_COLOR} vertical={false} />
+                      <XAxis
+                        dataKey="label"
+                        stroke={AXIS_COLOR}
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                        minTickGap={40}
+                      />
+                      {/* 0–100: foiz o'qi doim to'liq shkalada bo'lsin, aks
+                          holda 20% dan 25% gacha o'zgarish falokatdek
+                          ko'rinardi. */}
+                      <YAxis
+                        domain={[0, 100]}
+                        stroke={AXIS_COLOR}
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                        width={44}
+                        tickFormatter={(value) => `${value}%`}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          background: '#0d1411',
+                          border: '1px solid #2a302e',
+                          borderRadius: 12,
+                          fontSize: 12,
+                        }}
+                        labelStyle={{ color: '#A1A1AA' }}
+                        formatter={(value, name) => [
+                          `${Number(value)}%`,
+                          name === 'cpu' ? 'Protsessor' : 'Xotira',
+                        ]}
+                      />
+                      {/*
+                        `connectNulls` YO'Q: namuna olinmagan daqiqa
+                        bo'shliq bo'lib qolishi kerak. Chiziqni ustidan
+                        o'tkazish o'sha vaqtda yuklama bir tekis bo'lgan
+                        degan ma'noni berardi, holbuki biz shunchaki
+                        qaramaganmiz.
+                      */}
+                      <Area
+                        type="monotone"
+                        dataKey="cpu"
+                        stroke="#38BDF8"
+                        strokeWidth={2}
+                        fill="url(#cpuFill)"
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="mem"
+                        stroke="#A78BFA"
+                        strokeWidth={2}
+                        fill="url(#memFill)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-fg-muted">
+                  <span className="flex items-center gap-1.5">
+                    <span className="size-2 rounded-full bg-[#38BDF8]" />
+                    Protsessor
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="size-2 rounded-full bg-[#A78BFA]" />
+                    Xotira
+                  </span>
+                  <span className="text-fg-dim">
+                    {data.system_history.samples} ta namuna · uzilishlar — namuna olinmagan
+                    daqiqalar
+                  </span>
+                </div>
+              </>
+            )}
           </Card>
 
           <div className="grid gap-4 lg:grid-cols-[1fr_320px]">

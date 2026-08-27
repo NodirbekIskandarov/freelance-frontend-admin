@@ -55,6 +55,26 @@ export interface RouteStat {
   total_ms?: number;
 }
 
+export interface SystemPoint {
+  minute: string;
+  /** `null` — o'sha oynada namuna olinmagan. Nol EMAS: bo'shliq boshqa gap. */
+  cpu: number | null;
+  mem: number | null;
+}
+
+export interface SystemPeak {
+  value: number;
+  minute: string;
+}
+
+export interface SystemHistory {
+  series: SystemPoint[];
+  /** Nechta daqiqada namuna olingan — bo'shliqlar qanchaligini aytadi. */
+  samples: number;
+  peak_cpu: SystemPeak | null;
+  peak_memory: SystemPeak | null;
+}
+
 export interface MonitoringSnapshot {
   window_minutes: number;
   /** Oxirgi 5 daqiqadan — sutkalik o'rtacha tunni hisobga olib pasaytirardi. */
@@ -63,6 +83,7 @@ export interface MonitoringSnapshot {
   series: MonitoringPoint[];
   minutes_per_point: number;
   system: SystemStats;
+  system_history: SystemHistory;
   components: Record<string, ComponentHealth>;
   slowest_routes: RouteStat[];
   busiest_routes: RouteStat[];
