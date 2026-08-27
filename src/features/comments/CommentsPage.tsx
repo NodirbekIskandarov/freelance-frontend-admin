@@ -1,6 +1,6 @@
-import { MessageSquare, Trash2 } from 'lucide-react';
+import { MessageSquare, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 
 import { Avatar } from '@/components/ui/Avatar';
 import { IconButton } from '@/components/ui/Button';
@@ -20,6 +20,14 @@ import { DeleteCommentModal } from './DeleteCommentModal';
 import { useDeleteCommentMutation, useGetCommentsQuery } from './commentsApi';
 
 export function CommentsPage() {
+  /*
+   * `?assignment=` — topshiriq tafsilotidagi «hammasini ko'rish»
+   * havolasidan keladi. Filtr manzilda, holatda emas: havola shu bilan
+   * ishlaydi va sahifani yangilash uni yo'qotmaydi.
+   */
+  const [searchParams, setSearchParams] = useSearchParams();
+  const assignmentParam = searchParams.get('assignment');
+
   const [university, setUniversity] = useState('all');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -34,9 +42,17 @@ export function CommentsPage() {
   const { data, isLoading, isFetching, error } = useGetCommentsQuery({
     page,
     page_size: perPage,
+    ...(assignmentParam ? { assignment: assignmentParam } : {}),
     ...(university !== 'all' ? { assignment__subject__university: university } : {}),
     ...(debouncedSearch ? { search: debouncedSearch } : {}),
   });
+
+  function clearAssignmentFilter() {
+    const params = new URLSearchParams(searchParams);
+    params.delete('assignment');
+    setSearchParams(params, { replace: true });
+    setPage(1);
+  }
 
   const [remove, removeState] = useDeleteCommentMutation();
 
@@ -148,6 +164,22 @@ export function CommentsPage() {
             </h2>
 
             <div className="flex flex-wrap items-center gap-3">
+              {/*
+                Bitta topshiriq bo'yicha filtr yoqilganini ochiq aytish
+                kerak: aks holda ro'yxat sababsiz qisqargandek ko'rinardi
+                va moderator qolgan izohlar qayoqqa ketdi deb o'ylardi.
+              */}
+              {assignmentParam && (
+                <button
+                  type="button"
+                  onClick={clearAssignmentFilter}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-control border border-primary/40 bg-primary/10 px-3 text-xs font-medium text-primary transition-colors hover:bg-primary/15"
+                >
+                  Bitta topshiriq bo&apos;yicha
+                  <X className="size-3.5" strokeWidth={2} />
+                </button>
+              )}
+
               <Select
                 aria-label="Institut bo'yicha filtr"
                 options={universityOptions}

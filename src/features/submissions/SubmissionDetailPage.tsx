@@ -1,6 +1,6 @@
 import { ArrowLeft, Check, Download, Eye, Lock, LockOpen, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router';
+import { useParams, useSearchParams } from 'react-router';
 
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
@@ -56,8 +56,29 @@ type BucketId = (typeof BUCKETS)[number]['id'];
 export function SubmissionDetailPage() {
   const { subjectId = '' } = useParams();
 
-  const [assignmentId, setAssignmentId] = useState('');
-  const [variantId, setVariantId] = useState('');
+  /*
+   * Tanlangan topshiriq va variant MANZILDA.
+   *
+   * Ikki sabab: sahifani yangilagan moderator o'zi turgan joyda qoladi,
+   * va boshqa ekranlardan aniq variantga havola qilish mumkin bo'ladi —
+   * topshiriq tafsilotidagi «yechimlarni ko'rish» shu havola.
+   *
+   * `replace` — har tanlov brauzer tarixiga yozilmasin: «orqaga» tugmasi
+   * ekrandan chiqish o'rniga oldingi variantga qaytarardi.
+   */
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [assignmentId, setAssignmentId] = useState(() => searchParams.get('topshiriq') ?? '');
+  const [variantId, setVariantId] = useState(() => searchParams.get('variant') ?? '');
+
+  function syncUrl(assignment: string, variant: string) {
+    const params = new URLSearchParams(searchParams);
+    if (assignment) params.set('topshiriq', assignment);
+    else params.delete('topshiriq');
+    if (variant) params.set('variant', variant);
+    else params.delete('variant');
+    setSearchParams(params, { replace: true });
+  }
   const [bucket, setBucket] = useState<BucketId>('pending');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -149,12 +170,14 @@ export function SubmissionDetailPage() {
     setVariantId('');
     setPreviewId(null);
     setPage(1);
+    syncUrl(id, '');
   }
 
   function selectVariant(id: string) {
     setVariantId(id);
     setPreviewId(null);
     setPage(1);
+    syncUrl(assignmentId, id);
   }
 
   function selectBucket(id: string) {

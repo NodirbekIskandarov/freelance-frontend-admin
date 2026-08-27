@@ -1,6 +1,6 @@
 import { ArrowLeft, Pencil } from 'lucide-react';
 import { useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router';
+import { Link, Navigate, useNavigate, useParams } from 'react-router';
 
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -11,6 +11,8 @@ import { Table, type Column } from '@/components/ui/Table';
 import { formatDateTime } from '@/lib/format';
 import { getApiErrorMessage } from '@/shared/api';
 import { assignmentTypeLabel, type Variant } from '@/shared/types/assignments';
+
+import { AssignmentCommentsCard } from '@/features/comments/AssignmentCommentsCard';
 
 import { AssignmentFormModal } from './AssignmentFormModal';
 import { useGetAssignmentQuery, useGetAssignmentVariantsQuery } from './assignmentsApi';
@@ -100,6 +102,40 @@ const variantColumns: Column<Variant>[] = [
   },
 ];
 
+/**
+ * Variant qatoridagi «yechimlarni ko'rish» havolasi.
+ *
+ * Jadval sanoqni aytadi, javoblarning O'ZI esa yuborilgan javoblar
+ * ekranida. Havolasiz moderator o'sha bo'limga borib, institut → fan →
+ * topshiriq → variant zanjirini qo'lda qaytadan bosib chiqardi.
+ *
+ * Ustun alohida funksiyada, chunki u fan identifikatorini biladi —
+ * u esa variantda emas, topshiriqda.
+ */
+function variantColumnsWithLinks(subjectId: string, assignmentId: string): Column<Variant>[] {
+  return [
+    ...variantColumns,
+    {
+      key: 'answers',
+      header: 'Javoblar',
+      align: 'right',
+      cell: (row) =>
+        row.solution_count > 0 ? (
+          <Link
+            to={`/yuborilgan/javoblar/${subjectId}?topshiriq=${assignmentId}&variant=${row.id}`}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            Ko&apos;rish
+          </Link>
+        ) : (
+          // Javob kelmagan variantda havola yo'q: u bo'sh ekranga olib
+          // borardi va bosishga arziydigandek ko'rinardi.
+          <span className="text-fg-dim">—</span>
+        ),
+    },
+  ];
+}
+
 export function AssignmentDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -164,9 +200,10 @@ export function AssignmentDetailPage() {
         }
       />
 
-      {/* O'ng ustun kengaytirildi: universitetning to'liq nomi va uzun
-          qiymatlar 340px ga sig'may, ikki-uch qatorga bo'linib ketardi. */}
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_420px]">
+      {/* O'ng ustun: universitetning to'liq nomi va uzun qiymatlar tor
+          ustunda ikki-uch qatorga bo'linib ketardi. 480px ularning
+          ko'pchiligini bir qatorga sig'diradi. */}
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_480px]">
         <Card className="p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-base font-semibold text-fg">Tavsif</h2>
@@ -232,7 +269,7 @@ export function AssignmentDetailPage() {
           <p className="p-5 text-sm text-danger">{getApiErrorMessage(variantsError)}</p>
         ) : (
           <Table
-            columns={variantColumns}
+            columns={variantColumnsWithLinks(data.subject, data.id)}
             rows={variants?.results ?? []}
             rowKey={(row) => row.id}
             isLoading={isLoadingVariants}
@@ -241,6 +278,12 @@ export function AssignmentDetailPage() {
           />
         )}
       </Card>
+
+      {/* Izohlar variantlar ostida: «3-variant noto'g'ri» degan yozuv
+          aynan shu yerda, variantlar yonida turgani foydali. */}
+      <div className="mt-4">
+        <AssignmentCommentsCard assignmentId={data.id} />
+      </div>
 
       <AssignmentFormModal open={editOpen} assignment={data} onClose={() => setEditOpen(false)} />
     </>
