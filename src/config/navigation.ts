@@ -1,4 +1,5 @@
 import {
+  Activity,
   BanknoteArrowDown,
   BarChart3,
   Building2,
@@ -134,6 +135,12 @@ export const navigation: NavGroup[] = [
         to: '/tasdiqlangan-kontent',
         icon: CheckSquare,
         permission: 'solutions.view',
+      },
+      {
+        label: 'Server monitoringi',
+        to: '/monitoring',
+        icon: Activity,
+        permission: 'dashboard.view',
       },
       {
         label: 'Sotuv statistikasi',

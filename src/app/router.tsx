@@ -19,6 +19,10 @@ const CommentsPage = lazy(async () => ({
   default: (await import('@/features/comments/CommentsPage')).CommentsPage,
 }));
 
+const MonitoringPage = lazy(async () => ({
+  default: (await import('@/features/monitoring/MonitoringPage')).MonitoringPage,
+}));
+
 const DashboardPage = lazy(async () => ({
   default: (await import('@/features/dashboard/DashboardPage')).DashboardPage,
 }));
@@ -169,6 +173,7 @@ export const router = createBrowserRouter([
       },
 
       { path: 'izohlar', element: gated('catalogue.view', <CommentsPage />) },
+      { path: 'monitoring', element: gated('dashboard.view', <MonitoringPage />) },
       { path: 'shikoyatlar', element: gated('reports.view', <SolutionReportsPage />) },
 
       { path: 'yechimlar', element: gated('solutions.view', <SolutionsPage />) },
