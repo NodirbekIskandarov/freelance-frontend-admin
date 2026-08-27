@@ -75,7 +75,22 @@ function getServerErrorMessage(data: unknown): string | null {
   const body = data as Record<string, unknown>;
 
   if (typeof body.errors === 'object' && body.errors !== null) {
-    const fromEnvelope = firstMessage(body.errors as Record<string, unknown>);
+    const errors = body.errors as Record<string, unknown>;
+
+    /*
+     * Maydon xatosi UMUMIY matndan ustun.
+     *
+     * Validatsiya xatosida server `detail` ga «Validation failed.» yozadi
+     * va haqiqiy sababni `fields` ichiga qo'yadi. `detail` ni birinchi
+     * olish moderatorga hech nima aytmaydigan matn ko'rsatib, aynan
+     * kerakli izohni yashirib qo'yardi.
+     */
+    if (typeof errors.fields === 'object' && errors.fields !== null) {
+      const fromFields = firstMessage(errors.fields as Record<string, unknown>);
+      if (fromFields) return fromFields;
+    }
+
+    const fromEnvelope = firstMessage(errors);
     if (fromEnvelope) return fromEnvelope;
   }
 
@@ -130,6 +145,31 @@ export function getApiErrorMessage(error: unknown, fallback = 'Nimadir xato ketd
  */
 export function getFieldErrors(error: unknown): Record<string, string[]> | null {
   if (!isFetchBaseQueryError(error)) return null;
-  if (!isApiErrorBody(error.data)) return null;
-  return error.data.errors ?? null;
+  if (typeof error.data !== 'object' || error.data === null) return null;
+
+  /*
+   * Maydon xatolari konvertda `errors.fields` da turadi.
+   *
+   * Ilgari bu yerda `isApiErrorBody` tekshirilardi — u esa `message` degan
+   * satrni talab qiladi va server javobida bunday maydon YO'Q. Natijada
+   * funksiya har doim `null` qaytarardi va hech bir forma maydon ostidagi
+   * aniq xatoni ko'rsata olmasdi.
+   */
+  const errors = (error.data as Record<string, unknown>).errors;
+  if (typeof errors !== 'object' || errors === null) return null;
+
+  const fields = (errors as Record<string, unknown>).fields;
+  if (typeof fields !== 'object' || fields === null) return null;
+
+  const result: Record<string, string[]> = {};
+  for (const [key, value] of Object.entries(fields as Record<string, unknown>)) {
+    if (Array.isArray(value)) {
+      const messages = value.filter((item): item is string => typeof item === 'string');
+      if (messages.length > 0) result[key] = messages;
+    } else if (typeof value === 'string') {
+      result[key] = [value];
+    }
+  }
+
+  return Object.keys(result).length > 0 ? result : null;
 }
