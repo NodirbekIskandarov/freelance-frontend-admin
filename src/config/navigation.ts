@@ -14,7 +14,6 @@ import {
   Landmark,
   LayoutGrid,
   LifeBuoy,
-  LogOut,
   MessageSquare,
   ScrollText,
   Settings,
@@ -167,8 +166,19 @@ export const navigation: NavGroup[] = [
     items: [
       { label: 'Audit jurnali', to: '/audit', icon: ScrollText, permission: 'audit.view' },
       { label: 'Rollar va ruxsatlar', to: '/rollar', icon: KeyRound, permission: 'roles.manage' },
+      {
+        label: 'Admin foydalanuvchilar',
+        to: '/sozlamalar/adminlar',
+        icon: ShieldCheck,
+        // Menyuda `roles.manage` bilan ko'rinadi, ekranning o'zi esa
+        // superuserni talab qiladi va sababini aytadi. Ikkalasi ham
+        // kerak: menyuni ruxsat boshqaradi, qarorni superuser.
+        permission: 'roles.manage',
+      },
       { label: 'Sozlamalar', to: '/sozlamalar', icon: Settings },
-      { label: 'Chiqish', to: '/logout', icon: LogOut },
+      // «Chiqish» olib tashlandi: u `/logout` ga olib borardi va bunday
+      // sahifa umuman yo'q edi — bosgan odam bo'sh ekranga tushardi.
+      // Chiqish endi yuqori o'ngdagi profil menyusida, o'z joyida.
     ],
   },
 ];

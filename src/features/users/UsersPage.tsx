@@ -1,5 +1,15 @@
-import { CircleCheck, CircleX, Clock, KeyRound, Lock, Users, UserRoundCheck } from 'lucide-react';
+import {
+  CircleCheck,
+  CircleX,
+  Clock,
+  Eye,
+  KeyRound,
+  Lock,
+  Users,
+  UserRoundCheck,
+} from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
@@ -57,6 +67,7 @@ function statValue(value: number | undefined): string {
 }
 
 export function UsersPage() {
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
   const [status, setStatus] = useState<UserStatus | 'all'>('all');
@@ -152,6 +163,16 @@ export function UsersPage() {
       align: 'right',
       cell: (row) => (
         <span className="flex items-center justify-end gap-2">
+          {/* Tafsilot — birinchi amal: qolganlari qaror talab qiladi,
+              bu esa qaror qabul qilishdan oldin qaraydigan joy. */}
+          <IconButton
+            label={`${row.full_name || row.email} — tafsilot`}
+            size="sm"
+            onClick={() => void navigate(`/foydalanuvchilar/${row.id}`)}
+          >
+            <Eye className="size-4" strokeWidth={1.75} />
+          </IconButton>
+
           {/* Rol faqat xodimga beriladi — oddiy foydalanuvchi panelga kirmaydi. */}
           {row.is_staff && canManageRoles && (
             <IconButton

@@ -26,7 +26,13 @@ export function AdminLayout() {
       <Sidebar className={cn(!sidebarOpen && 'hidden')} />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar onToggleSidebar={() => setSidebarOpen((open) => !open)} notificationCount={5} />
+        {/*
+          Bildirishnomalar soni UZATILMAYDI: panelda bildirishnoma API'si
+          yo'q va oldingi `5` qat'iy yozilgan, o'ylab topilgan raqam edi.
+          Bo'sh qo'ng'iroq — «hozircha hech nima yo'q» degani, yolg'on
+          raqam esa har ochilganda tekshirishga majbur qilardi.
+        */}
+        <Topbar onToggleSidebar={() => setSidebarOpen((open) => !open)} />
 
         {/* Scroll faqat shu yerda — sidebar va topbar joyida qoladi. */}
         <main className="flex-1 overflow-y-auto px-6 py-6">

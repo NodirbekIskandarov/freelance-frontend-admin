@@ -17,8 +17,14 @@ export interface AdminUserAccount {
   email_verified: boolean;
   is_active: boolean;
   is_staff: boolean;
+  /** Huquqi rollardan emas, hisobning o'zidan keladi. */
+  is_superuser: boolean;
+  /** Biriktirilgan rollar nomi — panelda nima qila olishini aytadi. */
+  roles: string[];
+  auth_provider: string;
   last_login_at: string | null;
   created_at: string;
+  updated_at: string;
 }
 
 export const USER_STATUS_LABELS: Record<UserStatus, string> = {
@@ -33,6 +39,8 @@ export interface AdminUsersQuery extends ApiListQuery {
   is_active?: boolean;
   phone_verified?: boolean;
   email_verified?: boolean;
+  /** Adminlar boshqaruvi ekrani xodimlarni shu bilan ajratadi. */
+  is_staff?: boolean;
 }
 
 /** `PATCH /admin/users/{id}/block/` tanasi — sabab ixtiyoriy. */

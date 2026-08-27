@@ -15,6 +15,18 @@ import { PlaceholderPage } from '@/pages/PlaceholderPage';
  * bo'lsa, login sahifasini ochgan foydalanuvchi ham grafik kutubxonasini
  * yuklab olardi. Lazy qilinganda har sahifa o'z chunk'ida qoladi.
  */
+const ProfilePage = lazy(async () => ({
+  default: (await import('@/features/profile/ProfilePage')).ProfilePage,
+}));
+
+const StaffPage = lazy(async () => ({
+  default: (await import('@/features/staff/StaffPage')).StaffPage,
+}));
+
+const UserDetailPage = lazy(async () => ({
+  default: (await import('@/features/users/UserDetailPage')).UserDetailPage,
+}));
+
 const CommentsPage = lazy(async () => ({
   default: (await import('@/features/comments/CommentsPage')).CommentsPage,
 }));
@@ -139,6 +151,12 @@ export const router = createBrowserRouter([
       { path: 'dashboard', element: gated('dashboard.view', <DashboardPage />) },
 
       { path: 'foydalanuvchilar', element: gated('users.view', <UsersPage />) },
+      { path: 'foydalanuvchilar/:id', element: gated('users.view', <UserDetailPage />) },
+      // Profil ruxsat talab qilmaydi: har kim o'zinikini ko'radi.
+      { path: 'profil', element: <ProfilePage /> },
+      // Ekranning o'zi superuserni tekshiradi va sababini aytadi —
+      // `gated` bilan o'ralsa manzilni yozgan odam bo'sh sahifa ko'rardi.
+      { path: 'sozlamalar/adminlar', element: <StaffPage /> },
       { path: 'freelancerlar', element: gated('freelancers.view', <FreelancersPage />) },
       { path: 'freelancer-arizalari', element: gated('applications.view', <ApplicationsPage />) },
       { path: 'birja', element: gated('exchange.view', <ExchangeTasksPage />) },

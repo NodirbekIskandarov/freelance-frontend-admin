@@ -1,7 +1,8 @@
-import { Bell, ChevronDown, Menu, Sun } from 'lucide-react';
+import { Bell, Menu } from 'lucide-react';
 
-import { Avatar } from '@/components/ui/Avatar';
 import { cn } from '@/lib/cn';
+
+import { UserMenu } from './UserMenu';
 
 interface TopbarProps {
   onToggleSidebar: () => void;
@@ -43,10 +44,12 @@ export function Topbar({ onToggleSidebar, notificationCount = 0 }: TopbarProps) 
       </IconAction>
 
       <div className="flex items-center gap-1">
-        <IconAction label="Mavzuni almashtirish">
-          <Sun className="size-5" strokeWidth={1.75} />
-        </IconAction>
-
+        {/*
+          Mavzu tugmasi OLIB TASHLANDI: panelda yorug' tema yo'q —
+          tokenlar faqat qorong'i palitra uchun yozilgan. Hech nima
+          qilmaydigan tugma yo'q tugmadan yomonroq: odam uni bosib,
+          buzuq deb o'ylaydi.
+        */}
         <IconAction label="Bildirishnomalar">
           <Bell className="size-5" strokeWidth={1.75} />
           {notificationCount > 0 && (
@@ -56,17 +59,7 @@ export function Topbar({ onToggleSidebar, notificationCount = 0 }: TopbarProps) 
           )}
         </IconAction>
 
-        <button
-          type="button"
-          className="ml-2 flex items-center gap-2.5 rounded-control py-1.5 pr-2 pl-1.5 transition-colors hover:bg-elevated"
-        >
-          <Avatar name="Admin" />
-          <span className="text-left leading-tight">
-            <span className="block text-sm font-medium text-fg">Admin</span>
-            <span className="block text-xs text-fg-muted">Super Admin</span>
-          </span>
-          <ChevronDown className="size-4 text-fg-muted" strokeWidth={1.75} />
-        </button>
+        <UserMenu />
       </div>
     </header>
   );

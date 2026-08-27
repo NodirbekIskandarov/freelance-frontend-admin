@@ -23,6 +23,11 @@ export const adminUsersApi = baseApi.injectEndpoints({
       ],
     }),
 
+    getAdminUser: build.query<AdminUserAccount, string>({
+      query: (id) => ({ url: `/admin/users/${id}/` }),
+      providesTags: (_result, _error, id) => [{ type: 'User', id }],
+    }),
+
     activateUser: build.mutation<AdminUserAccount, string>({
       query: (id) => ({ url: `/admin/users/${id}/activate/`, method: 'PATCH' }),
       invalidatesTags: (_result, _error, id) => [
@@ -45,5 +50,9 @@ export const adminUsersApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetAdminUsersQuery, useActivateUserMutation, useBlockUserMutation } =
-  adminUsersApi;
+export const {
+  useGetAdminUsersQuery,
+  useGetAdminUserQuery,
+  useActivateUserMutation,
+  useBlockUserMutation,
+} = adminUsersApi;
