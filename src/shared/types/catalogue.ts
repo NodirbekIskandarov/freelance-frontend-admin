@@ -128,6 +128,25 @@ export const SEMESTER_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({
 export const CATALOGUE_ORDERING_OPTIONS = [
   { value: 'name', label: 'Nomi (A–Z)' },
   { value: '-name', label: 'Nomi (Z–A)' },
+  { value: '-subject_count,-assignment_count,short_name', label: "Fani ko'p" },
+  { value: '-assignment_count,-subject_count,short_name', label: "Topshirig'i ko'p" },
+  { value: '-solution_count,-assignment_count,short_name', label: "Yechimi ko'p" },
   { value: '-created_at', label: 'Avval yangilari' },
   { value: 'created_at', label: 'Avval eskilari' },
 ] as const;
+
+/**
+ * Yon paneldagi institutlar tartibi.
+ *
+ * Alifbo emas: panel ish qilinadigan joyni tanlash uchun va bo'sh
+ * institutni tepada ushlab turish har safar pastga aylantirishga majbur
+ * qilardi. Oxirgi bosqich — qisqa nom: sanoqlar teng bo'lganda (nol
+ * topshiriqli o'nlab institut) tartib aniqlanmagan bo'lib qolardi va
+ * sahifalash orasida qator takrorlanishi mumkin edi.
+ */
+export const UNIVERSITY_PANEL_ORDERING = {
+  /** Topshiriqlar ekrani uchun — topshirig'i ko'pi tepada. */
+  byAssignments: '-assignment_count,-subject_count,short_name',
+  /** Fanlar ekrani uchun — fani ko'pi tepada. */
+  bySubjects: '-subject_count,-assignment_count,short_name',
+} as const;

@@ -7,7 +7,7 @@ import { SearchInput } from '@/components/ui/SearchInput';
 import { cn } from '@/lib/cn';
 import { formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
-import type { Subject, University } from '@/shared/types/catalogue';
+import { UNIVERSITY_PANEL_ORDERING, type Subject, type University } from '@/shared/types/catalogue';
 
 import { useGetSubjectsQuery, useGetUniversitiesQuery } from './catalogueApi';
 import { UniversityBadge, universitySummary } from './UniversityPanel';
@@ -47,7 +47,7 @@ export function CatalogueNavPanel({
     {
       page,
       page_size: PAGE_SIZE,
-      ordering: 'short_name',
+      ordering: UNIVERSITY_PANEL_ORDERING.byAssignments,
       ...(debouncedSearch ? { search: debouncedSearch } : {}),
     },
     { skip: showSubjects },

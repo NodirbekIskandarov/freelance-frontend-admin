@@ -1,6 +1,6 @@
 import { ClipboardList, FileText, Library, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 
 import { Badge } from '@/components/ui/Badge';
 import { Button, IconButton } from '@/components/ui/Button';
@@ -26,6 +26,7 @@ import {
   useDeleteSubjectMutation,
   useGetDirectionsQuery,
   useGetSubjectsQuery,
+  useGetUniversityQuery,
 } from './catalogueApi';
 import { DeleteCatalogueModal } from './DeleteCatalogueModal';
 import { SubjectFormModal } from './SubjectFormModal';
@@ -40,7 +41,45 @@ const SOURCE_TONES = {
 export function SubjectsPage() {
   const navigate = useNavigate();
 
+  /*
+   * Tanlangan institut MANZILDA saqlanadi.
+   *
+   * Ilgari u faqat komponent holatida edi: sahifani yangilagan yoki
+   * havolani ulashgan odam boshidan, «barcha institutlar» dan boshlardi.
+   * `replace` — har tanlov brauzer tarixiga yozilmasin, aks holda
+   * «orqaga» tugmasi sahifadan chiqish o'rniga oldingi institutga
+   * qaytarardi.
+   */
+  const [searchParams, setSearchParams] = useSearchParams();
+  const universityParam = searchParams.get('university');
+
   const [university, setUniversity] = useState<University | null>(null);
+
+  /*
+   * Manzilda faqat identifikator bor, panel esa butun obyektni kutadi —
+   * shuning uchun u alohida so'raladi. Panelning o'z ro'yxatidan
+   * kutilmaydi: kerakli institut o'sha ro'yxatning boshqa sahifasida
+   * bo'lishi mumkin va u holda tanlov tiklanmasdan qolardi.
+   */
+  const { data: universityFromUrl } = useGetUniversityQuery(universityParam ?? '', {
+    skip: !universityParam || university?.id === universityParam,
+  });
+
+  useEffect(() => {
+    if (universityFromUrl) setUniversity(universityFromUrl);
+  }, [universityFromUrl]);
+
+  function selectUniversity(next: University | null) {
+    setUniversity(next);
+
+    const params = new URLSearchParams(searchParams);
+    if (next) {
+      params.set('university', next.id);
+    } else {
+      params.delete('university');
+    }
+    setSearchParams(params, { replace: true });
+  }
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
@@ -295,7 +334,7 @@ export function SubjectsPage() {
       />
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-        <UniversityPanel selectedId={university?.id ?? null} onSelect={setUniversity} />
+        <UniversityPanel selectedId={university?.id ?? null} onSelect={selectUniversity} />
 
         <div className="min-w-0 flex-1">
           {/*

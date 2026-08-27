@@ -7,7 +7,7 @@ import { SearchInput } from '@/components/ui/SearchInput';
 import { cn } from '@/lib/cn';
 import { formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
-import type { University } from '@/shared/types/catalogue';
+import { UNIVERSITY_PANEL_ORDERING, type University } from '@/shared/types/catalogue';
 
 import { useGetUniversitiesQuery } from './catalogueApi';
 
@@ -94,7 +94,7 @@ export function UniversityPanel({
   const { data, isLoading } = useGetUniversitiesQuery({
     page,
     page_size: PAGE_SIZE,
-    ordering: 'short_name',
+    ordering: UNIVERSITY_PANEL_ORDERING.bySubjects,
     ...(debouncedSearch ? { search: debouncedSearch } : {}),
   });
 
