@@ -32,6 +32,12 @@ export interface Solution {
   file: string;
   /** DRF `DecimalField` — satr sifatida keladi, aniqlik yo'qolmasligi uchun. */
   price: string;
+  /**
+   * Yuklovchi so'ragan narx. Hech qachon o'zgarmaydi — e'lon qilishda
+   * `price` ustiga yozilgandan keyin ham u qancha so'raganini bilish
+   * mumkin bo'lsin.
+   */
+  asking_price: string;
   status: SolutionStatus;
   reject_reason: string;
   commission_percent: string | null;

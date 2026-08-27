@@ -164,7 +164,9 @@ export function AssignmentDetailPage() {
         }
       />
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+      {/* O'ng ustun kengaytirildi: universitetning to'liq nomi va uzun
+          qiymatlar 340px ga sig'may, ikki-uch qatorga bo'linib ketardi. */}
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_420px]">
         <Card className="p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-base font-semibold text-fg">Tavsif</h2>

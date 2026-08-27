@@ -137,7 +137,12 @@ export function SolutionDetailPage() {
         </div>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+      {/*
+        O'ng ustun 340px edi va u UUID sig'adigan kenglik emas: «Muallif ID»
+        ikki qatorga bo'linib, jadval o'qishga noqulay bo'lardi. 420px bitta
+        UUID'ni bir qatorga sig'diradi.
+      */}
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_420px]">
         <Card className="p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-base font-semibold text-fg">Tavsif</h2>
@@ -175,7 +180,16 @@ export function SolutionDetailPage() {
 
           <InfoList className="mt-4">
             <InfoRow label="Variant" value={data.variant_label} />
-            <InfoRow label="Narx" value={formatDecimalSom(data.price)} />
+            {/*
+              Yuklovchi so'ragan narx alohida qator — e'lon qilishda `price`
+              ustiga yozilgandan keyin u qancha so'raganini bilish mumkin
+              bo'lsin. Ikkalasi teng bo'lsa faqat bittasi ko'rsatiladi:
+              takrorlangan raqam faqat joy egallardi.
+            */}
+            <InfoRow label="So'ralgan narx" value={formatDecimalSom(data.asking_price)} />
+            {data.price !== data.asking_price && (
+              <InfoRow label="Belgilangan narx" value={formatDecimalSom(data.price)} />
+            )}
             <InfoRow
               label="Komissiya"
               value={data.commission_percent === null ? '—' : `${data.commission_percent}%`}
@@ -203,6 +217,10 @@ export function SolutionDetailPage() {
 
       <PublishModal
         solutionId={id}
+        // Yuklovchi so'ragan narx maydonga oldindan tushadi: admin ko'p
+        // hollarda o'shani tasdiqlaydi, o'zgartirmoqchi bo'lsa ustiga
+        // yozadi. Qo'lda ko'chirish esa xatoga yo'l ochardi.
+        defaultPrice={data.asking_price}
         open={publishOpen}
         onClose={() => setPublishOpen(false)}
         onPublished={() => void navigate('/yechimlar')}
