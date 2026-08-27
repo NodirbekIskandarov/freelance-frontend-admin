@@ -15,6 +15,10 @@ import { PlaceholderPage } from '@/pages/PlaceholderPage';
  * bo'lsa, login sahifasini ochgan foydalanuvchi ham grafik kutubxonasini
  * yuklab olardi. Lazy qilinganda har sahifa o'z chunk'ida qoladi.
  */
+const CommentsPage = lazy(async () => ({
+  default: (await import('@/features/comments/CommentsPage')).CommentsPage,
+}));
+
 const DashboardPage = lazy(async () => ({
   default: (await import('@/features/dashboard/DashboardPage')).DashboardPage,
 }));
@@ -164,6 +168,7 @@ export const router = createBrowserRouter([
         element: gated('solutions.view', <SubmissionDetailPage />),
       },
 
+      { path: 'izohlar', element: gated('catalogue.view', <CommentsPage />) },
       { path: 'shikoyatlar', element: gated('reports.view', <SolutionReportsPage />) },
 
       { path: 'yechimlar', element: gated('solutions.view', <SolutionsPage />) },

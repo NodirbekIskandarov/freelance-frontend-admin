@@ -14,14 +14,15 @@ import {
   LayoutGrid,
   LifeBuoy,
   LogOut,
+  MessageSquare,
   ScrollText,
   Settings,
   ShieldCheck,
   TriangleAlert,
+  type LucideIcon,
   UserRound,
   Users,
   Wallet as WalletIcon,
-  type LucideIcon,
 } from 'lucide-react';
 
 import type { PermissionCode } from '@/shared/types/adminRoles';
@@ -120,6 +121,12 @@ export const navigation: NavGroup[] = [
         to: '/yechimlar',
         icon: FileCheck2,
         permission: 'solutions.view',
+      },
+      {
+        label: 'Izohlar',
+        to: '/izohlar',
+        icon: MessageSquare,
+        permission: 'catalogue.view',
       },
       { label: 'Shikoyatlar', to: '/shikoyatlar', icon: TriangleAlert, permission: 'reports.view' },
       {
