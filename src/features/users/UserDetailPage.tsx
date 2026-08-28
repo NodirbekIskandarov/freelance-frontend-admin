@@ -1,6 +1,7 @@
 import { ArrowLeft, Ban, CircleCheck, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router';
+import { Navigate, useParams } from 'react-router';
+import { useLocaleNavigate } from '@/i18n/navigation';
 
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
@@ -24,7 +25,7 @@ const statusTones = {
 
 export function UserDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const navigate = useLocaleNavigate();
   /* `null` — bloklash oynasi yopiq. */
   const [blockTarget, setBlockTarget] = useState<{
     id: string;

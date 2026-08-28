@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { TextField } from '@/components/ui/Field';
 import { useChangePasswordMutation, useLoginMethodsQuery } from '@/features/auth/authApi';
+import { useT } from '@/i18n/I18nProvider';
 import { getApiErrorMessage } from '@/shared/api';
 
 /**
@@ -20,6 +21,7 @@ import { getApiErrorMessage } from '@/shared/api';
  * ochilganini faqat backend biladi.
  */
 export function ChangePasswordCard() {
+  const { m } = useT();
   const { data } = useLoginMethodsQuery();
   const [changePassword, { isLoading }] = useChangePasswordMutation();
 
@@ -39,7 +41,7 @@ export function ChangePasswordCard() {
     setDone(false);
 
     if (password !== confirmPassword) {
-      setError('Parollar mos kelmadi.');
+      setError(m.profile.mismatch);
       return;
     }
 
@@ -52,7 +54,7 @@ export function ChangePasswordCard() {
         new_password_confirm: confirmPassword,
       }).unwrap();
     } catch (changeError) {
-      setError(getApiErrorMessage(changeError, "Parolni o'zgartirib bo'lmadi."));
+      setError(getApiErrorMessage(changeError, m.profile.changeFailed));
       return;
     }
 
@@ -66,18 +68,16 @@ export function ChangePasswordCard() {
     <Card className="p-6">
       <h2 className="flex items-center gap-2 text-base font-semibold text-fg">
         <KeyRound className="size-4 text-primary" strokeWidth={1.75} />
-        {hasPassword ? "Parolni o'zgartirish" : "Parol qo'yish"}
+        {hasPassword ? m.profile.changePasswordTitle : m.profile.setPasswordTitle}
       </h2>
       <p className="mt-1 text-sm leading-relaxed text-fg-muted">
-        {hasPassword
-          ? 'Hisob bitta — yangi parol saytda ham, panelda ham ishlaydi.'
-          : "Hisobingiz parolsiz ochilgan. Parol qo'ysangiz, panelga u bilan ham kira olasiz."}
+        {hasPassword ? m.profile.changePasswordDesc : m.profile.setPasswordDesc}
       </p>
 
       <form onSubmit={handleSubmit} className="mt-5 flex flex-col gap-4">
         {hasPassword && (
           <TextField
-            label="Joriy parol"
+            label={m.profile.currentPassword}
             type="password"
             required
             autoComplete="current-password"
@@ -88,18 +88,18 @@ export function ChangePasswordCard() {
         )}
 
         <TextField
-          label="Yangi parol"
+          label={m.profile.newPassword}
           type="password"
           required
           autoComplete="new-password"
           placeholder="••••••••"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          hint="Kamida 8 ta belgi, harf va raqam."
+          hint={m.profile.passwordHint}
         />
 
         <TextField
-          label="Yangi parolni takrorlang"
+          label={m.profile.repeatPassword}
           type="password"
           required
           autoComplete="new-password"
@@ -120,7 +120,7 @@ export function ChangePasswordCard() {
         {done && (
           <p className="flex items-center gap-2 rounded-control border border-success/25 bg-success/10 px-3.5 py-2.5 text-sm text-success">
             <Check className="size-4" strokeWidth={2} />
-            Parol yangilandi.
+            {m.profile.changed}
           </p>
         )}
 
@@ -130,7 +130,7 @@ export function ChangePasswordCard() {
           className="self-start"
           icon={isLoading ? <Loader2 className="size-4 animate-spin" /> : undefined}
         >
-          {isLoading ? 'Saqlanmoqda…' : 'Saqlash'}
+          {isLoading ? m.common.saving : m.common.save}
         </Button>
       </form>
     </Card>

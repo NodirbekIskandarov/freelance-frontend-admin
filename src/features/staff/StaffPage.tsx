@@ -1,6 +1,6 @@
 import { ShieldCheck, ShieldOff, UserRoundPlus } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router';
+import { Link } from '@/i18n/navigation';
 
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';

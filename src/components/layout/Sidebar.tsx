@@ -1,8 +1,12 @@
 import { ChevronDown, Headphones } from 'lucide-react';
 import { useState } from 'react';
-import { NavLink, useLocation } from 'react-router';
+import { useLocation } from 'react-router';
+import { NavLink } from '@/i18n/navigation';
 
 import { navigation, type NavItem } from '@/config/navigation';
+import { stripLocale } from '@/i18n/config';
+import { useT } from '@/i18n/I18nProvider';
+import type { Messages } from '@/i18n/messages/uz';
 import { usePermissions } from '@/features/adminRoles/usePermissions';
 import { cn } from '@/lib/cn';
 
@@ -29,7 +33,7 @@ function ActiveBar() {
   );
 }
 
-function LeafItem({ item }: { item: NavItem & { to: string } }) {
+function LeafItem({ item, m }: { item: NavItem & { to: string }; m: Messages }) {
   const Icon = item.icon;
 
   return (
@@ -48,7 +52,7 @@ function LeafItem({ item }: { item: NavItem & { to: string } }) {
         <>
           {isActive && <ActiveBar />}
           <Icon className="size-[18px] shrink-0" strokeWidth={1.75} />
-          <span className="truncate">{item.label}</span>
+          <span className="truncate">{item.label(m)}</span>
           {item.badge !== undefined && (
             <span className="ml-auto rounded-badge bg-info/15 px-1.5 py-0.5 text-xs font-medium text-info">
               {item.badge}
@@ -60,10 +64,17 @@ function LeafItem({ item }: { item: NavItem & { to: string } }) {
   );
 }
 
-function BranchItem({ item }: { item: NavItem & { children: NonNullable<NavItem['children']> } }) {
+function BranchItem({
+  item,
+  m,
+}: {
+  item: NavItem & { children: NonNullable<NavItem['children']> };
+  m: Messages;
+}) {
   const { pathname } = useLocation();
   const Icon = item.icon;
-  const hasActiveChild = item.children.some((child) => pathname === child.to);
+  /* Manzilda til bo'lagi bor (`/uz/fanlar`), menyudagi yo'l esa tilsiz. */
+  const hasActiveChild = item.children.some((child) => stripLocale(pathname) === child.to);
 
   // Ichida faol sahifa bo'lsa guruh ochiq boshlanadi — foydalanuvchi
   // qayerdaligini ko'rmay qolmasligi uchun.
@@ -81,7 +92,7 @@ function BranchItem({ item }: { item: NavItem & { children: NonNullable<NavItem[
         )}
       >
         <Icon className="size-[18px] shrink-0" strokeWidth={1.75} />
-        <span className="truncate">{item.label}</span>
+        <span className="truncate">{item.label(m)}</span>
         <ChevronDown
           className={cn('ml-auto size-4 shrink-0 transition-transform', open && 'rotate-180')}
           strokeWidth={1.75}
@@ -103,7 +114,7 @@ function BranchItem({ item }: { item: NavItem & { children: NonNullable<NavItem[
                 )
               }
             >
-              {child.label}
+              {child.label(m)}
             </NavLink>
           ))}
         </div>
@@ -113,26 +124,27 @@ function BranchItem({ item }: { item: NavItem & { children: NonNullable<NavItem[
 }
 
 function SupportCard() {
+  const { m } = useT();
+
   return (
     <div className="mx-3 mb-4 rounded-card border border-line bg-card p-4">
       <div className="flex items-start justify-between gap-2">
-        <p className="text-sm font-medium text-fg">Yordam kerakmi?</p>
+        <p className="text-sm font-medium text-fg">{m.layout.supportTitle}</p>
         <Headphones className="size-5 shrink-0 text-fg-muted" strokeWidth={1.75} />
       </div>
-      <p className="mt-1 text-xs leading-relaxed text-fg-muted">
-        Savollaringiz bo‘lsa biz bilan bog‘laning.
-      </p>
+      <p className="mt-1 text-xs leading-relaxed text-fg-muted">{m.layout.supportText}</p>
       <button
         type="button"
         className="mt-3 w-full rounded-control bg-primary py-2 text-sm font-medium text-white transition-colors hover:bg-primary-hover"
       >
-        Qo‘llab-quvvatlash
+        {m.layout.supportAction}
       </button>
     </div>
   );
 }
 
 export function Sidebar({ className }: { className?: string }) {
+  const { m } = useT();
   const { can, isError } = usePermissions();
 
   /*
@@ -167,21 +179,29 @@ export function Sidebar({ className }: { className?: string }) {
         */}
         {isError && (
           <p className="mx-1 mt-4 rounded-control border border-danger/25 bg-danger/10 px-3 py-2.5 text-xs leading-relaxed text-danger">
-            Ruxsatlar yuklanmadi. Sahifani yangilang — muammo qolsa administratorga murojaat qiling.
+            {m.layout.permissionsFailed}
           </p>
         )}
 
         {visible.map((group) => (
-          <div key={group.title} className="mb-2">
+          <div key={group.title(m)} className="mb-2">
             <p className="px-3 pt-4 pb-2 text-[11px] font-medium tracking-wider text-fg-dim uppercase">
-              {group.title}
+              {group.title(m)}
             </p>
             <div className="flex flex-col gap-0.5">
               {group.items.map((item) =>
                 item.children ? (
-                  <BranchItem key={item.label} item={{ ...item, children: item.children }} />
+                  <BranchItem
+                    key={item.to ?? item.label(m)}
+                    item={{ ...item, children: item.children }}
+                    m={m}
+                  />
                 ) : (
-                  <LeafItem key={item.label} item={{ ...item, to: item.to ?? '#' }} />
+                  <LeafItem
+                    key={item.to ?? item.label(m)}
+                    item={{ ...item, to: item.to ?? '#' }}
+                    m={m}
+                  />
                 ),
               )}
             </div>

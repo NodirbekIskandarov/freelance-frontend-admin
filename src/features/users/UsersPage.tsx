@@ -9,7 +9,7 @@ import {
   UserRoundCheck,
 } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useLocaleNavigate } from '@/i18n/navigation';
 
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
@@ -67,7 +67,7 @@ function statValue(value: number | undefined): string {
 }
 
 export function UsersPage() {
-  const navigate = useNavigate();
+  const navigate = useLocaleNavigate();
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
   const [status, setStatus] = useState<UserStatus | 'all'>('all');

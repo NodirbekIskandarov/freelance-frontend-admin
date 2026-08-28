@@ -1,6 +1,7 @@
 import { ClipboardList, FileText, Library, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router';
+import { Link, useLocaleNavigate } from '@/i18n/navigation';
 
 import { Badge } from '@/components/ui/Badge';
 import { Button, IconButton } from '@/components/ui/Button';
@@ -39,7 +40,7 @@ const SOURCE_TONES = {
 } as const;
 
 export function SubjectsPage() {
-  const navigate = useNavigate();
+  const navigate = useLocaleNavigate();
 
   /*
    * Tanlangan institut MANZILDA saqlanadi.

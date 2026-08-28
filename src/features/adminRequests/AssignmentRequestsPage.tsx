@@ -1,6 +1,6 @@
 import { ArrowLeft, FileText } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router';
+import { Link } from '@/i18n/navigation';
 
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';

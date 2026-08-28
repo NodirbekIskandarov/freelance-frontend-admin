@@ -1,17 +1,20 @@
 import { Loader2 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
-import { Navigate, useNavigate } from 'react-router';
+import { Navigate } from 'react-router';
+import { useLocaleNavigate } from '@/i18n/navigation';
 
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/Field';
 import { useLoginMutation } from '@/features/auth/authApi';
+import { useT } from '@/i18n/I18nProvider';
 import { getApiErrorMessage } from '@/shared/api';
 import { tokenStore } from '@/store/api';
 
 import { ForgotPasswordCard } from './ForgotPasswordCard';
 
 export function LoginPage() {
-  const navigate = useNavigate();
+  const { m } = useT();
+  const navigate = useLocaleNavigate();
   const [login, { isLoading, error }] = useLoginMutation();
 
   /*
@@ -47,14 +50,12 @@ export function LoginPage() {
           <ForgotPasswordCard onBack={() => setResetting(false)} />
         ) : (
           <>
-            <h1 className="text-xl font-semibold text-fg">Admin panelga kirish</h1>
-            <p className="mt-2 text-sm text-fg-muted">
-              Moderatsiya bo&apos;limlari faqat admin va moderatorlar uchun ochiq.
-            </p>
+            <h1 className="text-xl font-semibold text-fg">{m.login.title}</h1>
+            <p className="mt-2 text-sm text-fg-muted">{m.login.subtitle}</p>
 
             <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
               <TextField
-                label="Telefon raqam yoki email"
+                label={m.login.identifier}
                 required
                 autoComplete="username"
                 placeholder="+998901234567"
@@ -63,7 +64,7 @@ export function LoginPage() {
               />
 
               <TextField
-                label="Parol"
+                label={m.login.password}
                 type="password"
                 required
                 autoComplete="current-password"
@@ -77,7 +78,7 @@ export function LoginPage() {
                   role="alert"
                   className="rounded-control border border-danger/25 bg-danger/10 px-3.5 py-2.5 text-sm text-danger"
                 >
-                  {getApiErrorMessage(error, "Kirish amalga oshmadi. Ma'lumotlarni tekshiring.")}
+                  {getApiErrorMessage(error, m.login.failed)}
                 </p>
               )}
 
@@ -88,7 +89,7 @@ export function LoginPage() {
                 className="mt-1 w-full"
                 icon={isLoading ? <Loader2 className="size-4 animate-spin" /> : undefined}
               >
-                {isLoading ? 'Kirilmoqda…' : 'Kirish'}
+                {isLoading ? m.login.submitting : m.login.submit}
               </Button>
 
               {/* Ilgari parolni unutgan xodim uchun yo'l umuman yo'q edi. */}
@@ -97,7 +98,7 @@ export function LoginPage() {
                 onClick={() => setResetting(true)}
                 className="text-sm text-fg-muted transition-colors hover:text-fg"
               >
-                Parolni unutdingizmi?
+                {m.login.forgot}
               </button>
             </form>
           </>

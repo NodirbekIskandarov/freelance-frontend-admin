@@ -4,6 +4,7 @@ import { usePermissions } from '@/features/adminRoles/usePermissions';
 
 import { clearSession, readStoredUser, useLogoutMutation } from './authApi';
 import { tokenStore } from '@/store/api';
+import { useT } from '@/i18n/I18nProvider';
 
 /**
  * Joriy seans: kim kirgan va qanday chiqish.
@@ -14,6 +15,7 @@ import { tokenStore } from '@/store/api';
  * ko'rsatish uchun va uni brauzerda o'zgartirib bo'ladi.
  */
 export function useSession() {
+  const { m } = useT();
   const navigate = useNavigate();
   const [logout, { isLoading }] = useLogoutMutation();
   const { roles, isSuperuser } = usePermissions();
@@ -48,7 +50,9 @@ export function useSession() {
     isSuperuser,
     /** Ko'rsatish uchun nom: to'liq ism yo'q, shuning uchun telefon/email. */
     displayName: user?.phone || user?.email || 'Admin',
-    roleLabel: isSuperuser ? 'Super Admin' : (roles[0] ?? 'Xodim'),
+    /* Rol nomi backenddan keladi va tarjima qilinmaydi; qolgan
+       ikki holat esa interfeys matni. */
+    roleLabel: isSuperuser ? m.layout.superAdmin : (roles[0] ?? m.layout.staffMember),
     signOut,
     isSigningOut: isLoading,
   };

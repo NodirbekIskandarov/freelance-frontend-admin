@@ -1,6 +1,7 @@
 import { Eye, FileText, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router';
+import { Link, useLocaleNavigate } from '@/i18n/navigation';
 
 import { Badge } from '@/components/ui/Badge';
 import { Button, IconButton } from '@/components/ui/Button';
@@ -36,7 +37,7 @@ const activeOptions = [
 ];
 
 export function AssignmentsPage() {
-  const navigate = useNavigate();
+  const navigate = useLocaleNavigate();
 
   /*
    * Boshlang'ich filtr manzildan olinadi: fanlar bo'limidagi «Topshiriqlar»

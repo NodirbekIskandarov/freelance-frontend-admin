@@ -1,7 +1,9 @@
 import { lazy, type ReactNode } from 'react';
-import { createBrowserRouter, Navigate } from 'react-router';
+import { createBrowserRouter, Navigate, useLocation, useParams } from 'react-router';
 
 import { AdminLayout } from '@/components/layout/AdminLayout';
+import { DEFAULT_LOCALE, detectLocale, isLocale, localizeHref } from '@/i18n/config';
+import { I18nProvider } from '@/i18n/I18nProvider';
 import { RequirePermission } from '@/features/adminRoles/RequirePermission';
 import type { PermissionCode } from '@/shared/types/adminRoles';
 import { LoginPage } from '@/pages/LoginPage';
@@ -137,16 +139,69 @@ function gated(permission: PermissionCode, element: ReactNode) {
   return <RequirePermission permission={permission}>{element}</RequirePermission>;
 }
 
+/**
+ * Tilsiz manzilni tilga ko'chiradi va yo'lni SAQLAB qoladi.
+ *
+ * `/dashboard?page=3` → `/uz/dashboard?page=3`. Bosh sahifaga otib
+ * yuborish odamning qayerga ketayotganini yo'qotardi.
+ */
+function LocaleRedirect() {
+  const { pathname, search, hash } = useLocation();
+  const locale = detectLocale();
+
+  return <Navigate to={`${localizeHref(pathname, locale)}${search}${hash}`} replace />;
+}
+
+/**
+ * Birinchi bo'lak HAQIQATAN til ekanini tekshiradi.
+ *
+ * `:locale` istalgan bo'lakka mos keladi, ya'ni eski havola
+ * (`/foydalanuvchilar`) ham shu shoxga tushardi va `foydalanuvchilar`
+ * til deb qabul qilinardi — natijada sahifa topilmasdi. Bu yerda
+ * bunday manzil butunlay tilga ko'chiriladi: `/uz/foydalanuvchilar`.
+ */
+function LocaleGuard({ children }: { children: ReactNode }) {
+  const params = useParams();
+
+  if (!isLocale(params.locale)) return <LocaleRedirect />;
+
+  return <I18nProvider>{children}</I18nProvider>;
+}
+
+/** Til bo'lagini saqlagan holda ichki manzilga o'tish. */
+function LocaleNavigate({ to }: { to: string }) {
+  const params = useParams();
+  const locale = isLocale(params.locale) ? params.locale : DEFAULT_LOCALE;
+
+  return <Navigate to={localizeHref(to, locale)} replace />;
+}
+
+/**
+ * Til manzilning birinchi bo'lagida: `/uz/dashboard`, `/ru/dashboard`.
+ *
+ * Tilsiz manzil (eski xatcho'p, qo'lda yozilgan yo'l) aniqlangan tilga
+ * yo'naltiriladi — `LocaleRedirect`. Usiz eski havolalar 404 berardi.
+ */
 export const router = createBrowserRouter([
+  { path: '/', element: <LocaleRedirect /> },
+
   {
-    path: '/login',
-    element: <LoginPage />,
+    path: '/:locale/login',
+    element: (
+      <LocaleGuard>
+        <LoginPage />
+      </LocaleGuard>
+    ),
   },
   {
-    path: '/',
-    element: <AdminLayout />,
+    path: '/:locale',
+    element: (
+      <LocaleGuard>
+        <AdminLayout />
+      </LocaleGuard>
+    ),
     children: [
-      { index: true, element: <Navigate to="/dashboard" replace /> },
+      { index: true, element: <LocaleNavigate to="/dashboard" /> },
 
       { path: 'dashboard', element: gated('dashboard.view', <DashboardPage />) },
 
@@ -202,10 +257,15 @@ export const router = createBrowserRouter([
       { path: 'audit', element: gated('audit.view', <AuditPage />) },
       { path: 'rollar', element: gated('roles.manage', <RolesPage />) },
       { path: 'sozlamalar', element: <PlaceholderPage title="Sozlamalar" /> },
+
+      { path: '*', element: <NotFoundPage /> },
     ],
   },
-  {
-    path: '*',
-    element: <NotFoundPage />,
-  },
+  /*
+   * Tilsiz qolgan har qanday yo'l — eski havola. Uni 404 qilish o'rniga
+   * o'sha yo'lni tilga ko'chiramiz: `/dashboard` → `/uz/dashboard`.
+   * Til bo'lagi bor, lekin sahifa yo'q bo'lsa `AdminLayout` ichidagi
+   * `*` uni tutadi.
+   */
+  { path: '*', element: <LocaleRedirect /> },
 ]);

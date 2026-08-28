@@ -2,6 +2,7 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { createAppBaseQuery, createLocalStorageTokenStore } from '@/shared/api';
 
 import { env } from '@/lib/env';
+import { DEFAULT_LOCALE, localeFromPathname, localizeHref } from '@/i18n/config';
 
 export const tokenStore = createLocalStorageTokenStore('admin.auth');
 
@@ -35,7 +36,10 @@ export const baseApi = createApi({
       } catch {
         // ignore
       }
-      window.location.href = '/login';
+      /* Til bo'lagi saqlanadi: `/ru/...` da ishlagan xodim login
+         sahifasida ham ruscha matn ko'rishi kerak. */
+      const locale = localeFromPathname(window.location.pathname) ?? DEFAULT_LOCALE;
+      window.location.href = localizeHref('/login', locale);
     },
   }),
   tagTypes: [

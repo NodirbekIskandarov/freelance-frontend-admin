@@ -6,8 +6,11 @@ import { tokenStore } from '@/store/api';
 
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
+import { localizeHref } from '@/i18n/config';
+import { useT } from '@/i18n/I18nProvider';
 
 export function AdminLayout() {
+  const { m, locale } = useT();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   /*
@@ -19,7 +22,9 @@ export function AdminLayout() {
    * haqiqiy ruxsatni backend beradi va yaroqsiz token'da `baseQuery`
    * `onAuthFailure` orqali baribir bu yerga qaytaradi.
    */
-  if (!tokenStore.getAccessToken()) return <Navigate to="/login" replace />;
+  if (!tokenStore.getAccessToken()) {
+    return <Navigate to={localizeHref('/login', locale)} replace />;
+  }
 
   return (
     <div className="flex h-dvh overflow-hidden bg-canvas">
@@ -39,7 +44,7 @@ export function AdminLayout() {
           <Suspense
             fallback={
               <div className="grid place-items-center py-24 text-sm text-fg-muted">
-                Yuklanmoqda…
+                {m.common.loading}
               </div>
             }
           >

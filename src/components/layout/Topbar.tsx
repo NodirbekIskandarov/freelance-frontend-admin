@@ -1,6 +1,9 @@
 import { Bell, Menu } from 'lucide-react';
 
+import { useT } from '@/i18n/I18nProvider';
 import { cn } from '@/lib/cn';
+
+import { LocaleToggle } from './LocaleToggle';
 
 import { UserMenu } from './UserMenu';
 
@@ -37,9 +40,11 @@ function IconAction({
 }
 
 export function Topbar({ onToggleSidebar, notificationCount = 0 }: TopbarProps) {
+  const { m } = useT();
+
   return (
     <header className="sticky top-0 z-20 flex h-topbar shrink-0 items-center justify-between border-b border-line bg-topbar px-6">
-      <IconAction label="Menyuni ochish/yopish" onClick={onToggleSidebar} className="-ml-2">
+      <IconAction label={m.layout.toggleSidebar} onClick={onToggleSidebar} className="-ml-2">
         <Menu className="size-5" strokeWidth={1.75} />
       </IconAction>
 
@@ -50,7 +55,9 @@ export function Topbar({ onToggleSidebar, notificationCount = 0 }: TopbarProps) 
           qilmaydigan tugma yo'q tugmadan yomonroq: odam uni bosib,
           buzuq deb o'ylaydi.
         */}
-        <IconAction label="Bildirishnomalar">
+        <LocaleToggle />
+
+        <IconAction label={m.layout.notifications}>
           <Bell className="size-5" strokeWidth={1.75} />
           {notificationCount > 0 && (
             <span className="absolute top-1 right-1 grid min-w-4 place-items-center rounded-full bg-danger px-1 text-[10px] leading-4 font-semibold text-white">

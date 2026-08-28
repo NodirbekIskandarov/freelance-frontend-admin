@@ -1,0 +1,154 @@
+import type { Messages } from './uz';
+
+/**
+ * Ruscha matnlar. Tuzilma `uz.ts` dan olinadi va TypeScript mosligini
+ * tekshiradi — yangi kalit bu yerda unutilsa, build yiqiladi.
+ */
+export const ru: Messages = {
+  common: {
+    loading: 'Загрузка…',
+    save: 'Сохранить',
+    saving: 'Сохранение…',
+    cancel: 'Отмена',
+    close: 'Закрыть',
+    back: 'Назад',
+    search: 'Поиск',
+    delete: 'Удалить',
+    edit: 'Изменить',
+    confirm: 'Подтвердить',
+    all: 'Все',
+    yes: 'Да',
+    no: 'Нет',
+    none: '—',
+    empty: 'Нет данных',
+    error: 'Произошла ошибка',
+    retry: 'Повторить',
+    currency: 'сум',
+  },
+
+  locale: {
+    switcherLabel: 'Язык панели',
+    ariaSwitch: 'Переключить с {from} на {to}',
+  },
+
+  layout: {
+    permissionsFailed:
+      'Не удалось загрузить права. Обновите страницу — если проблема останется, обратитесь к администратору.',
+    supportTitle: 'Нужна помощь?',
+    supportText: 'Если есть вопросы — свяжитесь с нами.',
+    supportAction: 'Поддержка',
+    home: 'Главная',
+    notifications: 'Уведомления',
+    toggleSidebar: 'Открыть/закрыть боковое меню',
+    profile: 'Профиль',
+    logout: 'Выйти',
+    loggingOut: 'Выход…',
+    superAdmin: 'Супер-админ',
+    staffMember: 'Сотрудник панели',
+    support: 'Поддержка',
+  },
+
+  nav: {
+    groupHome: 'Главная',
+    groupMaterials: 'Готовые материалы',
+    groupFinance: 'Финансы',
+    groupSettings: 'Настройки',
+
+    dashboard: 'Дашборд',
+    users: 'Пользователи',
+    freelancers: 'Фрилансеры',
+    applications: 'Заявки фрилансеров',
+    exchange: 'Контроль биржи',
+    appeals: 'Обращения',
+
+    content: 'Управление контентом',
+    institutes: 'Вузы',
+    subjects: 'Предметы',
+    assignments: 'Задания',
+    variants: 'Варианты',
+    submittedInstitutes: 'Присланные вузы',
+    submittedSubjects: 'Присланные предметы',
+    submittedSolutions: 'Присланные решения',
+    solutionModeration: 'Модерация решений',
+    comments: 'Комментарии',
+    reports: 'Жалобы',
+    approvedContent: 'Одобренный контент',
+    monitoring: 'Мониторинг сервера',
+    salesStats: 'Статистика продаж',
+
+    wallets: 'Кошельки',
+    withdrawals: 'Заявки на вывод',
+
+    audit: 'Журнал аудита',
+    roles: 'Роли и права',
+    staff: 'Администраторы',
+    settings: 'Настройки',
+  },
+
+  login: {
+    title: 'Вход в админ-панель',
+    subtitle: 'Разделы модерации доступны только админам и модераторам.',
+    identifier: 'Номер телефона или email',
+    password: 'Пароль',
+    submit: 'Войти',
+    submitting: 'Выполняется вход…',
+    failed: 'Не удалось войти. Проверьте данные.',
+    forgot: 'Забыли пароль?',
+  },
+
+  forgot: {
+    title: 'Восстановление пароля',
+    subtitleStart: 'Введите номер телефона или подтверждённый email, привязанный к аккаунту.',
+    subtitleCode: 'Введите полученный код и новый пароль.',
+    identifier: 'Номер телефона или email',
+    sendCode: 'Отправить код',
+    sending: 'Отправка…',
+    sendFailed: 'Не удалось отправить код.',
+    code: 'Код подтверждения',
+    demoHint: 'Доставка не подключена. Тестовый код: {code}',
+    newPassword: 'Новый пароль',
+    passwordHint: 'Минимум 8 символов, буква и цифра.',
+    repeatPassword: 'Повторите новый пароль',
+    mismatch: 'Пароли не совпадают.',
+    submit: 'Обновить пароль',
+    submitting: 'Сохранение…',
+    submitFailed: 'Не удалось обновить пароль.',
+    changeAccount: 'Ввести другой аккаунт',
+    backToLogin: 'Вернуться ко входу',
+    doneTitle: 'Пароль обновлён',
+    doneSubtitle: 'Теперь войдите в панель с новым паролем.',
+    doneAction: 'Вернуться ко входу',
+  },
+
+  profile: {
+    title: 'Профиль',
+    subtitle: 'Ваш аккаунт и права в панели.',
+    phone: 'Телефон',
+    email: 'Email',
+    phoneVerified: 'Телефон подтверждён',
+    lastLogin: 'Последний вход',
+    registered: 'Дата регистрации',
+    permissions: 'Права',
+    superAdminNote: 'Полный доступ ко всем разделам. Права идут от самого аккаунта, а не от ролей.',
+    noRoles:
+      'Роли не назначены. Вы войдёте в панель, но разделы не будут видны — запросите роль у администратора.',
+    changePasswordTitle: 'Смена пароля',
+    setPasswordTitle: 'Установка пароля',
+    changePasswordDesc: 'Аккаунт один — новый пароль подойдёт и для сайта, и для панели.',
+    setPasswordDesc:
+      'Ваш аккаунт создан без пароля. Установите его — и сможете входить в панель по паролю.',
+    currentPassword: 'Текущий пароль',
+    newPassword: 'Новый пароль',
+    repeatPassword: 'Повторите новый пароль',
+    passwordHint: 'Минимум 8 символов, буква и цифра.',
+    mismatch: 'Пароли не совпадают.',
+    changeFailed: 'Не удалось изменить пароль.',
+    changed: 'Пароль обновлён.',
+  },
+
+  notFound: {
+    title: 'Страница не найдена',
+    description: 'Запрошенной страницы не существует или адрес указан неверно.',
+    action: 'Вернуться на главную',
+  },
+};

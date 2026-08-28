@@ -1,6 +1,7 @@
 import { Archive, ArrowLeft, Check, Download, Send, X } from 'lucide-react';
 import { useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router';
+import { Navigate, useParams } from 'react-router';
+import { useLocaleNavigate } from '@/i18n/navigation';
 
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -37,7 +38,7 @@ function allowedActions(status: Solution['status']) {
 
 export function SolutionDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const navigate = useLocaleNavigate();
 
   const [publishOpen, setPublishOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);

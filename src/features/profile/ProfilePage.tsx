@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/Card';
 import { InfoList, InfoRow } from '@/components/ui/InfoRow';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { useSession } from '@/features/auth/useSession';
+import { useT } from '@/i18n/I18nProvider';
 import { formatDateTime } from '@/lib/format';
 
 import { ChangePasswordCard } from './ChangePasswordCard';
@@ -21,15 +22,16 @@ import { ChangePasswordCard } from './ChangePasswordCard';
  * bo'lmaydi.
  */
 export function ProfilePage() {
+  const { m } = useT();
   const { user, roles, isSuperuser, displayName, signOut, isSigningOut } = useSession();
 
   return (
     <>
       <PageHeader
         breadcrumbsPosition="above"
-        breadcrumbs={[{ label: 'Bosh sahifa', to: '/' }, { label: 'Profil' }]}
-        title="Profil"
-        subtitle="Hisobingiz va paneldagi huquqlaringiz."
+        breadcrumbs={[{ label: m.layout.home, to: '/dashboard' }, { label: m.profile.title }]}
+        title={m.profile.title}
+        subtitle={m.profile.subtitle}
         actions={
           <Button
             variant="danger"
@@ -37,7 +39,7 @@ export function ProfilePage() {
             disabled={isSigningOut}
             onClick={() => void signOut()}
           >
-            {isSigningOut ? 'Chiqilmoqda…' : 'Chiqish'}
+            {isSigningOut ? m.layout.loggingOut : m.layout.logout}
           </Button>
         }
       />
@@ -49,29 +51,29 @@ export function ProfilePage() {
             <div className="min-w-0">
               <p className="truncate text-lg font-semibold text-fg">{displayName}</p>
               <p className="text-sm text-fg-muted">
-                {isSuperuser ? 'Super Admin' : 'Panel xodimi'}
+                {isSuperuser ? m.layout.superAdmin : m.layout.staffMember}
               </p>
             </div>
           </div>
 
           <InfoList className="mt-6">
-            <InfoRow label="Telefon" value={user?.phone || '—'} />
-            <InfoRow label="Email" value={user?.email || '—'} />
+            <InfoRow label={m.profile.phone} value={user?.phone || m.common.none} />
+            <InfoRow label={m.profile.email} value={user?.email || m.common.none} />
             <InfoRow
-              label="Telefon tasdiqlangan"
+              label={m.profile.phoneVerified}
               value={
                 <Badge tone={user?.phone_verified ? 'success' : 'neutral'}>
-                  {user?.phone_verified ? 'Ha' : "Yo'q"}
+                  {user?.phone_verified ? m.common.yes : m.common.no}
                 </Badge>
               }
             />
             <InfoRow
-              label="Oxirgi kirish"
-              value={user?.last_login_at ? formatDateTime(user.last_login_at) : '—'}
+              label={m.profile.lastLogin}
+              value={user?.last_login_at ? formatDateTime(user.last_login_at) : m.common.none}
             />
             <InfoRow
-              label="Ro'yxatdan o'tgan"
-              value={user?.created_at ? formatDateTime(user.created_at) : '—'}
+              label={m.profile.registered}
+              value={user?.created_at ? formatDateTime(user.created_at) : m.common.none}
             />
           </InfoList>
         </Card>
@@ -79,7 +81,7 @@ export function ProfilePage() {
         <Card className="p-6">
           <h2 className="flex items-center gap-2 text-base font-semibold text-fg">
             <ShieldCheck className="size-4 text-primary" strokeWidth={1.75} />
-            Huquqlar
+            {m.profile.permissions}
           </h2>
 
           {isSuperuser ? (
@@ -89,17 +91,13 @@ export function ProfilePage() {
               narsani ko'radi — bo'sh ro'yxat chalg'itardi.
             */
             <div className="mt-4 rounded-control border border-primary/25 bg-primary/10 px-3.5 py-3">
-              <p className="text-sm font-medium text-primary">Super Admin</p>
+              <p className="text-sm font-medium text-primary">{m.layout.superAdmin}</p>
               <p className="mt-1 text-xs leading-relaxed text-fg-soft">
-                Barcha bo&apos;limlarga to&apos;liq kirish. Huquq rollardan emas, hisobning
-                o&apos;zidan keladi.
+                {m.profile.superAdminNote}
               </p>
             </div>
           ) : roles.length === 0 ? (
-            <p className="mt-4 text-sm leading-relaxed text-fg-muted">
-              Hech qanday rol biriktirilmagan. Panelga kirasiz, lekin bo&apos;limlar
-              ko&apos;rinmaydi — administratordan rol so&apos;rang.
-            </p>
+            <p className="mt-4 text-sm leading-relaxed text-fg-muted">{m.profile.noRoles}</p>
           ) : (
             <div className="mt-4 flex flex-wrap gap-2">
               {roles.map((role) => (

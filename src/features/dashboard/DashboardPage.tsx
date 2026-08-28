@@ -13,7 +13,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router';
+import { Link } from '@/i18n/navigation';
 
 import { RevenueBarChart } from '@/components/charts/RevenueBarChart';
 import { SeriesLineChart } from '@/components/charts/SeriesLineChart';

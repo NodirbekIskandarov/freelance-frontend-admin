@@ -7,6 +7,7 @@ import {
   useConfirmForgotPasswordMutation,
   useForgotPasswordMutation,
 } from '@/features/auth/authApi';
+import { useT } from '@/i18n/I18nProvider';
 import { getApiErrorMessage } from '@/shared/api';
 
 /**
@@ -21,6 +22,7 @@ import { getApiErrorMessage } from '@/shared/api';
  * savolga javob beradigan ochiq vositaga aylanardi.
  */
 export function ForgotPasswordCard({ onBack }: { onBack: () => void }) {
+  const { t, m } = useT();
   const [requestCode, { isLoading: isSending }] = useForgotPasswordMutation();
   const [confirm, { isLoading: isConfirming }] = useConfirmForgotPasswordMutation();
 
@@ -42,7 +44,7 @@ export function ForgotPasswordCard({ onBack }: { onBack: () => void }) {
       setHint(result.demo_code ?? null);
       setSent(true);
     } catch (sendError) {
-      setError(getApiErrorMessage(sendError, "Kod yuborib bo'lmadi."));
+      setError(getApiErrorMessage(sendError, m.forgot.sendFailed));
     }
   }
 
@@ -51,7 +53,7 @@ export function ForgotPasswordCard({ onBack }: { onBack: () => void }) {
     setError(null);
 
     if (password !== confirmPassword) {
-      setError('Parollar mos kelmadi.');
+      setError(m.forgot.mismatch);
       return;
     }
 
@@ -63,7 +65,7 @@ export function ForgotPasswordCard({ onBack }: { onBack: () => void }) {
       }).unwrap();
       setDone(true);
     } catch (confirmError) {
-      setError(getApiErrorMessage(confirmError, "Parolni yangilab bo'lmadi."));
+      setError(getApiErrorMessage(confirmError, m.forgot.submitFailed));
     }
   }
 
@@ -71,11 +73,11 @@ export function ForgotPasswordCard({ onBack }: { onBack: () => void }) {
     return (
       <div>
         <CheckCircle2 className="size-8 text-success" strokeWidth={1.75} />
-        <h1 className="mt-3 text-xl font-semibold text-fg">Parol yangilandi</h1>
-        <p className="mt-2 text-sm text-fg-muted">Endi yangi parolingiz bilan panelga kiring.</p>
+        <h1 className="mt-3 text-xl font-semibold text-fg">{m.forgot.doneTitle}</h1>
+        <p className="mt-2 text-sm text-fg-muted">{m.forgot.doneSubtitle}</p>
 
         <Button size="lg" className="mt-6 w-full" onClick={onBack}>
-          Kirish sahifasiga qaytish
+          {m.forgot.doneAction}
         </Button>
       </div>
     );
@@ -83,17 +85,15 @@ export function ForgotPasswordCard({ onBack }: { onBack: () => void }) {
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-fg">Parolni tiklash</h1>
+      <h1 className="text-xl font-semibold text-fg">{m.forgot.title}</h1>
       <p className="mt-2 text-sm text-fg-muted">
-        {sent
-          ? 'Yuborilgan kodni va yangi parolni kiriting.'
-          : 'Hisobingizga bog‘langan telefon raqam yoki tasdiqlangan emailni kiriting.'}
+        {sent ? m.forgot.subtitleCode : m.forgot.subtitleStart}
       </p>
 
       {sent ? (
         <form onSubmit={handleConfirm} className="mt-6 flex flex-col gap-4">
           <TextField
-            label="Tasdiqlash kodi"
+            label={m.forgot.code}
             required
             inputMode="numeric"
             autoComplete="one-time-code"
@@ -104,23 +104,23 @@ export function ForgotPasswordCard({ onBack }: { onBack: () => void }) {
             hint={
               /* Yetkazish ulanmaganda backend kodni javobda qaytaradi.
                  Provayder ulangach bu maslahat o'z-o'zidan yo'qoladi. */
-              hint ? `Yetkazish ulanmagan. Sinov kodi: ${hint}` : undefined
+              hint ? t((x) => x.forgot.demoHint, { code: hint }) : undefined
             }
           />
 
           <TextField
-            label="Yangi parol"
+            label={m.forgot.newPassword}
             type="password"
             required
             autoComplete="new-password"
             placeholder="••••••••"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            hint="Kamida 8 ta belgi, harf va raqam."
+            hint={m.forgot.passwordHint}
           />
 
           <TextField
-            label="Yangi parolni takrorlang"
+            label={m.forgot.repeatPassword}
             type="password"
             required
             autoComplete="new-password"
@@ -145,7 +145,7 @@ export function ForgotPasswordCard({ onBack }: { onBack: () => void }) {
             className="mt-1 w-full"
             icon={isConfirming ? <Loader2 className="size-4 animate-spin" /> : undefined}
           >
-            {isConfirming ? 'Saqlanmoqda…' : 'Parolni yangilash'}
+            {isConfirming ? m.forgot.submitting : m.forgot.submit}
           </Button>
 
           <button
@@ -157,13 +157,13 @@ export function ForgotPasswordCard({ onBack }: { onBack: () => void }) {
             className="inline-flex items-center justify-center gap-1.5 text-sm text-fg-muted transition-colors hover:text-fg"
           >
             <ArrowLeft className="size-4" strokeWidth={1.75} />
-            Boshqa hisob kiritish
+            {m.forgot.changeAccount}
           </button>
         </form>
       ) : (
         <form onSubmit={handleSend} className="mt-6 flex flex-col gap-4">
           <TextField
-            label="Telefon raqam yoki email"
+            label={m.forgot.identifier}
             required
             autoComplete="username"
             placeholder="+998901234567"
@@ -187,7 +187,7 @@ export function ForgotPasswordCard({ onBack }: { onBack: () => void }) {
             className="mt-1 w-full"
             icon={isSending ? <Loader2 className="size-4 animate-spin" /> : undefined}
           >
-            {isSending ? 'Yuborilmoqda…' : 'Kod yuborish'}
+            {isSending ? m.forgot.sending : m.forgot.sendCode}
           </Button>
 
           <button
@@ -196,7 +196,7 @@ export function ForgotPasswordCard({ onBack }: { onBack: () => void }) {
             className="inline-flex items-center justify-center gap-1.5 text-sm text-fg-muted transition-colors hover:text-fg"
           >
             <ArrowLeft className="size-4" strokeWidth={1.75} />
-            Kirishga qaytish
+            {m.forgot.backToLogin}
           </button>
         </form>
       )}

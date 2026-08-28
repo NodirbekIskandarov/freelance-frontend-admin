@@ -1,6 +1,6 @@
 import { ArrowLeft, ChevronRight, CircleCheck, CircleX, Clock } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useLocaleNavigate } from '@/i18n/navigation';
 
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
@@ -62,7 +62,7 @@ function CountCell({ value, tone }: { value: number; tone: 'approved' | 'pending
 }
 
 export function SubmissionsPage() {
-  const navigate = useNavigate();
+  const navigate = useLocaleNavigate();
   const [universityId, setUniversityId] = useState('all');
   const [status, setStatus] = useState('all');
   const [search, setSearch] = useState('');

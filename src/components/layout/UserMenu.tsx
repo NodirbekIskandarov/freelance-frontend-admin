@@ -1,9 +1,11 @@
 import { ChevronDown, LogOut, UserRound } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router';
+import { useLocation } from 'react-router';
+import { Link } from '@/i18n/navigation';
 
 import { Avatar } from '@/components/ui/Avatar';
 import { useSession } from '@/features/auth/useSession';
+import { useT } from '@/i18n/I18nProvider';
 import { cn } from '@/lib/cn';
 
 /**
@@ -14,6 +16,7 @@ import { cn } from '@/lib/cn';
  * chiqish faqat yon menyudagi havola orqali bo'lardi.
  */
 export function UserMenu() {
+  const { m } = useT();
   const { displayName, roleLabel, signOut, isSigningOut } = useSession();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -86,7 +89,7 @@ export function UserMenu() {
             className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-fg-soft transition-colors hover:bg-elevated hover:text-fg"
           >
             <UserRound className="size-4" strokeWidth={1.75} />
-            Profil
+            {m.layout.profile}
           </Link>
 
           <button
@@ -97,7 +100,7 @@ export function UserMenu() {
             className="flex w-full items-center gap-2.5 border-t border-line px-4 py-2.5 text-left text-sm text-danger transition-colors hover:bg-danger/10 disabled:opacity-50"
           >
             <LogOut className="size-4" strokeWidth={1.75} />
-            {isSigningOut ? 'Chiqilmoqda…' : 'Chiqish'}
+            {isSigningOut ? m.layout.loggingOut : m.layout.logout}
           </button>
         </div>
       )}

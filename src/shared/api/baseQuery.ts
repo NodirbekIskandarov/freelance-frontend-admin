@@ -8,6 +8,7 @@ import {
 
 import { toAuthTokens, type TokenPair } from '../types/api';
 import type { TokenStore } from './tokenStore';
+import { DEFAULT_LOCALE, LOCALE_TAGS, localeFromPathname } from '@/i18n/config';
 
 export type AppBaseQuery = BaseQueryFn<
   string | FetchArgs,
@@ -83,6 +84,17 @@ export function createAppBaseQuery({
   const fetchQuery = fetchBaseQuery({
     baseUrl,
     prepareHeaders: (headers) => {
+      /*
+       * Til MANZILDAN olinadi — backend tarjima qilingan nomlarni
+       * (fan, institut, topshiriq) shu sarlavhaga qarab qaytaradi.
+       * Ilgari sarlavha umuman yuborilmasdi va panel har doim
+       * o'zbekcha ma'lumot olardi.
+       */
+      headers.set(
+        'Accept-Language',
+        LOCALE_TAGS[localeFromPathname(window.location.pathname) ?? DEFAULT_LOCALE],
+      );
+
       const accessToken = tokens.getAccessToken();
       if (accessToken) {
         headers.set('Authorization', `Bearer ${accessToken}`);

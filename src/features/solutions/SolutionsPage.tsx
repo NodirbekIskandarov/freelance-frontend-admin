@@ -1,6 +1,6 @@
 import { Eye } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useLocaleNavigate } from '@/i18n/navigation';
 
 import { IconButton } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -18,7 +18,7 @@ import { SolutionStatusBadge } from './SolutionStatusBadge';
 import { useGetPendingSolutionsQuery } from './solutionsApi';
 
 export function SolutionsPage() {
-  const navigate = useNavigate();
+  const navigate = useLocaleNavigate();
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);

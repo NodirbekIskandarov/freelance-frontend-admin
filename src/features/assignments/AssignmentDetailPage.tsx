@@ -1,6 +1,7 @@
 import { ArrowLeft, Pencil } from 'lucide-react';
 import { useState } from 'react';
-import { Link, Navigate, useNavigate, useParams } from 'react-router';
+import { Navigate, useParams } from 'react-router';
+import { Link, useLocaleNavigate } from '@/i18n/navigation';
 
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -138,7 +139,7 @@ function variantColumnsWithLinks(subjectId: string, assignmentId: string): Colum
 
 export function AssignmentDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const navigate = useLocaleNavigate();
   const [editOpen, setEditOpen] = useState(false);
 
   const { data, isLoading, error } = useGetAssignmentQuery(id ?? '', { skip: !id });
