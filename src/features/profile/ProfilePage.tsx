@@ -1,4 +1,4 @@
-import { KeyRound, LogOut, ShieldCheck } from 'lucide-react';
+import { LogOut, ShieldCheck } from 'lucide-react';
 
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
@@ -8,6 +8,8 @@ import { InfoList, InfoRow } from '@/components/ui/InfoRow';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { useSession } from '@/features/auth/useSession';
 import { formatDateTime } from '@/lib/format';
+
+import { ChangePasswordCard } from './ChangePasswordCard';
 
 /**
  * O'z profili.
@@ -107,15 +109,9 @@ export function ProfilePage() {
               ))}
             </div>
           )}
-
-          <div className="mt-6 border-t border-line pt-4">
-            <p className="flex items-start gap-2 text-xs leading-relaxed text-fg-dim">
-              <KeyRound className="mt-0.5 size-3.5 shrink-0" strokeWidth={1.75} />
-              Parolni o&apos;zgartirish saytning o&apos;z kabinetidan bajariladi — hisob bitta,
-              panel esa uning bir ko&apos;rinishi.
-            </p>
-          </div>
         </Card>
+
+        <ChangePasswordCard />
       </div>
     </>
   );

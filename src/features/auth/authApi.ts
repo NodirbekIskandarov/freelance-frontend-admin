@@ -1,5 +1,14 @@
 import { toAuthTokens } from '@/shared/types/api';
-import type { AuthResponse, CurrentUser, LoginRequest } from '@/shared/types/auth';
+import type {
+  AuthResponse,
+  ChangePasswordRequest,
+  CodeSentResponse,
+  CurrentUser,
+  ForgotPasswordConfirmRequest,
+  ForgotPasswordRequest,
+  LoginMethodsResponse,
+  LoginRequest,
+} from '@/shared/types/auth';
 import { baseApi, tokenStore } from '@/store/api';
 
 /**
@@ -58,6 +67,33 @@ export const authApi = baseApi.injectEndpoints({
     }),
 
     /**
+     * Hisobda parol bormi.
+     *
+     * Google yoki SMS kodi orqali ochilgan hisobda parol umuman yo'q va
+     * undan eski parolni so'rash mumkin emas. Buni faqat backend biladi,
+     * shuning uchun taxmin qilinmaydi.
+     */
+    loginMethods: build.query<LoginMethodsResponse, void>({
+      query: () => '/me/login-methods/',
+      providesTags: ['LoginMethod'],
+    }),
+
+    changePassword: build.mutation<void, ChangePasswordRequest>({
+      query: (body) => ({ url: '/auth/change-password/', method: 'POST', body }),
+      // Birinchi parol qo'yilgach `has_password` `true` bo'ladi va
+      // karta «parol qo'yish»dan «o'zgartirish»ga o'tishi kerak.
+      invalidatesTags: ['LoginMethod'],
+    }),
+
+    forgotPassword: build.mutation<CodeSentResponse, ForgotPasswordRequest>({
+      query: (body) => ({ url: '/auth/forgot-password/', method: 'POST', body }),
+    }),
+
+    confirmForgotPassword: build.mutation<void, ForgotPasswordConfirmRequest>({
+      query: (body) => ({ url: '/auth/forgot-password/confirm/', method: 'POST', body }),
+    }),
+
+    /**
      * Backend refresh token'ni qora ro'yxatga qo'shadi, shuning uchun uni
      * tanada yuborish shart. 205 qaytaradi — bu xato emas.
      */
@@ -67,4 +103,11 @@ export const authApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useLoginMutation, useLogoutMutation } = authApi;
+export const {
+  useLoginMutation,
+  useLogoutMutation,
+  useLoginMethodsQuery,
+  useChangePasswordMutation,
+  useForgotPasswordMutation,
+  useConfirmForgotPasswordMutation,
+} = authApi;

@@ -30,8 +30,44 @@ export interface CurrentUser {
 }
 
 export interface LoginRequest {
-  phone: string;
+  /**
+   * Telefon raqam yoki tasdiqlangan email — backend «@» belgisiga qarab
+   * o'zi ajratadi. Panel xodimi hisobi saytdagi hisobning o'zi, ya'ni u
+   * qaysi usul bilan ochilgan bo'lsa, shu bilan kiradi.
+   */
+  identifier: string;
   password: string;
+}
+
+export interface ChangePasswordRequest {
+  /**
+   * Paroli YO'Q hisob uchun yuborilmaydi (Google yoki SMS kodi orqali
+   * ochilgani). Bunday hisobdan eski parolni so'rash javobi yo'q savol.
+   */
+  old_password?: string;
+  new_password: string;
+  new_password_confirm: string;
+}
+
+export interface ForgotPasswordRequest {
+  identifier: string;
+}
+
+export interface ForgotPasswordConfirmRequest {
+  identifier: string;
+  code: string;
+  new_password: string;
+}
+
+/** Kod yuborildi. `demo_code` faqat yetkazish o'chiq bo'lganda keladi. */
+export interface CodeSentResponse {
+  detail: string;
+  demo_code?: string;
+}
+
+/** `/me/login-methods/` — bu yerda faqat «paroli bormi» kerak. */
+export interface LoginMethodsResponse {
+  has_password: boolean;
 }
 
 export interface AuthResponse {
