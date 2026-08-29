@@ -1,6 +1,7 @@
 import type { ApiListQuery, ApiPaginated } from '@/shared/types/api';
 import type {
   Assignment,
+  AssignmentCreateRequest,
   AssignmentsQuery,
   AssignmentWriteRequest,
   Subject,
@@ -32,9 +33,14 @@ export const assignmentsApi = baseApi.injectEndpoints({
       providesTags: (_result, _error, id) => [{ type: 'Task', id }],
     }),
 
-    createAssignment: build.mutation<Assignment, AssignmentWriteRequest>({
+    createAssignment: build.mutation<Assignment, AssignmentCreateRequest>({
       query: (body) => ({ url: '/assignments/', method: 'POST', body }),
-      invalidatesTags: [{ type: 'Task', id: 'LIST' }],
+      // `variant_count` bilan server variantlarni ham yaratadi — variantlar
+      // ro'yxati eskirmasin.
+      invalidatesTags: [
+        { type: 'Task', id: 'LIST' },
+        { type: 'Variant', id: 'LIST' },
+      ],
     }),
 
     updateAssignment: build.mutation<Assignment, { id: string } & Partial<AssignmentWriteRequest>>({

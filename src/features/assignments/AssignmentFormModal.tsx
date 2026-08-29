@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
+import { RadioGroup, SegmentedControl } from '@/components/ui/Choice';
 import { TextAreaField, TextField } from '@/components/ui/Field';
 import { Modal } from '@/components/ui/Modal';
 import { Select } from '@/components/ui/Select';
@@ -9,6 +10,8 @@ import { getApiErrorMessage } from '@/shared/api';
 import {
   ASSIGNMENT_TYPE_LABELS,
   ASSIGNMENT_TYPES,
+  MAX_ASSIGNMENT_VARIANTS,
+  VARIANT_COUNT_PRESETS,
   type Assignment,
 } from '@/shared/types/assignments';
 
@@ -68,6 +71,13 @@ export function AssignmentFormModal({
   const [type, setType] = useState<string>(ASSIGNMENT_TYPES[0]);
   const [description, setDescription] = useState('');
   const [isActive, setIsActive] = useState(true);
+  /*
+   * `null` — hali tanlanmagan. Ataylab sukut qiymati yo'q: variantli va
+   * variantsiz topshiriq katalogda butunlay boshqacha ko'rinadi, birini
+   * o'zicha tanlab qo'yish esa admin ko'rmagan qarorni qabul qilish edi.
+   */
+  const [hasVariants, setHasVariants] = useState<boolean | null>(null);
+  const [variantCount, setVariantCount] = useState('');
   const [touched, setTouched] = useState(false);
 
   // Modal ochilganda forma tanlangan topshiriqdan to'ldiriladi. Bu
@@ -89,6 +99,8 @@ export function AssignmentFormModal({
     setType(assignment?.type ?? ASSIGNMENT_TYPES[0]);
     setDescription(assignment?.description ?? '');
     setIsActive(assignment?.is_active ?? true);
+    setHasVariants(null);
+    setVariantCount('');
     setTouched(false);
   }, [open, assignment, defaultSubjectId, defaultUniversityId]);
 
@@ -116,12 +128,31 @@ export function AssignmentFormModal({
   const subjectError = touched && !subject ? 'Fanni tanlang' : undefined;
   const titleError = touched && !title.trim() ? 'Sarlavhani kiriting' : undefined;
 
+  /*
+   * Variantlar FAQAT yaratishda so'raladi. Mavjud topshiriqda ular allaqachon
+   * bor va o'z ekranida boshqariladi — bu yerdagi son ularni qayta yaratishga
+   * urinardi.
+   */
+  const parsedCount = Number(variantCount);
+  const isCountValid =
+    Number.isInteger(parsedCount) && parsedCount >= 1 && parsedCount <= MAX_ASSIGNMENT_VARIANTS;
+  const variantsError =
+    touched && !isEdit && hasVariants === null
+      ? "Variantli yoki variantsiz ekanini tanlang"
+      : undefined;
+  const countError =
+    touched && !isEdit && hasVariants === true && !isCountValid
+      ? `1 dan ${MAX_ASSIGNMENT_VARIANTS} gacha son kiriting`
+      : undefined;
+
   const isSaving = createState.isLoading || updateState.isLoading;
   const error = createState.error ?? updateState.error;
 
   async function handleSubmit() {
     setTouched(true);
     if (!subject || !title.trim()) return;
+    if (!isEdit && hasVariants === null) return;
+    if (!isEdit && hasVariants && !isCountValid) return;
 
     const body = {
       subject,
@@ -134,7 +165,13 @@ export function AssignmentFormModal({
 
     try {
       if (assignment) await updateAssignment({ id: assignment.id, ...body }).unwrap();
-      else await createAssignment(body).unwrap();
+      else
+        await createAssignment({
+          ...body,
+          // Variantsizida umuman yuborilmaydi: server uchun «maydon yo'q»
+          // degani aynan variantsiz topshiriq.
+          ...(hasVariants ? { variant_count: parsedCount } : {}),
+        }).unwrap();
     } catch {
       // Xato quyida ko'rsatiladi (masalan bir fanda bir xil sarlavha).
       return;
@@ -220,6 +257,63 @@ export function AssignmentFormModal({
             onChange={(event) => setType(event.target.value)}
           />
         </div>
+
+        {/* Variantlar faqat yaratishda: mavjud topshiriqda ular «Variantlar»
+            ekranida qo'shiladi va o'chiriladi. */}
+        {!isEdit && (
+          <div className="rounded-control border border-line p-3.5">
+            <RadioGroup
+              label="Variantlar"
+              description="Har bir talabaga alohida raqamli variant beriladimi?"
+              required
+              options={[
+                { value: 'with', label: 'Variantli' },
+                { value: 'without', label: 'Variantsiz' },
+              ]}
+              value={hasVariants === null ? '' : hasVariants ? 'with' : 'without'}
+              onChange={(value) => {
+                const next = value === 'with';
+                setHasVariants(next);
+                if (!next) setVariantCount('');
+              }}
+            />
+
+            {variantsError && <p className="mt-2 text-xs text-danger">{variantsError}</p>}
+
+            {/* Son FAQAT variantlida so'raladi — variantsizida u ma'nosiz va
+                serverga ham yuborilmaydi. */}
+            {hasVariants === true && (
+              <div className="mt-4 flex flex-col gap-3">
+                <SegmentedControl
+                  label="Ko'p uchraydiganlari"
+                  options={[...VARIANT_COUNT_PRESETS]}
+                  value={variantCount}
+                  onChange={setVariantCount}
+                />
+
+                <TextField
+                  label="Nechta variant?"
+                  required
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={MAX_ASSIGNMENT_VARIANTS}
+                  placeholder="Masalan: 25"
+                  value={variantCount}
+                  error={countError}
+                  hint={`1 dan ${MAX_ASSIGNMENT_VARIANTS} gacha. 1..N qilib raqamlanadi.`}
+                  onChange={(event) => setVariantCount(event.target.value)}
+                />
+              </div>
+            )}
+
+            {hasVariants === false && (
+              <p className="mt-3 text-xs text-fg-muted">
+                Topshiriq bitta — katalogda variantlar to&apos;ri ko&apos;rsatilmaydi.
+              </p>
+            )}
+          </div>
+        )}
 
         <TextField
           label="Topshiriq nomi (o'zbekcha)"

@@ -64,6 +64,15 @@ export interface Assignment {
   updated_at: string;
 }
 
+/**
+ * Bitta topshiriqqa nechta variant yaratish mumkin — backenddagi
+ * `MAX_REQUESTED_VARIANTS` bilan bir xil chegara.
+ */
+export const MAX_ASSIGNMENT_VARIANTS = 100;
+
+/** Ko'p uchraydigan variant sonlari — qo'lda terishni tezlashtiradi. */
+export const VARIANT_COUNT_PRESETS = ['10', '15', '20', '25', '30'] as const;
+
 /** `POST /assignments/` va `PUT/PATCH /assignments/{id}/` tanasi. */
 export interface AssignmentWriteRequest {
   subject: string;
@@ -74,6 +83,17 @@ export interface AssignmentWriteRequest {
   description?: string;
   accepts_submissions?: boolean;
   is_active?: boolean;
+}
+
+/**
+ * Yaratish tanasi — ustiga `variant_count`.
+ *
+ * Bu topshiriqning ustuni emas, serverga ko'rsatma: 1..N raqamli
+ * variantlarni darrov yaratib ber. Yuborilmasa topshiriq «variantsiz»
+ * bo'ladi. Tahrirlashda yo'q — variantlar o'z ekranida boshqariladi.
+ */
+export interface AssignmentCreateRequest extends AssignmentWriteRequest {
+  variant_count?: number;
 }
 
 export interface AssignmentsQuery extends ApiListQuery {
