@@ -33,6 +33,10 @@ export const uz = {
   },
 
   layout: {
+    commandPalette: 'Tezkor qidiruv',
+    commandPlaceholder: 'Sahifa nomi yoki qidiruv so‘zi…',
+    commandEmpty: 'Hech nima topilmadi',
+    openCommand: 'Tezkor qidiruv (Ctrl+K)',
     permissionsFailed:
       'Ruxsatlar yuklanmadi. Sahifani yangilang — muammo qolsa administratorga murojaat qiling.',
     supportTitle: 'Yordam kerakmi?',

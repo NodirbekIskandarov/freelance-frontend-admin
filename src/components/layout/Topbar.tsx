@@ -1,4 +1,4 @@
-import { Bell, Menu } from 'lucide-react';
+import { Bell, Menu, Search } from 'lucide-react';
 
 import { useT } from '@/i18n/I18nProvider';
 import { cn } from '@/lib/cn';
@@ -10,6 +10,8 @@ import { UserMenu } from './UserMenu';
 
 interface TopbarProps {
   onToggleSidebar: () => void;
+  /** Tezkor qidiruvni ochadi (Ctrl/Cmd+K bilan bir xil). */
+  onOpenSearch: () => void;
   /** O'qilmagan bildirishnomalar soni. 0 bo'lsa badge ko'rsatilmaydi. */
   notificationCount?: number;
 }
@@ -40,14 +42,33 @@ function IconAction({
   );
 }
 
-export function Topbar({ onToggleSidebar, notificationCount = 0 }: TopbarProps) {
+export function Topbar({ onToggleSidebar, onOpenSearch, notificationCount = 0 }: TopbarProps) {
   const { m } = useT();
 
   return (
     <header className="sticky top-0 z-20 flex h-topbar shrink-0 items-center justify-between border-b border-line bg-topbar px-6">
-      <IconAction label={m.layout.toggleSidebar} onClick={onToggleSidebar} className="-ml-2">
-        <Menu className="size-5" strokeWidth={1.75} />
-      </IconAction>
+      <div className="flex items-center gap-2">
+        <IconAction label={m.layout.toggleSidebar} onClick={onToggleSidebar} className="-ml-2">
+          <Menu className="size-5" strokeWidth={1.75} />
+        </IconAction>
+
+        {/*
+          Qidiruv maydoni EMAS, tugma: palitraning o'zi kirish maydoni
+          va ikkinchi maydon chizish odamni qaysi biriga yozishni
+          o'ylashga majbur qilardi.
+        */}
+        <button
+          type="button"
+          onClick={onOpenSearch}
+          className="hidden items-center gap-2 rounded-control border border-line bg-input px-3 py-1.5 text-sm text-fg-dim transition-colors hover:border-line-strong hover:text-fg-muted sm:flex"
+        >
+          <Search className="size-4" strokeWidth={1.75} />
+          <span>{m.layout.commandPlaceholder}</span>
+          <kbd className="ml-6 rounded border border-line-strong px-1.5 py-0.5 font-sans text-[10px] text-fg-dim">
+            Ctrl K
+          </kbd>
+        </button>
+      </div>
 
       <div className="flex items-center gap-1">
         <ThemeToggle />

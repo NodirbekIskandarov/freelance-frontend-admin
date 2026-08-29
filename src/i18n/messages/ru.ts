@@ -32,6 +32,10 @@ export const ru: Messages = {
   },
 
   layout: {
+    commandPalette: 'Быстрый поиск',
+    commandPlaceholder: 'Название страницы или запрос…',
+    commandEmpty: 'Ничего не найдено',
+    openCommand: 'Быстрый поиск (Ctrl+K)',
     permissionsFailed:
       'Не удалось загрузить права. Обновите страницу — если проблема останется, обратитесь к администратору.',
     supportTitle: 'Нужна помощь?',

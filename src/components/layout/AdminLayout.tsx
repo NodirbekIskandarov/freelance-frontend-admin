@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useState, useSyncExternalStore } from 'react';
+import { Suspense, useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router';
 
 import { localizeHref } from '@/i18n/config';
@@ -6,6 +6,7 @@ import { useT } from '@/i18n/I18nProvider';
 import { cn } from '@/lib/cn';
 import { tokenStore } from '@/store/api';
 
+import { CommandPalette } from './CommandPalette';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 
@@ -56,11 +57,32 @@ export function AdminLayout() {
    * davomida ochiq menyu ostida chizilardi. Kompyuterda menyu joyida
    * qoladi — u kontentni to'smaydi.
    */
+  const [paletteOpen, setPaletteOpen] = useState(false);
+
   const [lastPathname, setLastPathname] = useState(pathname);
   if (lastPathname !== pathname) {
     setLastPathname(pathname);
     if (!isDesktop) setSidebarOpen(false);
   }
+
+  /*
+    Ctrl/Cmd+K — tezkor qidiruv. 445 fan va 188 variantda menyu bo'ylab
+    yurish sekin; klaviatura bilan istalgan sahifaga bir bosishda
+    o'tiladi.
+
+    `keydown` hujjatda: fokus qayerda bo'lishidan qat'i nazar ishlashi
+    kerak, aks holda jadval ichida turgan odamga yetmasdi.
+  */
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setPaletteOpen(true);
+      }
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
 
   if (!tokenStore.getAccessToken()) {
     return <Navigate to={localizeHref('/login', locale)} replace />;
@@ -109,7 +131,10 @@ export function AdminLayout() {
           Bo'sh qo'ng'iroq — «hozircha hech nima yo'q» degani, yolg'on
           raqam esa har ochilganda tekshirishga majbur qilardi.
         */}
-        <Topbar onToggleSidebar={() => setSidebarOpen((open) => !open)} />
+        <Topbar
+          onToggleSidebar={() => setSidebarOpen((open) => !open)}
+          onOpenSearch={() => setPaletteOpen(true)}
+        />
 
         {/* Scroll faqat shu yerda — sidebar va topbar joyida qoladi. */}
         <main className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6">
@@ -124,6 +149,8 @@ export function AdminLayout() {
           </Suspense>
         </main>
       </div>
+
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
     </div>
   );
 }
