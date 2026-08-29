@@ -5,12 +5,25 @@
  * Uni oddiy probelga almashtiramiz, aks holda matn nusxalanganda
  * ko'rinmas belgi ergashadi va qidiruvda mos kelmay qoladi.
  */
-export function formatSom(value: number): string {
+export function formatSom(value: number | null | undefined): string {
+  /*
+    Yo'q qiymat sahifani YIQITMASLIGI kerak.
+
+    Ilgari tur `number` edi va u yerda yolg'on bor edi: javob to'liq
+    kelmasa (yangi maydon, eski backend, qisman xato) chaqiruvchi
+    `undefined` uzatardi va `undefined.toLocaleString()` butun ekranni
+    xato chegarasiga olib borardi. Dashboard aynan shunday yiqilardi —
+    bitta yetishmagan maydon uchun.
+
+    Nol emas, chiziqcha: «0» va «ma'lumot yo'q» boshqa-boshqa gap.
+  */
+  if (value === null || value === undefined || Number.isNaN(value)) return '—';
   return value.toLocaleString('ru-RU').replace(/ /g, ' ');
 }
 
 /** 24560000 → "24.6 mln". Qisqa ko'rinish kerak bo'lgan joylar uchun. */
-export function formatMillions(value: number): string {
+export function formatMillions(value: number | null | undefined): string {
+  if (value === null || value === undefined || Number.isNaN(value)) return '—';
   return `${(value / 1_000_000).toFixed(1)} mln`;
 }
 
@@ -23,8 +36,8 @@ export function formatMillions(value: number): string {
  * qaytarish har doim satr ustida bo'ladi, aks holda katta summalarda
  * float aniqligi yo'qoladi.
  */
-export function formatDecimalSom(value: string | null): string {
-  if (value === null || value.trim() === '') return '—';
+export function formatDecimalSom(value: string | null | undefined): string {
+  if (value === null || value === undefined || value.trim() === '') return '—';
 
   const parsed = Number(value);
   if (Number.isNaN(parsed)) return value;
@@ -33,7 +46,7 @@ export function formatDecimalSom(value: string | null): string {
 }
 
 /** `"2026-08-17T04:44:52.082Z"` → `"17.08.2026 04:44"`. */
-export function formatDateTime(value: string | null): string {
+export function formatDateTime(value: string | null | undefined): string {
   if (!value) return '—';
 
   const date = new Date(value);
