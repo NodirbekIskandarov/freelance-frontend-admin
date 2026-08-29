@@ -3,10 +3,17 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
 const variants = {
-  primary: 'bg-primary text-white hover:bg-primary-hover active:bg-primary-active',
+  /*
+    To'ldirilgan tugmalar `*-solid` tokenlarini oladi — aksentning o'zi
+    emas. Sabab tokenlar faylida: aksent qorong'i kartada matn bo'lib
+    ishlatiladi va yorug' bo'lishi kerak, oq yorliq ostida esa u kontrast
+    talabini bermaydi.
+  */
+  primary:
+    'bg-primary-solid text-white hover:bg-primary-solid-hover active:bg-primary-solid-active',
   secondary: 'border border-line bg-card text-fg-soft hover:bg-elevated hover:text-fg',
-  danger: 'bg-danger text-white hover:bg-danger/85',
-  success: 'bg-success text-white hover:bg-success/85',
+  danger: 'bg-danger-solid text-white hover:bg-danger-solid/85',
+  success: 'bg-success-solid text-white hover:bg-success-solid/85',
   ghost: 'text-fg-muted hover:bg-elevated hover:text-fg',
 } as const;
 

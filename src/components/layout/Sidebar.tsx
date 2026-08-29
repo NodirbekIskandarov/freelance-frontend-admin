@@ -135,7 +135,7 @@ function SupportCard() {
       <p className="mt-1 text-xs leading-relaxed text-fg-muted">{m.layout.supportText}</p>
       <button
         type="button"
-        className="mt-3 w-full rounded-control bg-primary py-2 text-sm font-medium text-white transition-colors hover:bg-primary-hover"
+        className="mt-3 w-full rounded-control bg-primary-solid py-2 text-sm font-medium text-white transition-colors hover:bg-primary-solid-hover"
       >
         {m.layout.supportAction}
       </button>
