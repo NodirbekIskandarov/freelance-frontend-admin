@@ -79,9 +79,7 @@ export function LedgerPage() {
     {
       key: 'type',
       header: 'Turi',
-      cell: (row) => (
-        <Badge tone="neutral">{TRANSACTION_TYPE_LABELS[row.type] ?? row.type}</Badge>
-      ),
+      cell: (row) => <Badge tone="neutral">{TRANSACTION_TYPE_LABELS[row.type] ?? row.type}</Badge>,
     },
     {
       key: 'description',

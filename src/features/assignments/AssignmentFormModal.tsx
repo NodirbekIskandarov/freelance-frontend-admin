@@ -138,7 +138,7 @@ export function AssignmentFormModal({
     Number.isInteger(parsedCount) && parsedCount >= 1 && parsedCount <= MAX_ASSIGNMENT_VARIANTS;
   const variantsError =
     touched && !isEdit && hasVariants === null
-      ? "Variantli yoki variantsiz ekanini tanlang"
+      ? 'Variantli yoki variantsiz ekanini tanlang'
       : undefined;
   const countError =
     touched && !isEdit && hasVariants === true && !isCountValid
