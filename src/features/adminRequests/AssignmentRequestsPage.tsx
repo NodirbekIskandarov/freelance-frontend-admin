@@ -15,6 +15,7 @@ import {
 } from './adminRequestsApi';
 import { ApproveAssignmentModal } from './ApproveAssignmentModal';
 import { RequestsShell, StatusBadge } from './RequestsShell';
+import { PersonCell } from '@/components/ui/PersonCell';
 
 const columns: Column<AdminAssignmentRequest>[] = [
   {
@@ -67,6 +68,12 @@ const columns: Column<AdminAssignmentRequest>[] = [
       ) : (
         <span className="text-xs text-fg-muted">—</span>
       ),
+  },
+  {
+    key: 'user',
+    header: 'Ariza beruvchi',
+    className: 'max-w-[180px]',
+    cell: (row) => <PersonCell name={row.user?.full_name} phone={row.user?.phone} />,
   },
   {
     key: 'created_at',

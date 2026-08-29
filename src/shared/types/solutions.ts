@@ -26,6 +26,9 @@ export interface Solution {
   variant: string;
   variant_label: string;
   uploader: string;
+  /** Kim yuklagani — moderator uchun ID emas, ism kerak. */
+  uploader_name: string;
+  uploader_phone: string;
   title: string;
   description: string;
   /** Yuklab olinadigan fayl manzili. */

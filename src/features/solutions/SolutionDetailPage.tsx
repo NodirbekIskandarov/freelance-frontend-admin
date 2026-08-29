@@ -19,6 +19,7 @@ import {
   useArchiveSolutionMutation,
   useGetSolutionQuery,
 } from './solutionsApi';
+import { PersonCell } from '@/components/ui/PersonCell';
 
 /**
  * Qaysi amal qaysi holatda mumkinligi — bitta joyda.
@@ -198,9 +199,16 @@ export function SolutionDetailPage() {
             <InfoRow label="Yuborilgan" value={formatDateTime(data.created_at)} />
             <InfoRow label="Yangilangan" value={formatDateTime(data.updated_at)} />
             <InfoRow label="E'lon qilingan" value={formatDateTime(data.published_at)} />
+            {/* Ilgari bu yerda faqat UUID turardi — moderatorga u hech
+                nima aytmasdi. ID `title` da qoladi: qo'llab-quvvatlashga
+                murojaat qilganda o'sha kerak bo'ladi. */}
             <InfoRow
-              label="Muallif ID"
-              value={<span className="font-mono text-xs break-all">{data.uploader}</span>}
+              label="Muallif"
+              value={
+                <span title={data.uploader}>
+                  <PersonCell name={data.uploader_name} phone={data.uploader_phone} />
+                </span>
+              }
             />
             <InfoRow
               label="Moderator ID"

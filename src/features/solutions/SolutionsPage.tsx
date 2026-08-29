@@ -16,6 +16,7 @@ import { SOLUTION_ORDERING_OPTIONS, type Solution } from '@/shared/types/solutio
 
 import { SolutionStatusBadge } from './SolutionStatusBadge';
 import { useGetPendingSolutionsQuery } from './solutionsApi';
+import { PersonCell } from '@/components/ui/PersonCell';
 
 export function SolutionsPage() {
   const navigate = useLocaleNavigate();
@@ -51,6 +52,12 @@ export function SolutionsPage() {
           )}
         </span>
       ),
+    },
+    {
+      key: 'uploader',
+      header: 'Kim yubordi',
+      className: 'max-w-[180px]',
+      cell: (row) => <PersonCell name={row.uploader_name} phone={row.uploader_phone} />,
     },
     {
       key: 'variant_label',

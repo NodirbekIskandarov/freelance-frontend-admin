@@ -18,6 +18,7 @@ import {
 } from './adminRequestsApi';
 import { ApproveSubjectModal } from './ApproveSubjectModal';
 import { RequestsShell, StatusBadge } from './RequestsShell';
+import { PersonCell } from '@/components/ui/PersonCell';
 
 /** «2-kurs · 4-semestr» — ikkalasi ham bo'lmasa qator umuman chizilmaydi. */
 function courseLine(row: AdminSubjectRequest): string | null {
@@ -74,16 +75,7 @@ const columns: Column<AdminSubjectRequest>[] = [
     key: 'user',
     header: 'Ariza beruvchi',
     className: 'max-w-[180px]',
-    cell: (row) => (
-      <span className="block min-w-0">
-        <span className="block truncate text-[13px] font-medium text-fg">
-          {row.user?.full_name?.trim() || row.user?.phone || '—'}
-        </span>
-        {row.user?.phone && row.user.full_name?.trim() && (
-          <span className="block truncate text-[11px] text-fg-dim">{row.user.phone}</span>
-        )}
-      </span>
-    ),
+    cell: (row) => <PersonCell name={row.user?.full_name} phone={row.user?.phone} />,
   },
   {
     key: 'created_at',
