@@ -51,6 +51,11 @@ export const ru: Messages = {
 
   nav: {
     groupHome: 'Главная',
+    groupPeople: 'Пользователи',
+    groupContent: 'Контент',
+    groupModeration: 'Модерация',
+    groupComplaints: 'Обращения',
+    groupSystem: 'Система',
     groupMaterials: 'Готовые материалы',
     groupFinance: 'Финансы',
     groupSettings: 'Настройки',

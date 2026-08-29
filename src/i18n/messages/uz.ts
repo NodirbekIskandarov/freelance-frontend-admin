@@ -52,6 +52,11 @@ export const uz = {
 
   nav: {
     groupHome: 'Bosh sahifa',
+    groupPeople: 'Foydalanuvchilar',
+    groupContent: 'Kontent',
+    groupModeration: 'Moderatsiya',
+    groupComplaints: 'Murojaatlar',
+    groupSystem: 'Tizim',
     groupMaterials: 'Tayyor materiallar',
     groupFinance: 'Moliya',
     groupSettings: 'Sozlamalar',

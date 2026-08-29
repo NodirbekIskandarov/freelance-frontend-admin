@@ -42,8 +42,11 @@ export interface NavItem {
   /** Yo'q bo'lsa — element faqat ochiladigan guruh (children bilan). */
   to?: string;
   icon: LucideIcon;
-  /** O'ngdagi son (dizaynning 16–18-rasmlaridagi variantida ishlatiladi). */
-  badge?: number;
+  /**
+   * Ish navbati sonini qaysi kalitdan olish. Sonning O'ZI emas: ro'yxat
+   * modul yuklanganda tuziladi, son esa serverdan keyin keladi.
+   */
+  queue?: 'solutions' | 'subjectRequests' | 'assignmentRequests' | 'reports' | 'disputes';
   /**
    * Shu band ko'rinishi uchun kerakli ruxsat. Ko'rsatilmagan band
    * hammaga ochiq (masalan "Chiqish"). Kalitlar `/me/permissions/`
@@ -58,8 +61,18 @@ export interface NavItem {
 }
 
 export interface NavGroup {
-  /** Kichik uppercase sarlavha. Bo'sh bo'lsa sarlavhasiz guruh. */
+  /**
+   * Barqaror identifikator — ochiq/yopiq holati shu kalit bilan
+   * saqlanadi. Sarlavha tarjimadan keladi va til almashganda o'zgaradi,
+   * ya'ni uni kalit sifatida ishlatib bo'lmasdi.
+   */
+  id: string;
+  /** Kichik uppercase sarlavha. */
   title: (messages: Messages) => string;
+  /**
+   * Ish navbati soni qaysi maydondan olinishi. Ko'rsatilmagan bandda
+   * badge chizilmaydi; nol bo'lsa ham chizilmaydi — «0» ish emas.
+   */
   items: NavItem[];
 }
 
@@ -73,6 +86,7 @@ export interface NavGroup {
  */
 export const navigation: NavGroup[] = [
   {
+    id: 'home',
     title: (m) => m.nav.groupHome,
     items: [
       {
@@ -81,6 +95,12 @@ export const navigation: NavGroup[] = [
         icon: House,
         permission: 'dashboard.view',
       },
+    ],
+  },
+  {
+    id: 'people',
+    title: (m) => m.nav.groupPeople,
+    items: [
       { label: (m) => m.nav.users, to: '/foydalanuvchilar', icon: Users, permission: 'users.view' },
       {
         label: (m) => m.nav.freelancers,
@@ -94,17 +114,20 @@ export const navigation: NavGroup[] = [
         icon: FileText,
         permission: 'applications.view',
       },
-      { label: (m) => m.nav.exchange, to: '/birja', icon: Handshake, permission: 'exchange.view' },
       {
-        label: (m) => m.nav.appeals,
-        to: '/murojaatlar',
-        icon: LifeBuoy,
-        permission: 'appeals.view',
+        label: (m) => m.nav.staff,
+        to: '/sozlamalar/adminlar',
+        icon: ShieldCheck,
+        // Menyuda `roles.manage` bilan ko'rinadi, ekranning o'zi esa
+        // superuserni talab qiladi va sababini aytadi. Ikkalasi ham
+        // kerak: menyuni ruxsat boshqaradi, qarorni superuser.
+        permission: 'roles.manage',
       },
     ],
   },
   {
-    title: (m) => m.nav.groupMaterials,
+    id: 'content',
+    title: (m) => m.nav.groupContent,
     items: [
       { label: (m) => m.nav.content, to: '/kontent', icon: Landmark, permission: 'content.view' },
       {
@@ -114,10 +137,9 @@ export const navigation: NavGroup[] = [
         permission: 'catalogue.view',
       },
       /*
-       * Bitta element: arizalar sahifasiga fanlar ekranining o'zidagi
-       * tugma orqali o'tiladi. Menyuda ikkiga bo'lish ularni bir-biridan
-       * uzoq ko'rsatardi, aslida esa bu bitta ish oqimi — fanni ko'rish,
-       * yangisini qo'shish, kelgan arizani ko'rib chiqish.
+       * Fan arizalari alohida band emas: ularga fanlar ekranining o'z
+       * tugmasi orqali o'tiladi. Menyuda ikkiga bo'lish bitta ish
+       * oqimini ikki joyga uzoqlashtirardi.
        */
       {
         label: (m) => m.nav.subjects,
@@ -138,10 +160,30 @@ export const navigation: NavGroup[] = [
         permission: 'catalogue.view',
       },
       {
+        label: (m) => m.nav.comments,
+        to: '/izohlar',
+        icon: MessageSquare,
+        permission: 'catalogue.view',
+      },
+    ],
+  },
+  {
+    id: 'moderation',
+    title: (m) => m.nav.groupModeration,
+    items: [
+      {
+        label: (m) => m.nav.solutionModeration,
+        to: '/yechimlar',
+        icon: FileCheck2,
+        permission: 'solutions.view',
+        queue: 'solutions',
+      },
+      {
         label: (m) => m.nav.submittedSubjects,
         to: '/yuborilgan/fanlar',
         icon: ClipboardCheck,
         permission: 'catalogue_requests.view',
+        queue: 'subjectRequests',
       },
       {
         label: (m) => m.nav.submittedSolutions,
@@ -150,50 +192,41 @@ export const navigation: NavGroup[] = [
         permission: 'solutions.view',
       },
       {
-        label: (m) => m.nav.solutionModeration,
-        to: '/yechimlar',
-        icon: FileCheck2,
+        label: (m) => m.nav.approvedContent,
+        to: '/tasdiqlangan-kontent',
+        icon: CheckSquare,
         permission: 'solutions.view',
       },
-      {
-        label: (m) => m.nav.comments,
-        to: '/izohlar',
-        icon: MessageSquare,
-        permission: 'catalogue.view',
-      },
+    ],
+  },
+  {
+    id: 'complaints',
+    title: (m) => m.nav.groupComplaints,
+    items: [
       {
         label: (m) => m.nav.reports,
         to: '/shikoyatlar',
         icon: TriangleAlert,
         permission: 'reports.view',
+        queue: 'reports',
       },
       {
         label: (m) => m.nav.purchaseDisputes,
         to: '/xarid-shikoyatlari',
         icon: Gavel,
         permission: 'reports.view',
+        queue: 'disputes',
       },
       {
-        label: (m) => m.nav.approvedContent,
-        to: '/tasdiqlangan-kontent',
-        icon: CheckSquare,
-        permission: 'solutions.view',
-      },
-      {
-        label: (m) => m.nav.monitoring,
-        to: '/monitoring',
-        icon: Activity,
-        permission: 'dashboard.view',
-      },
-      {
-        label: (m) => m.nav.salesStats,
-        to: '/sotuv-statistikasi',
-        icon: BarChart3,
-        permission: 'content.view',
+        label: (m) => m.nav.appeals,
+        to: '/murojaatlar',
+        icon: LifeBuoy,
+        permission: 'appeals.view',
       },
     ],
   },
   {
+    id: 'finance',
     title: (m) => m.nav.groupFinance,
     items: [
       {
@@ -214,26 +247,30 @@ export const navigation: NavGroup[] = [
         icon: Receipt,
         permission: 'wallets.view',
       },
+      {
+        label: (m) => m.nav.salesStats,
+        to: '/sotuv-statistikasi',
+        icon: BarChart3,
+        permission: 'content.view',
+      },
+      { label: (m) => m.nav.exchange, to: '/birja', icon: Handshake, permission: 'exchange.view' },
     ],
   },
   {
-    title: (m) => m.nav.groupSettings,
+    id: 'system',
+    title: (m) => m.nav.groupSystem,
     items: [
+      {
+        label: (m) => m.nav.monitoring,
+        to: '/monitoring',
+        icon: Activity,
+        permission: 'dashboard.view',
+      },
       { label: (m) => m.nav.audit, to: '/audit', icon: ScrollText, permission: 'audit.view' },
       { label: (m) => m.nav.roles, to: '/rollar', icon: KeyRound, permission: 'roles.manage' },
-      {
-        label: (m) => m.nav.staff,
-        to: '/sozlamalar/adminlar',
-        icon: ShieldCheck,
-        // Menyuda `roles.manage` bilan ko'rinadi, ekranning o'zi esa
-        // superuserni talab qiladi va sababini aytadi. Ikkalasi ham
-        // kerak: menyuni ruxsat boshqaradi, qarorni superuser.
-        permission: 'roles.manage',
-      },
       { label: (m) => m.nav.settings, to: '/sozlamalar', icon: Settings },
-      // «Chiqish» olib tashlandi: u `/logout` ga olib borardi va bunday
-      // sahifa umuman yo'q edi — bosgan odam bo'sh ekranga tushardi.
-      // Chiqish endi yuqori o'ngdagi profil menyusida, o'z joyida.
+      // «Chiqish» yo'q: u `/logout` ga olib borardi va bunday sahifa
+      // umuman yo'q edi. Chiqish yuqori o'ngdagi profil menyusida.
     ],
   },
 ];

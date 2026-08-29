@@ -83,14 +83,21 @@ export function AdminLayout() {
         />
       )}
 
+      {/*
+        Kompyuterda menyu YASHIRILMAYDI, 64px chiziqqa yig'iladi.
+        Ilgari `lg:hidden` bilan butunlay yo'q bo'lardi va navigatsiya
+        qolmasdi — joy bo'shatish uchun bosgan odam har safar uni
+        qaytadan ochishga majbur edi.
+      */}
       <Sidebar
         aria-hidden={hidden}
+        collapsed={isDesktop && !sidebarOpen}
         className={cn(
           'transition-transform duration-200 lg:static lg:z-auto lg:translate-x-0 lg:transition-none',
           isDrawer && 'fixed inset-y-0 left-0 z-50',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:hidden',
-          // Yopiq menyu ekrandan tashqarida turadi, lekin DOM'da qoladi —
-          // klaviatura fokusi u yerga tushib ketmasin.
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+          // Telefonda yopiq menyu ekrandan tashqarida turadi, lekin
+          // DOM'da qoladi — klaviatura fokusi u yerga tushib ketmasin.
           hidden && 'pointer-events-none',
         )}
       />

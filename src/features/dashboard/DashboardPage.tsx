@@ -26,6 +26,7 @@ import { getApiErrorMessage } from '@/shared/api';
 import type { AdminDashboard } from '@/shared/types/adminDashboard';
 
 import { useGetAdminDashboardQuery } from '../adminFreelance/adminFreelanceApi';
+import { DASHBOARD_DAYS } from './useQueueCounts';
 
 const rangeOptions = [
   { value: '7', label: '7 kunlik' },
@@ -161,7 +162,19 @@ function Charts({ data }: { data: AdminDashboard }) {
 }
 
 export function DashboardPage() {
-  const [days, setDays] = useState('30');
+  /*
+    Sukut bo'yicha 7 kun, 30 emas.
+
+    Platformada ma'lumot yaqinda paydo bo'lgan: 30 kunlik oynada
+    grafikning katta qismi nolda yotgan tekis chiziq bo'lardi — u
+    trendni ko'rsatmaydi, faqat joy egallaydi. Tanlagich joyida:
+    uzunroq oyna kerak bo'lsa bir bosishda olinadi.
+
+    Qiymat sidebar bilan UMUMIY (`DASHBOARD_DAYS`) — ikkalasi bir xil
+    argument bilan so'rasa RTK Query bitta keshdan foydalanadi va
+    menyudagi navbat sonlari qo'shimcha so'rov tug'dirmaydi.
+  */
+  const [days, setDays] = useState(String(DASHBOARD_DAYS));
   const { data, isLoading, error } = useGetAdminDashboardQuery({ days: Number(days) });
 
   if (error) {
