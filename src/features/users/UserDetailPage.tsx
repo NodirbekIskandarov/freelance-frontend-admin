@@ -4,7 +4,7 @@ import { Navigate, useParams } from 'react-router';
 import { useLocaleNavigate } from '@/i18n/navigation';
 
 import { Avatar } from '@/components/ui/Avatar';
-import { Badge } from '@/components/ui/Badge';
+import { Badge, VerificationBadge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { InfoList, InfoRow } from '@/components/ui/InfoRow';
@@ -137,17 +137,19 @@ export function UserDetailPage() {
             <InfoRow
               label="Telefon tasdiqlangan"
               value={
-                <Badge tone={data.phone_verified ? 'success' : 'neutral'}>
-                  {data.phone_verified ? 'Ha' : "Yo'q"}
-                </Badge>
+                <VerificationBadge
+                  label={data.phone_verified ? 'Ha' : "Yo'q"}
+                  verified={data.phone_verified}
+                />
               }
             />
             <InfoRow
               label="Email tasdiqlangan"
               value={
-                <Badge tone={data.email_verified ? 'success' : 'neutral'}>
-                  {data.email_verified ? 'Ha' : "Yo'q"}
-                </Badge>
+                <VerificationBadge
+                  label={data.email_verified ? 'Ha' : "Yo'q"}
+                  verified={data.email_verified}
+                />
               }
             />
             <InfoRow label="Kirish usuli" value={data.auth_provider || '—'} />

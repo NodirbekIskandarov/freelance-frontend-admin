@@ -12,8 +12,8 @@ import { useState } from 'react';
 import { useLocaleNavigate } from '@/i18n/navigation';
 
 import { Avatar } from '@/components/ui/Avatar';
-import { Badge, type BadgeTone } from '@/components/ui/Badge';
-import { IconButton } from '@/components/ui/Button';
+import { Badge, VerificationBadge, type BadgeTone } from '@/components/ui/Badge';
+
 import { Card } from '@/components/ui/Card';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
@@ -35,6 +35,9 @@ import { StaffRolesModal } from '@/features/adminRoles/StaffRolesModal';
 import { usePermissions } from '@/features/adminRoles/usePermissions';
 
 import { useActivateUserMutation, useGetAdminUsersQuery } from './adminUsersApi';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { RowActions } from '@/components/ui/RowActions';
+
 import { BlockUserModal } from './BlockUserModal';
 
 const statusOptions = [
@@ -78,6 +81,7 @@ export function UsersPage() {
 
   const [rolesTarget, setRolesTarget] = useState<AdminUserAccount | null>(null);
   const [blockTarget, setBlockTarget] = useState<AdminUserAccount | null>(null);
+  const [activateTarget, setActivateTarget] = useState<AdminUserAccount | null>(null);
 
   // Har harf uchun so'rov yubormaslik kerak — foydalanuvchi yozib
   // bo'lgandan keyin bitta so'rov ketadi.
@@ -128,8 +132,8 @@ export function UsersPage() {
       header: 'Tasdiqlangan',
       cell: (row) => (
         <span className="flex flex-wrap gap-1.5">
-          <Badge tone={row.phone_verified ? 'success' : 'neutral'}>Telefon</Badge>
-          <Badge tone={row.email_verified ? 'success' : 'neutral'}>Email</Badge>
+          <VerificationBadge label="Telefon" verified={row.phone_verified} />
+          <VerificationBadge label="Email" verified={row.email_verified} />
         </span>
       ),
     },
@@ -163,54 +167,56 @@ export function UsersPage() {
       align: 'right',
       // O'ng chetga yopishadi — jadval siljiganda ham ko'rinadi.
       sticky: true,
-      cell: (row) => (
-        <span className="flex items-center justify-end gap-2">
-          {/* Tafsilot — birinchi amal: qolganlari qaror talab qiladi,
-              bu esa qaror qabul qilishdan oldin qaraydigan joy. */}
-          <IconButton
-            label={`${row.full_name || row.email} — tafsilot`}
-            size="sm"
-            onClick={() => void navigate(`/foydalanuvchilar/${row.id}`)}
-          >
-            <Eye className="size-4" strokeWidth={1.75} />
-          </IconButton>
+      cell: (row) => {
+        const name = row.full_name || row.email || row.phone;
 
-          {/* Rol faqat xodimga beriladi — oddiy foydalanuvchi panelga kirmaydi. */}
-          {row.is_staff && canManageRoles && (
-            <IconButton
-              label={`${row.full_name || row.email} — rollari`}
-              tone="info"
-              size="sm"
-              onClick={() => setRolesTarget(row)}
-            >
-              <KeyRound className="size-4" strokeWidth={1.75} />
-            </IconButton>
-          )}
-
-          {row.status !== 'active' && (
-            <IconButton
-              label={`${row.full_name || row.email} — faollashtirish`}
-              tone="success"
-              size="sm"
-              disabled={isActivating}
-              onClick={() => void activateUser(row.id)}
-            >
-              <CircleCheck className="size-4" strokeWidth={1.75} />
-            </IconButton>
-          )}
-
-          {row.status !== 'blocked' && (
-            <IconButton
-              label={`${row.full_name || row.email} — bloklash`}
-              tone="danger"
-              size="sm"
-              onClick={() => setBlockTarget(row)}
-            >
-              <Lock className="size-4" strokeWidth={1.75} />
-            </IconButton>
-          )}
-        </span>
-      ),
+        /*
+          Ko'p bosiladigan ikkitasi tashqarida, qaror talab qiladigani
+          `⋯` ichida. Ilgari beshtasi ham yonma-yon turardi va
+          «bloklash» zararsiz «tafsilot» dan bir barmoq narida edi.
+        */
+        return (
+          <RowActions
+            actions={[
+              {
+                label: `${name} — tafsilot`,
+                icon: <Eye className="size-4" strokeWidth={1.75} />,
+                onSelect: () => void navigate(`/foydalanuvchilar/${row.id}`),
+              },
+              // Rol faqat xodimga beriladi — oddiy foydalanuvchi panelga kirmaydi.
+              ...(row.is_staff && canManageRoles
+                ? [
+                    {
+                      label: `${name} — rollari`,
+                      icon: <KeyRound className="size-4" strokeWidth={1.75} />,
+                      onSelect: () => setRolesTarget(row),
+                    },
+                  ]
+                : []),
+              ...(row.status !== 'active'
+                ? [
+                    {
+                      label: 'Faollashtirish',
+                      icon: <CircleCheck className="size-4" strokeWidth={1.75} />,
+                      disabled: isActivating,
+                      onSelect: () => setActivateTarget(row),
+                    },
+                  ]
+                : []),
+              ...(row.status !== 'blocked'
+                ? [
+                    {
+                      label: 'Bloklash',
+                      icon: <Lock className="size-4" strokeWidth={1.75} />,
+                      destructive: true,
+                      onSelect: () => setBlockTarget(row),
+                    },
+                  ]
+                : []),
+            ]}
+          />
+        );
+      },
     },
   ];
 
@@ -321,6 +327,26 @@ export function UsersPage() {
       )}
 
       <BlockUserModal user={blockTarget} onClose={() => setBlockTarget(null)} />
+
+      {/* Faollashtirish ham holatni o'zgartiradi — bir bosishda emas,
+          kimga tegishi aytilgan holda. */}
+      <ConfirmDialog
+        open={activateTarget !== null}
+        title="Foydalanuvchini faollashtirish"
+        description={`${activateTarget?.full_name || activateTarget?.email || activateTarget?.phone} faol holatga o'tkaziladi va tizimga kira oladi.`}
+        confirmLabel="Faollashtirish"
+        pendingLabel="Bajarilmoqda…"
+        isLoading={isActivating}
+        error={activateError}
+        onConfirm={() => {
+          if (!activateTarget) return;
+          void activateUser(activateTarget.id)
+            .unwrap()
+            .then(() => setActivateTarget(null))
+            .catch(() => undefined);
+        }}
+        onClose={() => setActivateTarget(null)}
+      />
       <StaffRolesModal user={rolesTarget} onClose={() => setRolesTarget(null)} />
     </>
   );

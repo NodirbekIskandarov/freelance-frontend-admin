@@ -2,7 +2,6 @@ import { Lock, LockOpen, PencilLine, Plus, Receipt, Snowflake } from 'lucide-rea
 import { useState } from 'react';
 
 import { Badge } from '@/components/ui/Badge';
-import { IconButton } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
@@ -13,6 +12,9 @@ import { formatDecimalSom, formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { getApiErrorMessage } from '@/shared/api';
 import type { AdminWallet } from '@/shared/types/adminWallet';
+
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { RowActions } from '@/components/ui/RowActions';
 
 import { AdjustWalletModal } from './AdjustWalletModal';
 import { TopupWalletModal } from './TopupWalletModal';
@@ -32,6 +34,7 @@ export function WalletsPage() {
   const [search, setSearch] = useState('');
   const [adjustTarget, setAdjustTarget] = useState<AdminWallet | null>(null);
   const [topupTarget, setTopupTarget] = useState<AdminWallet | null>(null);
+  const [freezeTarget, setFreezeTarget] = useState<AdminWallet | null>(null);
   const [historyTarget, setHistoryTarget] = useState<AdminWallet | null>(null);
 
   const debouncedSearch = useDebouncedValue(search, 350);
@@ -93,48 +96,41 @@ export function WalletsPage() {
       // O'ng chetga yopishadi — jadval siljiganda ham ko'rinadi.
       sticky: true,
       cell: (row) => (
-        <span className="flex items-center justify-end gap-2">
-          <IconButton
-            label="Tranzaksiyalar"
-            tone="info"
-            size="sm"
-            onClick={() => setHistoryTarget(row)}
-          >
-            <Receipt className="size-4" strokeWidth={1.75} />
-          </IconButton>
-          {/* To'ldirish tuzatishdan alohida tugma: birinchisi kelgan
-              pulni yozadi, ikkinchisi xatoni to'g'rilaydi — jurnalda ular
-              boshqa-boshqa turi bilan qoladi. */}
-          <IconButton
-            label="Balansni to'ldirish"
-            tone="success"
-            size="sm"
-            onClick={() => setTopupTarget(row)}
-          >
-            <Plus className="size-4" strokeWidth={2} />
-          </IconButton>
-          <IconButton
-            label="Balansni tuzatish"
-            tone="warning"
-            size="sm"
-            onClick={() => setAdjustTarget(row)}
-          >
-            <PencilLine className="size-4" strokeWidth={1.75} />
-          </IconButton>
-          <IconButton
-            label={row.is_frozen ? 'Muzlatishni bekor qilish' : 'Muzlatish'}
-            tone={row.is_frozen ? 'success' : 'danger'}
-            size="sm"
-            disabled={freezeState.isLoading}
-            onClick={() => void freeze({ id: row.id, frozen: !row.is_frozen })}
-          >
-            {row.is_frozen ? (
-              <LockOpen className="size-4" strokeWidth={1.75} />
-            ) : (
-              <Lock className="size-4" strokeWidth={1.75} />
-            )}
-          </IconButton>
-        </span>
+        <RowActions
+          actions={[
+            {
+              label: 'Tranzaksiyalar',
+              icon: <Receipt className="size-4" strokeWidth={1.75} />,
+              onSelect: () => setHistoryTarget(row),
+            },
+            {
+              label: "Balansni to'ldirish",
+              icon: <Plus className="size-4" strokeWidth={2} />,
+              onSelect: () => setTopupTarget(row),
+            },
+            {
+              label: 'Balansni tuzatish',
+              icon: <PencilLine className="size-4" strokeWidth={1.75} />,
+              onSelect: () => setAdjustTarget(row),
+            },
+            /*
+                Muzlatish ilgari bir bosishda bajarilardi — tasdiqsiz,
+                zararsiz amallar yonida. Endi u `⋯` ichida va kimga
+                tegishini aytadigan oyna ochadi.
+              */
+            {
+              label: row.is_frozen ? 'Muzlatishni bekor qilish' : 'Muzlatish',
+              icon: row.is_frozen ? (
+                <LockOpen className="size-4" strokeWidth={1.75} />
+              ) : (
+                <Lock className="size-4" strokeWidth={1.75} />
+              ),
+              destructive: !row.is_frozen,
+              disabled: freezeState.isLoading,
+              onSelect: () => setFreezeTarget(row),
+            },
+          ]}
+        />
       ),
     },
   ];
@@ -222,6 +218,27 @@ export function WalletsPage() {
           </Card>
         </>
       )}
+
+      <ConfirmDialog
+        open={freezeTarget !== null}
+        title={freezeTarget?.is_frozen ? 'Muzlatishni bekor qilish' : 'Hamyonni muzlatish'}
+        description={
+          freezeTarget?.is_frozen
+            ? `${freezeTarget.user.full_name || freezeTarget.user.phone} hamyonida pul yana harakatlana boshlaydi.`
+            : `${freezeTarget?.user.full_name || freezeTarget?.user.phone} hamyonida pul harakati to'xtaydi: xarid ham, sotuv ham, pul yechish ham. Tarix saqlanadi.`
+        }
+        confirmLabel={freezeTarget?.is_frozen ? 'Bekor qilish' : 'Muzlatish'}
+        isLoading={freezeState.isLoading}
+        error={freezeState.error}
+        onConfirm={() => {
+          if (!freezeTarget) return;
+          void freeze({ id: freezeTarget.id, frozen: !freezeTarget.is_frozen })
+            .unwrap()
+            .then(() => setFreezeTarget(null))
+            .catch(() => undefined);
+        }}
+        onClose={() => setFreezeTarget(null)}
+      />
 
       <TopupWalletModal wallet={topupTarget} onClose={() => setTopupTarget(null)} />
       <AdjustWalletModal wallet={adjustTarget} onClose={() => setAdjustTarget(null)} />

@@ -65,8 +65,16 @@ const densityStyles = {
  * siljiyotgan matn ko'rinib turadi. Chapdagi soya esa u "suzib" turgani
  * va ortida yana ustun borligini bildiradi.
  */
+/*
+ * `before:pointer-events-none` — SHART.
+ *
+ * Soya psevdo-elementi katak ustida turadi va usiz u bosishlarni o'ziga
+ * olardi: aynan shu katakda `⋯` menyusi ochiladi, ya'ni menyu bandini
+ * bosib bo'lmasdi. Xato ko'rinmaydi — tugma bosilgandek turadi, faqat
+ * hech nima bo'lmaydi.
+ */
 const stickyCell =
-  'sticky right-0 z-10 bg-card before:absolute before:inset-y-0 before:-left-3 before:w-3 before:bg-gradient-to-l before:from-card before:to-transparent before:content-[""]';
+  'sticky right-0 z-10 bg-card before:pointer-events-none before:absolute before:inset-y-0 before:-left-3 before:w-3 before:bg-gradient-to-l before:from-card before:to-transparent before:content-[""]';
 const stickyHead = 'sticky right-0 z-10 bg-elevated';
 
 const alignClass = {
