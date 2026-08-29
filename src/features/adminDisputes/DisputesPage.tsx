@@ -156,6 +156,8 @@ export function DisputesPage() {
       key: 'actions',
       header: 'Amallar',
       align: 'right',
+      // O'ng chetga yopishadi — jadval siljiganda ham ko'rinadi.
+      sticky: true,
       cell: (row) => (
         <IconButton
           label={`${row.solution_title} — ochish`}

@@ -147,6 +147,8 @@ export function WithdrawalsPage() {
       key: 'actions',
       header: 'Amallar',
       align: 'right',
+      // O'ng chetga yopishadi — jadval siljiganda ham ko'rinadi.
+      sticky: true,
       cell: (row) =>
         // Yakunlangan so'rovga qayta tegib bo'lmaydi.
         row.status === 'pending' ? (

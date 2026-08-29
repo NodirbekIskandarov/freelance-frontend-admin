@@ -143,6 +143,8 @@ export function StaffPage() {
       key: 'actions',
       header: 'Amallar',
       align: 'right',
+      // O'ng chetga yopishadi — jadval siljiganda ham ko'rinadi.
+      sticky: true,
       cell: (row) =>
         row.is_superuser ? (
           // Superuserning huquqi rollardan kelmaydi va uni bu yerdan
@@ -183,6 +185,8 @@ export function StaffPage() {
       key: 'actions',
       header: 'Amallar',
       align: 'right',
+      // O'ng chetga yopishadi — jadval siljiganda ham ko'rinadi.
+      sticky: true,
       cell: (row) => (
         <Button
           variant="secondary"

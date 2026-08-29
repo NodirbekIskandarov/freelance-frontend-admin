@@ -149,6 +149,8 @@ export function RequestsShell<T extends RequestRow>({
     key: 'actions',
     header: 'Amallar',
     align: 'right',
+    // O'ng chetga yopishadi — jadval siljiganda ham ko'rinadi.
+    sticky: true,
     cell: (row) =>
       row.status === 'pending' ? (
         <span className="flex items-center justify-end gap-2">

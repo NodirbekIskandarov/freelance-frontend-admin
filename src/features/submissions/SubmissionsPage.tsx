@@ -180,6 +180,8 @@ export function SubmissionsPage() {
       key: 'actions',
       header: 'Amallar',
       align: 'right',
+      // O'ng chetga yopishadi — jadval siljiganda ham ko'rinadi.
+      sticky: true,
       cell: (row) => (
         <IconButton
           label={`${row.title} — ochish`}
@@ -228,6 +230,8 @@ export function SubmissionsPage() {
       key: 'actions',
       header: 'Amallar',
       align: 'right',
+      // O'ng chetga yopishadi — jadval siljiganda ham ko'rinadi.
+      sticky: true,
       cell: (row) => (
         <IconButton
           label={`${row.name} — ochish`}

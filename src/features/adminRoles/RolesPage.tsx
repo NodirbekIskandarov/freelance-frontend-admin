@@ -106,6 +106,8 @@ export function RolesPage() {
       key: 'actions',
       header: 'Amallar',
       align: 'right',
+      // O'ng chetga yopishadi — jadval siljiganda ham ko'rinadi.
+      sticky: true,
       cell: (row) => (
         <span className="flex items-center justify-end gap-2">
           <IconButton
