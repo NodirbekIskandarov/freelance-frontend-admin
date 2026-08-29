@@ -1,4 +1,4 @@
-import { Archive, ArrowLeft, Check, Download, Send, X } from 'lucide-react';
+import { Archive, ArrowLeft, Check, Download, Pencil, Send, X } from 'lucide-react';
 import { useState } from 'react';
 import { Navigate, useParams } from 'react-router';
 import { useLocaleNavigate } from '@/i18n/navigation';
@@ -12,6 +12,7 @@ import { getApiErrorMessage } from '@/shared/api';
 import type { Solution } from '@/shared/types/solutions';
 
 import { PublishModal } from './PublishModal';
+import { SolutionEditModal } from './SolutionEditModal';
 import { RejectModal } from './RejectModal';
 import { SolutionStatusBadge } from './SolutionStatusBadge';
 import {
@@ -37,14 +38,35 @@ function allowedActions(status: Solution['status']) {
   };
 }
 
+/**
+ * Tahrirlash ro'yxatda yo'q: u har holatda mumkin.
+ *
+ * Sarlavhadagi xato e'lon qilingandan keyin ham xato bo'lib qoladi, arxivdagi
+ * yozuvni esa tarix uchun to'g'ri saqlash kerak. Chegara qo'yish faqat
+ * moderatorni yechimni rad etishga majburlardi.
+ */
+
 export function SolutionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useLocaleNavigate();
 
   const [publishOpen, setPublishOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   const { data, isLoading, error } = useGetSolutionQuery(id ?? '', { skip: !id });
+
+  /*
+   * Bu sahifaga ikki yo'ldan kelinadi: moderatsiya navbatidan va
+   * «Yuborilgan javoblar» ro'yxatidan. Qat'iy `/yechimlar` ga qaytarish
+   * ikkinchisini har safar boshqa bo'limga otib yuborardi.
+   *
+   * Tarix bo'sh bo'lsa (havola yangi oynada ochilgan) — navbatga.
+   */
+  function goBack() {
+    if (window.history.length > 1) navigate(-1);
+    else void navigate('/yechimlar');
+  }
   const [approve, { isLoading: isApproving, error: approveError }] = useApproveSolutionMutation();
   const [archive, { isLoading: isArchiving, error: archiveError }] = useArchiveSolutionMutation();
 
@@ -84,9 +106,17 @@ export function SolutionDetailPage() {
             <Button
               variant="secondary"
               icon={<ArrowLeft className="size-4" strokeWidth={1.75} />}
-              onClick={() => void navigate('/yechimlar')}
+              onClick={goBack}
             >
-              Ro&apos;yxatga
+              Orqaga
+            </Button>
+
+            <Button
+              variant="secondary"
+              icon={<Pencil className="size-4" strokeWidth={1.75} />}
+              onClick={() => setEditOpen(true)}
+            >
+              Tahrirlash
             </Button>
 
             {can.reject && (
@@ -226,20 +256,32 @@ export function SolutionDetailPage() {
 
       <PublishModal
         solutionId={id}
-        // Yuklovchi so'ragan narx maydonga oldindan tushadi: admin ko'p
-        // hollarda o'shani tasdiqlaydi, o'zgartirmoqchi bo'lsa ustiga
-        // yozadi. Qo'lda ko'chirish esa xatoga yo'l ochardi.
-        defaultPrice={data.asking_price}
+        // JORIY narx tushadi, so'ralgani emas. Yuklashda ikkalasi teng,
+        // ya'ni odatda farqi yo'q; admin narxni tahrirlagan bo'lsa esa
+        // so'ralganini qo'yish uning tuzatishini jimgina bekor qilardi.
+        defaultPrice={data.price}
         open={publishOpen}
         onClose={() => setPublishOpen(false)}
-        onPublished={() => void navigate('/yechimlar')}
+        onPublished={goBack}
       />
+
+      {editOpen && (
+        <SolutionEditModal
+          solutionId={id}
+          open
+          onClose={() => setEditOpen(false)}
+          title={data.title}
+          description={data.description}
+          price={data.price}
+          askingPrice={data.asking_price}
+        />
+      )}
 
       <RejectModal
         solutionId={id}
         open={rejectOpen}
         onClose={() => setRejectOpen(false)}
-        onRejected={() => void navigate('/yechimlar')}
+        onRejected={goBack}
       />
     </>
   );

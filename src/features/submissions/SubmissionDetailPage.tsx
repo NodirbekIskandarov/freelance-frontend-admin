@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, Download, Eye, Lock, LockOpen, X } from 'lucide-react';
+import { ArrowLeft, Check, Download, Eye, Lock, LockOpen, Pencil, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router';
 
@@ -28,6 +28,7 @@ import {
 } from '../assignments/assignmentsApi';
 import { PublishModal } from '../solutions/PublishModal';
 import { RejectModal } from '../solutions/RejectModal';
+import { SolutionEditModal } from '../solutions/SolutionEditModal';
 import { SubmissionPreview } from './SubmissionPreview';
 import { statusTones } from './SubmissionsPage';
 import {
@@ -86,6 +87,7 @@ export function SubmissionDetailPage() {
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [publishTarget, setPublishTarget] = useState<Submission | null>(null);
   const [rejectTarget, setRejectTarget] = useState<Submission | null>(null);
+  const [editTarget, setEditTarget] = useState<Submission | null>(null);
 
   const debouncedSearch = useDebouncedValue(search, 350);
 
@@ -273,6 +275,17 @@ export function SubmissionDetailPage() {
               <Download className="size-4" strokeWidth={1.75} />
             </IconButton>
           )}
+
+          {/* Yuklovchi o'z yechimini tahrirlay olmaydi, shuning uchun
+              sarlavhadagi xatoni yoki noto'g'ri narxni faqat moderator
+              tuzatadi — aks holda yagona chora rad etish bo'lardi. */}
+          <IconButton
+            label={`${row.title} — tahrirlash`}
+            size="sm"
+            onClick={() => setEditTarget(row)}
+          >
+            <Pencil className="size-4" strokeWidth={1.75} />
+          </IconButton>
 
           {/* Tasdiqlash va rad etish faqat hali qaror qilinmagan javobda:
               chop etilganini qayta tasdiqlab bo'lmaydi va backend ham buni
@@ -589,9 +602,23 @@ export function SubmissionDetailPage() {
         <PublishModal
           open
           solutionId={publishTarget.id}
-          defaultPrice={publishTarget.asking_price}
+          // JORIY narx — admin uni tahrirlagan bo'lsa, so'ralganini qo'yish
+          // o'sha tuzatishni jimgina bekor qilardi.
+          defaultPrice={publishTarget.price}
           onClose={() => setPublishTarget(null)}
           onPublished={() => setPublishTarget(null)}
+        />
+      )}
+
+      {editTarget && (
+        <SolutionEditModal
+          open
+          solutionId={editTarget.id}
+          title={editTarget.title}
+          description={editTarget.description}
+          price={editTarget.price}
+          askingPrice={editTarget.asking_price}
+          onClose={() => setEditTarget(null)}
         />
       )}
 

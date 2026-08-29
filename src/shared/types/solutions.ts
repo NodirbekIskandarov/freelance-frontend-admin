@@ -57,6 +57,20 @@ export interface SolutionPublishRequest {
   commission_percent: string;
 }
 
+/**
+ * `PATCH /admin/solutions/{id}/` tanasi — matn va narxni tuzatish.
+ *
+ * Yuklovchi o'z yechimini tahrirlay olmaydi, shuning uchun sarlavhadagi
+ * xatoni yoki ochiqcha noto'g'ri narxni faqat moderator tuzatadi.
+ * `asking_price` va `status` bu yerda yo'q: birinchisi yuklovchi so'ragan
+ * o'zgarmas raqam, ikkinchisi esa o'z amallari orqali o'zgaradi.
+ */
+export interface SolutionEditRequest {
+  title?: string;
+  description?: string;
+  price?: string;
+}
+
 /** `POST /admin/solutions/{id}/reject/` tanasi. */
 export interface SolutionRejectRequest {
   reason: string;

@@ -1,6 +1,7 @@
 import type { ApiListQuery, ApiPaginated } from '@/shared/types/api';
 import type {
   Solution,
+  SolutionEditRequest,
   SolutionPublishRequest,
   SolutionRejectRequest,
 } from '@/shared/types/solutions';
@@ -25,6 +26,20 @@ export const solutionsApi = baseApi.injectEndpoints({
     getSolution: build.query<Solution, string>({
       query: (id) => ({ url: `/admin/solutions/${id}/` }),
       providesTags: (_result, _error, id) => [{ type: 'Solution', id }],
+    }),
+
+    /** Matn va narxni tuzatish. Holatga tegmaydi. */
+    editSolution: build.mutation<Solution, { id: string } & SolutionEditRequest>({
+      query: ({ id, ...body }) => ({
+        url: `/admin/solutions/${id}/`,
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: 'Solution', id },
+        { type: 'Solution', id: 'PENDING' },
+        { type: 'Solution', id: 'SUBMISSIONS' },
+      ],
     }),
 
     approveSolution: build.mutation<Solution, string>({
@@ -76,6 +91,7 @@ export const solutionsApi = baseApi.injectEndpoints({
 export const {
   useGetPendingSolutionsQuery,
   useGetSolutionQuery,
+  useEditSolutionMutation,
   useApproveSolutionMutation,
   useRejectSolutionMutation,
   usePublishSolutionMutation,

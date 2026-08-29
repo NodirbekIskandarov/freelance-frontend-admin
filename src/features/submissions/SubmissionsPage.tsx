@@ -170,6 +170,26 @@ export function SubmissionsPage() {
         <Badge tone={statusTones[row.status]}>{SOLUTION_STATUS_LABELS[row.status]}</Badge>
       ),
     },
+    {
+      /*
+       * Ro'yxat javobni faqat ko'rsatardi: uni ochib tekshirish, matnini
+       * yoki narxini tuzatish va moderatsiyadan o'tkazish uchun bu yerdan
+       * chiqib ketishga to'g'ri kelardi. Yechim tafsiloti bularning
+       * hammasini bitta sahifada beradi.
+       */
+      key: 'actions',
+      header: 'Amallar',
+      align: 'right',
+      cell: (row) => (
+        <IconButton
+          label={`${row.title} — ochish`}
+          size="sm"
+          onClick={() => navigate(`/yechimlar/${row.id}`)}
+        >
+          <ChevronRight className="size-4" strokeWidth={2} />
+        </IconButton>
+      ),
+    },
   ];
 
   const subjectColumns: Column<SubmissionSubject>[] = [
