@@ -55,6 +55,7 @@ export const baseApi = createApi({
     'Freelancer',
     'Request',
     'Report',
+    'Dispute',
     'Appeal',
     'Wallet',
     'Withdrawal',

@@ -1,6 +1,7 @@
 import {
   Activity,
   BanknoteArrowDown,
+  Gavel,
   Receipt,
   BarChart3,
   Building2,
@@ -164,6 +165,12 @@ export const navigation: NavGroup[] = [
         label: (m) => m.nav.reports,
         to: '/shikoyatlar',
         icon: TriangleAlert,
+        permission: 'reports.view',
+      },
+      {
+        label: (m) => m.nav.purchaseDisputes,
+        to: '/xarid-shikoyatlari',
+        icon: Gavel,
         permission: 'reports.view',
       },
       {

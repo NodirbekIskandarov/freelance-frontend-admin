@@ -73,6 +73,7 @@ export const uz = {
     solutionModeration: 'Yechim moderatsiyasi',
     comments: 'Izohlar',
     reports: 'Shikoyatlar',
+    purchaseDisputes: 'Xarid shikoyatlari',
     approvedContent: 'Tasdiqlangan kontent',
     monitoring: 'Server monitoringi',
     salesStats: 'Sotuv statistikasi',

@@ -72,6 +72,7 @@ export const ru: Messages = {
     solutionModeration: 'Модерация решений',
     comments: 'Комментарии',
     reports: 'Жалобы',
+    purchaseDisputes: 'Жалобы на покупки',
     approvedContent: 'Одобренный контент',
     monitoring: 'Мониторинг сервера',
     salesStats: 'Статистика продаж',

@@ -117,6 +117,12 @@ const WalletsPage = lazy(async () => ({
   default: (await import('@/features/adminWallet/WalletsPage')).WalletsPage,
 }));
 
+const DisputesPage = lazy(async () => ({
+  default: (await import('@/features/adminDisputes/DisputesPage')).DisputesPage,
+}));
+const DisputeDetailPage = lazy(async () => ({
+  default: (await import('@/features/adminDisputes/DisputeDetailPage')).DisputeDetailPage,
+}));
 const LedgerPage = lazy(async () => ({
   default: (await import('@/features/adminWallet/LedgerPage')).LedgerPage,
 }));
@@ -248,6 +254,11 @@ export const router = createBrowserRouter([
       { path: 'izohlar', element: gated('catalogue.view', <CommentsPage />) },
       { path: 'monitoring', element: gated('dashboard.view', <MonitoringPage />) },
       { path: 'shikoyatlar', element: gated('reports.view', <SolutionReportsPage />) },
+      { path: 'xarid-shikoyatlari', element: gated('reports.view', <DisputesPage />) },
+      {
+        path: 'xarid-shikoyatlari/:id',
+        element: gated('reports.view', <DisputeDetailPage />),
+      },
 
       { path: 'yechimlar', element: gated('solutions.view', <SolutionsPage />) },
       { path: 'yechimlar/:id', element: gated('solutions.view', <SolutionDetailPage />) },
