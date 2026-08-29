@@ -1,6 +1,7 @@
 import {
   Activity,
   BanknoteArrowDown,
+  Receipt,
   BarChart3,
   Building2,
   CheckSquare,
@@ -136,12 +137,6 @@ export const navigation: NavGroup[] = [
         permission: 'catalogue.view',
       },
       {
-        label: (m) => m.nav.submittedInstitutes,
-        to: '/yuborilgan/institutlar',
-        icon: ClipboardCheck,
-        permission: 'catalogue_requests.view',
-      },
-      {
         label: (m) => m.nav.submittedSubjects,
         to: '/yuborilgan/fanlar',
         icon: ClipboardCheck,
@@ -205,6 +200,12 @@ export const navigation: NavGroup[] = [
         to: '/pul-yechish',
         icon: BanknoteArrowDown,
         permission: 'withdrawals.view',
+      },
+      {
+        label: (m) => m.nav.ledger,
+        to: '/pul-harakati',
+        icon: Receipt,
+        permission: 'wallets.view',
       },
     ],
   },

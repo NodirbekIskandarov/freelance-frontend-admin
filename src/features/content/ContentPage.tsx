@@ -11,6 +11,7 @@ import {
 import { useState, type ReactNode } from 'react';
 
 import { SalesAreaChart } from '@/components/charts/SalesAreaChart';
+import { Link } from '@/i18n/navigation';
 import { Avatar } from '@/components/ui/Avatar';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -76,6 +77,58 @@ interface TopRow {
   note?: string;
   count: number;
   revenue: string;
+  /** Qator bosilganda boriladigan joy. Bo'lmasa qator oddiy matn. */
+  to?: string;
+}
+
+/**
+ * Bitta qator — havolali yoki havolasiz.
+ *
+ * Ro'yxatdagi nomlar aynan odam bosmoqchi bo'ladigan narsalar: «bu institut
+ * qanday fanlar sotyapti?» degan savol shu qatorda tug'iladi va javobi
+ * boshqa ekranda. Havolasi yo'q qator ham bor — muallif o'chirilgan bo'lsa
+ * boradigan joy qolmaydi — shuning uchun `to` ixtiyoriy.
+ */
+function TopRowBody({ row, index }: { row: TopRow; index: number }) {
+  const body = (
+    <>
+      <span className="w-3 shrink-0 pt-0.5 text-[11px] text-fg-dim">{index + 1}</span>
+      <Avatar name={row.name} size="sm" className="mt-px size-5 shrink-0" />
+
+      <span className="min-w-0 flex-1">
+        {/* To'liq nom `title` da qoladi — qisqargani o'qib bo'lmaydigan
+            bo'lib qolmasin. */}
+        <span className="block truncate text-xs text-fg" title={row.name}>
+          {row.name}
+        </span>
+        {row.note && (
+          <span className="block truncate text-[11px] text-fg-muted" title={row.note}>
+            {row.note}
+          </span>
+        )}
+      </span>
+
+      <span className="shrink-0 text-right">
+        <span className="block text-xs whitespace-nowrap text-fg-soft">{formatSom(row.count)}</span>
+        <span className="block text-[11px] whitespace-nowrap text-fg-muted">
+          {formatDecimalSom(row.revenue)}
+        </span>
+      </span>
+    </>
+  );
+
+  if (!row.to) {
+    return <span className="flex items-start gap-2 py-2.5">{body}</span>;
+  }
+
+  return (
+    <Link
+      to={row.to}
+      className="-mx-2 flex items-start gap-2 rounded-control px-2 py-2.5 transition-colors hover:bg-elevated"
+    >
+      {body}
+    </Link>
+  );
 }
 
 function TopCard({
@@ -113,34 +166,8 @@ function TopCard({
         */
         <ul className="mt-3 px-3 pb-2">
           {rows.map((row, index) => (
-            <li
-              key={row.id}
-              className="flex items-start gap-2 border-b border-line py-2.5 last:border-b-0"
-            >
-              <span className="w-3 shrink-0 pt-0.5 text-[11px] text-fg-dim">{index + 1}</span>
-              <Avatar name={row.name} size="sm" className="mt-px size-5 shrink-0" />
-
-              <span className="min-w-0 flex-1">
-                {/* To'liq nom `title` da qoladi — qisqargani o'qib
-                    bo'lmaydigan bo'lib qolmasin. */}
-                <span className="block truncate text-xs text-fg" title={row.name}>
-                  {row.name}
-                </span>
-                {row.note && (
-                  <span className="block truncate text-[11px] text-fg-muted" title={row.note}>
-                    {row.note}
-                  </span>
-                )}
-              </span>
-
-              <span className="shrink-0 text-right">
-                <span className="block text-xs whitespace-nowrap text-fg-soft">
-                  {formatSom(row.count)}
-                </span>
-                <span className="block text-[11px] whitespace-nowrap text-fg-muted">
-                  {formatDecimalSom(row.revenue)}
-                </span>
-              </span>
+            <li key={row.id} className="border-b border-line last:border-b-0">
+              <TopRowBody row={row} index={index} />
             </li>
           ))}
         </ul>
@@ -316,6 +343,9 @@ export function ContentPage() {
                 name: row.short_name || row.name,
                 count: row.sales,
                 revenue: row.revenue,
+                // Institutning o'z ekrani yo'q — «bu institut nima sotyapti»
+                // degan savolga uning fanlari javob beradi.
+                to: `/fanlar?university=${row.id}`,
               }))}
             />
             <TopCard
@@ -328,6 +358,7 @@ export function ContentPage() {
                 note: row.university_name,
                 count: row.sales,
                 revenue: row.revenue,
+                to: `/topshiriqlar?subject=${row.id}`,
               }))}
             />
             <TopCard
@@ -340,6 +371,7 @@ export function ContentPage() {
                 note: row.subject_name,
                 count: row.sales,
                 revenue: row.revenue,
+                to: `/topshiriqlar/${row.id}`,
               }))}
             />
             <TopCard
@@ -352,6 +384,7 @@ export function ContentPage() {
                 note: `${row.solutions} ta yechim`,
                 count: row.sales,
                 revenue: row.revenue,
+                to: `/foydalanuvchilar/${row.id}`,
               }))}
             />
 

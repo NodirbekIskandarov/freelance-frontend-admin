@@ -67,7 +67,6 @@ export const ru: Messages = {
     subjects: 'Предметы',
     assignments: 'Задания',
     variants: 'Варианты',
-    submittedInstitutes: 'Присланные вузы',
     submittedSubjects: 'Присланные предметы',
     submittedSolutions: 'Присланные решения',
     solutionModeration: 'Модерация решений',
@@ -79,6 +78,7 @@ export const ru: Messages = {
 
     wallets: 'Кошельки',
     withdrawals: 'Заявки на вывод',
+    ledger: 'Движение средств',
 
     audit: 'Журнал аудита',
     roles: 'Роли и права',

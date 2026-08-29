@@ -2,6 +2,9 @@ import type { ApiPaginated } from '@/shared/types/api';
 import type {
   AdminWallet,
   AdminWithdrawal,
+  LedgerEntry,
+  LedgerQuery,
+  LedgerTotals,
   WalletsQuery,
   WalletTransaction,
   WithdrawalsQuery,
@@ -50,7 +53,41 @@ export const adminWalletApi = baseApi.injectEndpoints({
         method: 'POST',
         body,
       }),
-      invalidatesTags: (_result, _error, { id }) => ['Wallet', { type: 'Wallet', id: `tx-${id}` }],
+      invalidatesTags: (_result, _error, { id }) => [
+        'Wallet',
+        { type: 'Wallet', id: `tx-${id}` },
+        { type: 'Wallet', id: 'LEDGER' },
+      ],
+    }),
+
+    /**
+     * Balansni to'ldirish — tashqarida kelgan pulni yozish (naqd, qo'lda
+     * o'tkazma). Tuzatishdan alohida: tuzatish xatoni to'g'rilaydi va
+     * ikki tomonga ishlaydi, to'ldirish esa faqat qo'shadi. Izoh
+     * MAJBURIY — «bu pul qayerdan keldi» degan savolga javob shu.
+     */
+    topupWallet: build.mutation<AdminWallet, { id: string; amount: string; description: string }>({
+      query: ({ id, ...body }) => ({
+        url: `/admin/wallet/wallets/${id}/topup/`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: (_result, _error, { id }) => [
+        'Wallet',
+        { type: 'Wallet', id: `tx-${id}` },
+        { type: 'Wallet', id: 'LEDGER' },
+      ],
+    }),
+
+    /** Butun platforma bo'yicha pul harakati. */
+    getLedger: build.query<ApiPaginated<LedgerEntry>, LedgerQuery>({
+      query: (params) => ({ url: '/admin/wallet/transactions/', params }),
+      providesTags: [{ type: 'Wallet', id: 'LEDGER' }],
+    }),
+
+    getLedgerTotals: build.query<LedgerTotals, Omit<LedgerQuery, 'page' | 'page_size'>>({
+      query: (params) => ({ url: '/admin/wallet/transactions/totals/', params }),
+      providesTags: [{ type: 'Wallet', id: 'LEDGER' }],
     }),
 
     freezeWallet: build.mutation<AdminWallet, { id: string; frozen: boolean }>({
@@ -104,6 +141,9 @@ export const {
   useGetWalletQuery,
   useGetWalletTransactionsQuery,
   useAdjustWalletMutation,
+  useTopupWalletMutation,
+  useGetLedgerQuery,
+  useGetLedgerTotalsQuery,
   useFreezeWalletMutation,
   useGetWithdrawalsQuery,
   useGetWithdrawalStatsQuery,

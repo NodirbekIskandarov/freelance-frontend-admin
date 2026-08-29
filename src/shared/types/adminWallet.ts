@@ -75,6 +75,35 @@ export interface WalletTransaction {
   created_at: string;
 }
 
+/**
+ * Butun platforma jurnalidagi qator.
+ *
+ * Hamyon ichidagi ko'chirmadan farqi — `user`: bu yerda har qator boshqa
+ * hamyondan keladi va kimniki ekani ko'rinmasa ro'yxat behuda.
+ */
+export interface LedgerEntry extends WalletTransaction {
+  wallet: string;
+  user: WalletOwner;
+  created_by: WalletOwner | null;
+}
+
+export interface LedgerQuery {
+  page?: number;
+  page_size?: number;
+  ordering?: string;
+  search?: string;
+  type?: TransactionType;
+  wallet?: string;
+}
+
+/** Filtrga tushgan qatorlarning yig'indisi. */
+export interface LedgerTotals {
+  count: number;
+  credit: string;
+  debit: string;
+  net: string;
+}
+
 export const WITHDRAWAL_METHODS = ['card', 'phone'] as const;
 export type WithdrawalMethod = (typeof WITHDRAWAL_METHODS)[number];
 

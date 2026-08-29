@@ -117,6 +117,9 @@ const WalletsPage = lazy(async () => ({
   default: (await import('@/features/adminWallet/WalletsPage')).WalletsPage,
 }));
 
+const LedgerPage = lazy(async () => ({
+  default: (await import('@/features/adminWallet/LedgerPage')).LedgerPage,
+}));
 const WithdrawalsPage = lazy(async () => ({
   default: (await import('@/features/adminWallet/WithdrawalsPage')).WithdrawalsPage,
 }));
@@ -218,6 +221,7 @@ export const router = createBrowserRouter([
       { path: 'murojaatlar', element: gated('appeals.view', <AppealsPage />) },
       { path: 'hamyonlar', element: gated('wallets.view', <WalletsPage />) },
       { path: 'pul-yechish', element: gated('withdrawals.view', <WithdrawalsPage />) },
+      { path: 'pul-harakati', element: gated('wallets.view', <LedgerPage />) },
 
       { path: 'kontent', element: gated('content.view', <ContentPage />) },
       { path: 'institutlar', element: gated('catalogue.view', <InstitutesPage />) },
@@ -234,10 +238,6 @@ export const router = createBrowserRouter([
       { path: 'topshiriqlar/:id', element: gated('catalogue.view', <AssignmentDetailPage />) },
       { path: 'variantlar', element: gated('catalogue.view', <VariantsPage />) },
 
-      {
-        path: 'yuborilgan/institutlar',
-        element: <PlaceholderPage title="Yuborilgan institutlar" />,
-      },
       { path: 'yuborilgan/fanlar', element: <PlaceholderPage title="Yuborilgan fanlar" /> },
       { path: 'yuborilgan/javoblar', element: gated('solutions.view', <SubmissionsPage />) },
       {

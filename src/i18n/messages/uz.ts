@@ -68,7 +68,6 @@ export const uz = {
     subjects: 'Fanlar',
     assignments: 'Topshiriqlar',
     variants: 'Variantlar',
-    submittedInstitutes: 'Yuborilgan institutlar',
     submittedSubjects: 'Yuborilgan fanlar',
     submittedSolutions: 'Yuborilgan javoblar',
     solutionModeration: 'Yechim moderatsiyasi',
@@ -80,6 +79,7 @@ export const uz = {
 
     wallets: 'Hamyonlar',
     withdrawals: "Pul yechish so'rovlari",
+    ledger: 'Pul harakati',
 
     audit: 'Audit jurnali',
     roles: 'Rollar va ruxsatlar',

@@ -1,4 +1,4 @@
-import { Lock, LockOpen, PencilLine, Receipt, Snowflake } from 'lucide-react';
+import { Lock, LockOpen, PencilLine, Plus, Receipt, Snowflake } from 'lucide-react';
 import { useState } from 'react';
 
 import { Badge } from '@/components/ui/Badge';
@@ -15,6 +15,7 @@ import { getApiErrorMessage } from '@/shared/api';
 import type { AdminWallet } from '@/shared/types/adminWallet';
 
 import { AdjustWalletModal } from './AdjustWalletModal';
+import { TopupWalletModal } from './TopupWalletModal';
 import { WalletTransactionsModal } from './WalletTransactionsModal';
 import { useFreezeWalletMutation, useGetWalletsQuery } from './adminWalletApi';
 
@@ -30,6 +31,7 @@ export function WalletsPage() {
   const [frozen, setFrozen] = useState('all');
   const [search, setSearch] = useState('');
   const [adjustTarget, setAdjustTarget] = useState<AdminWallet | null>(null);
+  const [topupTarget, setTopupTarget] = useState<AdminWallet | null>(null);
   const [historyTarget, setHistoryTarget] = useState<AdminWallet | null>(null);
 
   const debouncedSearch = useDebouncedValue(search, 350);
@@ -97,6 +99,17 @@ export function WalletsPage() {
             onClick={() => setHistoryTarget(row)}
           >
             <Receipt className="size-4" strokeWidth={1.75} />
+          </IconButton>
+          {/* To'ldirish tuzatishdan alohida tugma: birinchisi kelgan
+              pulni yozadi, ikkinchisi xatoni to'g'rilaydi — jurnalda ular
+              boshqa-boshqa turi bilan qoladi. */}
+          <IconButton
+            label="Balansni to'ldirish"
+            tone="success"
+            size="sm"
+            onClick={() => setTopupTarget(row)}
+          >
+            <Plus className="size-4" strokeWidth={2} />
           </IconButton>
           <IconButton
             label="Balansni tuzatish"
@@ -208,6 +221,7 @@ export function WalletsPage() {
         </>
       )}
 
+      <TopupWalletModal wallet={topupTarget} onClose={() => setTopupTarget(null)} />
       <AdjustWalletModal wallet={adjustTarget} onClose={() => setAdjustTarget(null)} />
       <WalletTransactionsModal wallet={historyTarget} onClose={() => setHistoryTarget(null)} />
     </>
