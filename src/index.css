@@ -1,22 +1,58 @@
 @import 'tailwindcss';
+/*
+ * Inter — o'zimizda joylashgan (`@fontsource-variable`), Google Fonts
+ * havolasi emas: tashqi so'rov birinchi chizishni to'sadi va panel
+ * ichki tarmoqdan ochilganda umuman kelmasligi mumkin. Variable versiya
+ * bitta fayl bo'lib, barcha qalinliklarni beradi.
+ *
+ * `font-display: swap` paketning o'zida sozlangan — matn shrift
+ * kelguncha tizim shriftida chiziladi, ko'rinmas qolmaydi.
+ */
+@import '@fontsource-variable/inter';
 @import './shared/styles/tokens.css';
 
 @layer base {
+  /*
+   * `color-scheme` ni JS qo'yadi (`lib/theme.ts`), bu yerda faqat
+   * boshlang'ich qiymat: skript ishga tushguncha sahifa qorong'i
+   * bo'lib tursin, aks holda bir kadr oq miltillaydi.
+   */
   html {
     color-scheme: dark;
+  }
+
+  html[data-theme='light'] {
+    color-scheme: light;
   }
 
   body {
     background-color: var(--color-canvas);
     color: var(--color-fg);
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  /*
+   * Jadvallarda raqamlar bir xil kenglikda.
+   *
+   * `340 100 so'm` va `37 260 so'm` proporsional raqamlarda ustunda
+   * qatorma-qator siljib ketardi va summalarni ko'z bilan solishtirib
+   * bo'lmasdi. Butun jadvalga qo'yiladi: tabular raqamlar faqat
+   * raqamlarga ta'sir qiladi, harflarga emas.
+   */
+  table {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
   }
 
   /* Klaviatura bilan yurganda fokus ko'rinib turishi kerak (a11y). */
   :focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
+    /* Halqa elementning o'z shaklini takrorlasin — dumaloq tugmada
+       to'rtburchak ramka begona ko'rinadi. */
+    border-radius: inherit;
   }
 
   /*

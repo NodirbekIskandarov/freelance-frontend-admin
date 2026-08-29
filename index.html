@@ -5,6 +5,28 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin panel</title>
+    <!--
+      Mavzu bundle yuklanguncha qo'yiladi. Aks holda sahifa avval
+      qorong'i chizilib, keyin yorug'ga sakraydi — bir kadrga bo'lsa ham
+      bu ko'zga tashlanadi. Mantiq `src/lib/theme.ts` da takrorlanadi va
+      bu ataylab: skript modul yuklanguncha ishlashi kerak.
+    -->
+    <script>
+      (function () {
+        try {
+          var mode = localStorage.getItem('admin.theme') || 'system';
+          var dark =
+            mode === 'dark' ||
+            (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var root = document.documentElement;
+          root.dataset.theme = dark ? 'dark' : 'light';
+          root.dataset.themeMode = mode;
+          root.style.colorScheme = dark ? 'dark' : 'light';
+        } catch (error) {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

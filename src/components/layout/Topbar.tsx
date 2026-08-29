@@ -3,6 +3,7 @@ import { Bell, Menu } from 'lucide-react';
 import { useT } from '@/i18n/I18nProvider';
 import { cn } from '@/lib/cn';
 
+import { ThemeToggle } from './ThemeToggle';
 import { LocaleToggle } from './LocaleToggle';
 
 import { UserMenu } from './UserMenu';
@@ -49,12 +50,7 @@ export function Topbar({ onToggleSidebar, notificationCount = 0 }: TopbarProps) 
       </IconAction>
 
       <div className="flex items-center gap-1">
-        {/*
-          Mavzu tugmasi OLIB TASHLANDI: panelda yorug' tema yo'q —
-          tokenlar faqat qorong'i palitra uchun yozilgan. Hech nima
-          qilmaydigan tugma yo'q tugmadan yomonroq: odam uni bosib,
-          buzuq deb o'ylaydi.
-        */}
+        <ThemeToggle />
         <LocaleToggle />
 
         <IconAction label={m.layout.notifications}>

@@ -1,18 +1,80 @@
+import { useSyncExternalStore } from 'react';
+
+import { subscribeToTheme } from '@/lib/theme';
+
 /**
- * Grafik ranglari.
+ * Grafik ranglari — tokenlardan O'QIB olinadi, nusxa emas.
  *
- * Recharts SVG atributlariga aniq qiymat kutadi, shuning uchun bu yerda
- * CSS o'zgaruvchisi emas, literal qiymatlar. Ular `shared/styles/tokens.css`
- * dagi tokenlarning nusxasi — palitra o'zgarsa BU FAYLNI HAM yangilash
- * kerak, aks holda grafiklar eski rangda qolib ketadi (aynan shunday
- * bo'lgan: tokenlar yashilga o'tganda o'qlar ko'k-kulrang qolgandi).
+ * Ilgari bu yerda literal qiymatlar turardi va faylning o'z izohi buni
+ * ogohlantirish bilan tan olardi: «palitra o'zgarsa BU FAYLNI HAM
+ * yangilash kerak». Aynan shunday bo'ldi ham — palitra ko'tarilganda
+ * o'qlar va to'r eski, quyuqroq fon uchun tanlangan ranglarda qolib ketdi.
+ *
+ * Recharts SVG atributiga aniq qiymat kutadi, ya'ni `var(--color-x)` ni
+ * to'g'ridan-to'g'ri berib bo'lmaydi. Shuning uchun qiymat brauzerdan
+ * hisoblab olinadi: token o'zgarsa (mavzu almashsa ham) grafik o'zi
+ * ergashadi va sinxronlashni hech kim eslab yurishi shart emas.
  */
 
-/** `--color-fg-muted` */
-export const AXIS_COLOR = '#A1A1AA';
+const FALLBACKS: Record<string, string> = {
+  '--color-fg-muted': '#97a09b',
+  '--color-line': '#2e3431',
+  '--color-card': '#191f1c',
+  '--color-chart-1': '#10b981',
+  '--color-chart-2': '#3b82f6',
+  '--color-chart-3': '#f59e0b',
+  '--color-chart-4': '#a78bfa',
+};
 
-/** `--color-line` */
-export const GRID_COLOR = '#1B221F';
+/** Bitta tokenning hisoblangan qiymati (test muhitida — zaxira). */
+function readToken(name: string): string {
+  if (typeof document === 'undefined') return FALLBACKS[name] ?? '#10b981';
+  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return value || FALLBACKS[name] || '#10b981';
+}
 
-/** `--color-brand-500` — shablondagi grafiklarda ham emerald. */
-export const SERIES_COLOR = '#10B981';
+export interface ChartTheme {
+  axis: string;
+  grid: string;
+  surface: string;
+  /** Bir xil ko'rsatkich hamma grafikda bir xil rangda bo'lishi uchun. */
+  series: [string, string, string, string];
+}
+
+function snapshot(): ChartTheme {
+  return {
+    axis: readToken('--color-fg-muted'),
+    grid: readToken('--color-line'),
+    surface: readToken('--color-card'),
+    series: [
+      readToken('--color-chart-1'),
+      readToken('--color-chart-2'),
+      readToken('--color-chart-3'),
+      readToken('--color-chart-4'),
+    ],
+  };
+}
+
+/*
+ * `useSyncExternalStore` har chaqiruvda BIR XIL obyektni kutadi — yangi
+ * obyekt qaytarilsa React cheksiz qayta chizadi. Shuning uchun qiymat
+ * keshlanadi va faqat mavzu o'zgarganda bekor qilinadi.
+ */
+let cached: ChartTheme | null = null;
+
+function getSnapshot(): ChartTheme {
+  cached ??= snapshot();
+  return cached;
+}
+
+function subscribe(onChange: () => void): () => void {
+  return subscribeToTheme(() => {
+    cached = null;
+    onChange();
+  });
+}
+
+/** Joriy mavzuga mos grafik ranglari. */
+export function useChartTheme(): ChartTheme {
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+}

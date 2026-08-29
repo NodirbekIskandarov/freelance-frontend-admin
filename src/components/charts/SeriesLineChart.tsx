@@ -8,15 +8,12 @@ import {
   YAxis,
 } from 'recharts';
 
-import { AXIS_COLOR, GRID_COLOR } from './chartTheme';
+import { useChartTheme } from './chartTheme';
 import type { SeriesPoint } from '@/shared/types/dashboard';
 
 import { ChartTooltip } from './ChartTooltip';
 
-/** Dizayndagi o'q va tur ranglari — tokenlar bilan bir xil. */
-
 const axisProps = {
-  stroke: AXIS_COLOR,
   fontSize: 12,
   tickLine: false,
   axisLine: false,
@@ -26,8 +23,15 @@ interface SeriesLineChartProps {
   data: SeriesPoint[];
   primaryLabel: string;
   secondaryLabel: string;
-  primaryColor: string;
-  secondaryColor: string;
+  /*
+    Ranglar IXTIYORIY va sukut bo'yicha mavzudan olinadi.
+    Ilgari ular majburiy edi va har chaqiruvchi o'zicha tanlardi: bitta
+    grafikda «kunlik yangi» ko'k, ikkinchisida «jami» ko'k bo'lib qolgandi
+    — ya'ni rang hech nima anglatmasdi. Endi ma'no rangga bog'langan:
+    to'plangan qiymat doim series[0], kunlik oqim doim series[1].
+  */
+  primaryColor?: string;
+  secondaryColor?: string;
   /** Y o'qidagi qiymatlarni qisqartirish (1250 → 1.25K). */
   formatY?: (value: number) => string;
   /**
@@ -63,28 +67,33 @@ export function SeriesLineChart({
   formatY,
   yTicks,
 }: SeriesLineChartProps) {
+  const theme = useChartTheme();
+  const primary = primaryColor ?? theme.series[0];
+  const secondary = secondaryColor ?? theme.series[1];
+
   return (
     <div>
       <Legend
         items={[
-          { label: primaryLabel, color: primaryColor },
-          { label: secondaryLabel, color: secondaryColor },
+          { label: primaryLabel, color: primary },
+          { label: secondaryLabel, color: secondary },
         ]}
       />
 
       <ResponsiveContainer width="100%" height={230}>
         <LineChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -12 }}>
-          <CartesianGrid stroke={GRID_COLOR} vertical={false} />
-          <XAxis dataKey="date" {...axisProps} dy={8} />
+          <CartesianGrid stroke={theme.grid} vertical={false} />
+          <XAxis dataKey="date" {...axisProps} stroke={theme.axis} dy={8} />
           <YAxis
             {...axisProps}
+            stroke={theme.axis}
             tickFormatter={formatY}
             width={52}
             ticks={yTicks}
             domain={[yTicks[0] ?? 0, yTicks[yTicks.length - 1] ?? 'auto']}
           />
           <Tooltip
-            cursor={{ stroke: GRID_COLOR }}
+            cursor={{ stroke: theme.grid }}
             content={<ChartTooltip />}
             // Recharts tooltip'ni har harakatda qayta chizadi; animatsiya
             // o'chirilmasa kursor tez yurganda kechikib ergashadi.
@@ -94,18 +103,18 @@ export function SeriesLineChart({
             type="linear"
             dataKey="primary"
             name={primaryLabel}
-            stroke={primaryColor}
+            stroke={primary}
             strokeWidth={2}
-            dot={{ r: 3, fill: primaryColor, strokeWidth: 0 }}
+            dot={{ r: 3, fill: primary, strokeWidth: 0 }}
             activeDot={{ r: 5 }}
           />
           <Line
             type="linear"
             dataKey="secondary"
             name={secondaryLabel}
-            stroke={secondaryColor}
+            stroke={secondary}
             strokeWidth={2}
-            dot={{ r: 3, fill: secondaryColor, strokeWidth: 0 }}
+            dot={{ r: 3, fill: secondary, strokeWidth: 0 }}
             activeDot={{ r: 5 }}
           />
         </LineChart>

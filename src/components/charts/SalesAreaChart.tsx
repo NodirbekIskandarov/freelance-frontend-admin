@@ -8,7 +8,7 @@ import {
   YAxis,
 } from 'recharts';
 
-import { AXIS_COLOR, GRID_COLOR, SERIES_COLOR } from './chartTheme';
+import { useChartTheme } from './chartTheme';
 import type { SalesPoint } from '@/shared/types/content';
 
 import { ChartTooltip } from './ChartTooltip';
@@ -39,6 +39,7 @@ function formatSom(value: number): string {
 
 /** "Kundalik sotuvlar" katta grafigi (6-rasm). */
 export function SalesAreaChart({ data }: { data: SalesPoint[] }) {
+  const theme = useChartTheme();
   const { ticks, domain } = ticksFor(Math.max(...data.map((point) => point.amount), 0));
 
   return (
@@ -46,22 +47,22 @@ export function SalesAreaChart({ data }: { data: SalesPoint[] }) {
       <AreaChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: -8 }}>
         <defs>
           <linearGradient id="salesFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={SERIES_COLOR} stopOpacity={0.25} />
-            <stop offset="100%" stopColor={SERIES_COLOR} stopOpacity={0} />
+            <stop offset="0%" stopColor={theme.series[0]} stopOpacity={0.25} />
+            <stop offset="100%" stopColor={theme.series[0]} stopOpacity={0} />
           </linearGradient>
         </defs>
 
-        <CartesianGrid stroke={GRID_COLOR} vertical={false} />
+        <CartesianGrid stroke={theme.grid} vertical={false} />
         <XAxis
           dataKey="date"
-          stroke={AXIS_COLOR}
+          stroke={theme.axis}
           fontSize={12}
           tickLine={false}
           axisLine={false}
           dy={8}
         />
         <YAxis
-          stroke={AXIS_COLOR}
+          stroke={theme.axis}
           fontSize={12}
           tickLine={false}
           axisLine={false}
@@ -71,7 +72,7 @@ export function SalesAreaChart({ data }: { data: SalesPoint[] }) {
           width={48}
         />
         <Tooltip
-          cursor={{ stroke: GRID_COLOR }}
+          cursor={{ stroke: theme.grid }}
           content={<ChartTooltip formatter={formatSom} />}
           isAnimationActive={false}
         />
@@ -79,10 +80,10 @@ export function SalesAreaChart({ data }: { data: SalesPoint[] }) {
           type="linear"
           dataKey="amount"
           name="Kunlik sotuv"
-          stroke={SERIES_COLOR}
+          stroke={theme.series[0]}
           strokeWidth={2}
           fill="url(#salesFill)"
-          dot={{ r: 3.5, fill: SERIES_COLOR, strokeWidth: 0 }}
+          dot={{ r: 3.5, fill: theme.series[0], strokeWidth: 0 }}
           activeDot={{ r: 5 }}
         />
       </AreaChart>

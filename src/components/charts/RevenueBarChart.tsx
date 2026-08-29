@@ -1,6 +1,6 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
-import { AXIS_COLOR, GRID_COLOR, SERIES_COLOR } from './chartTheme';
+import { useChartTheme } from './chartTheme';
 import type { RevenuePoint } from '@/shared/types/dashboard';
 
 import { ChartTooltip } from './ChartTooltip';
@@ -35,6 +35,7 @@ function formatSom(value: number): string {
 }
 
 export function RevenueBarChart({ data }: { data: RevenuePoint[] }) {
+  const theme = useChartTheme();
   const { ticks, domain } = ticksFor(Math.max(...data.map((point) => point.amount), 0));
 
   return (
@@ -43,7 +44,7 @@ export function RevenueBarChart({ data }: { data: RevenuePoint[] }) {
         <span
           aria-hidden
           className="h-[3px] w-4 rounded-full"
-          style={{ background: SERIES_COLOR }}
+          style={{ background: theme.series[0] }}
         />
         Kunlik daromad (so‘m)
       </div>
@@ -54,10 +55,10 @@ export function RevenueBarChart({ data }: { data: RevenuePoint[] }) {
           margin={{ top: 4, right: 8, bottom: 0, left: -8 }}
           barCategoryGap="34%"
         >
-          <CartesianGrid stroke={GRID_COLOR} vertical={false} />
+          <CartesianGrid stroke={theme.grid} vertical={false} />
           <XAxis
             dataKey="date"
-            stroke={AXIS_COLOR}
+            stroke={theme.axis}
             fontSize={12}
             tickLine={false}
             axisLine={false}
@@ -67,7 +68,7 @@ export function RevenueBarChart({ data }: { data: RevenuePoint[] }) {
             interval={6}
           />
           <YAxis
-            stroke={AXIS_COLOR}
+            stroke={theme.axis}
             fontSize={12}
             tickLine={false}
             axisLine={false}
@@ -81,7 +82,12 @@ export function RevenueBarChart({ data }: { data: RevenuePoint[] }) {
             content={<ChartTooltip formatter={formatSom} />}
             isAnimationActive={false}
           />
-          <Bar dataKey="amount" name="Kunlik daromad" fill={SERIES_COLOR} radius={[2, 2, 0, 0]} />
+          <Bar
+            dataKey="amount"
+            name="Kunlik daromad"
+            fill={theme.series[0]}
+            radius={[2, 2, 0, 0]}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

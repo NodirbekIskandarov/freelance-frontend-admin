@@ -132,8 +132,6 @@ function Charts({ data }: { data: AdminDashboard }) {
             data={userSeries}
             primaryLabel="Jami (to'plangan)"
             secondaryLabel="Kunlik yangi"
-            primaryColor="#22C55E"
-            secondaryColor="#3B82F6"
             formatY={formatThousands}
             yTicks={ticksFor(Math.max(...userSeries.map((p) => p.primary), 0))}
           />
@@ -147,8 +145,6 @@ function Charts({ data }: { data: AdminDashboard }) {
             data={solutionSeries}
             primaryLabel="Jami (to'plangan)"
             secondaryLabel="Kunlik yangi"
-            primaryColor="#3B82F6"
-            secondaryColor="#F59E0B"
             yTicks={ticksFor(Math.max(...solutionSeries.map((p) => p.primary), 0))}
           />
         </div>

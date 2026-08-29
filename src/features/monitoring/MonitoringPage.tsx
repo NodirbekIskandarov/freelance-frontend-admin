@@ -20,7 +20,7 @@ import {
   YAxis,
 } from 'recharts';
 
-import { AXIS_COLOR, GRID_COLOR } from '@/components/charts/chartTheme';
+import { useChartTheme } from '@/components/charts/chartTheme';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -165,6 +165,7 @@ const routeColumns: Column<RouteStat>[] = [
 ];
 
 export function MonitoringPage() {
+  const chart = useChartTheme();
   const [window, setWindow] = useState('60');
 
   const { data, isLoading, isFetching, error, refetch } = useGetMonitoringQuery(
@@ -292,21 +293,21 @@ export function MonitoringPage() {
                 <AreaChart data={chartData} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
                   <defs>
                     <linearGradient id="rpmFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#10B981" stopOpacity={0.35} />
-                      <stop offset="100%" stopColor="#10B981" stopOpacity={0} />
+                      <stop offset="0%" stopColor={chart.series[0]} stopOpacity={0.35} />
+                      <stop offset="100%" stopColor={chart.series[0]} stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid stroke={GRID_COLOR} vertical={false} />
+                  <CartesianGrid stroke={chart.grid} vertical={false} />
                   <XAxis
                     dataKey="label"
-                    stroke={AXIS_COLOR}
+                    stroke={chart.axis}
                     fontSize={11}
                     tickLine={false}
                     axisLine={false}
                     minTickGap={40}
                   />
                   <YAxis
-                    stroke={AXIS_COLOR}
+                    stroke={chart.axis}
                     fontSize={11}
                     tickLine={false}
                     axisLine={false}
@@ -314,18 +315,18 @@ export function MonitoringPage() {
                   />
                   <Tooltip
                     contentStyle={{
-                      background: '#0d1411',
-                      border: '1px solid #2a302e',
+                      background: chart.surface,
+                      border: `1px solid ${chart.grid}`,
                       borderRadius: 12,
                       fontSize: 12,
                     }}
-                    labelStyle={{ color: '#A1A1AA' }}
+                    labelStyle={{ color: chart.axis }}
                     formatter={(value) => [`${Number(value)} / daqiqa`, "So'rov"]}
                   />
                   <Area
                     type="monotone"
                     dataKey="rpm"
-                    stroke="#10B981"
+                    stroke={chart.series[0]}
                     strokeWidth={2}
                     fill="url(#rpmFill)"
                   />
@@ -341,21 +342,21 @@ export function MonitoringPage() {
                 <AreaChart data={chartData} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
                   <defs>
                     <linearGradient id="latencyFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#F59E0B" stopOpacity={0} />
+                      <stop offset="0%" stopColor={chart.series[2]} stopOpacity={0.3} />
+                      <stop offset="100%" stopColor={chart.series[2]} stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid stroke={GRID_COLOR} vertical={false} />
+                  <CartesianGrid stroke={chart.grid} vertical={false} />
                   <XAxis
                     dataKey="label"
-                    stroke={AXIS_COLOR}
+                    stroke={chart.axis}
                     fontSize={11}
                     tickLine={false}
                     axisLine={false}
                     minTickGap={40}
                   />
                   <YAxis
-                    stroke={AXIS_COLOR}
+                    stroke={chart.axis}
                     fontSize={11}
                     tickLine={false}
                     axisLine={false}
@@ -363,18 +364,18 @@ export function MonitoringPage() {
                   />
                   <Tooltip
                     contentStyle={{
-                      background: '#0d1411',
-                      border: '1px solid #2a302e',
+                      background: chart.surface,
+                      border: `1px solid ${chart.grid}`,
                       borderRadius: 12,
                       fontSize: 12,
                     }}
-                    labelStyle={{ color: '#A1A1AA' }}
+                    labelStyle={{ color: chart.axis }}
                     formatter={(value) => [`${Math.round(Number(value))} ms`, 'p95']}
                   />
                   <Area
                     type="monotone"
                     dataKey="p95_ms"
-                    stroke="#F59E0B"
+                    stroke={chart.series[2]}
                     strokeWidth={2}
                     fill="url(#latencyFill)"
                     connectNulls
@@ -426,18 +427,18 @@ export function MonitoringPage() {
                     >
                       <defs>
                         <linearGradient id="cpuFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#38BDF8" stopOpacity={0.3} />
-                          <stop offset="100%" stopColor="#38BDF8" stopOpacity={0} />
+                          <stop offset="0%" stopColor={chart.series[1]} stopOpacity={0.3} />
+                          <stop offset="100%" stopColor={chart.series[1]} stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="memFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#A78BFA" stopOpacity={0.25} />
-                          <stop offset="100%" stopColor="#A78BFA" stopOpacity={0} />
+                          <stop offset="0%" stopColor={chart.series[3]} stopOpacity={0.25} />
+                          <stop offset="100%" stopColor={chart.series[3]} stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid stroke={GRID_COLOR} vertical={false} />
+                      <CartesianGrid stroke={chart.grid} vertical={false} />
                       <XAxis
                         dataKey="label"
-                        stroke={AXIS_COLOR}
+                        stroke={chart.axis}
                         fontSize={11}
                         tickLine={false}
                         axisLine={false}
@@ -448,7 +449,7 @@ export function MonitoringPage() {
                           ko'rinardi. */}
                       <YAxis
                         domain={[0, 100]}
-                        stroke={AXIS_COLOR}
+                        stroke={chart.axis}
                         fontSize={11}
                         tickLine={false}
                         axisLine={false}
@@ -457,12 +458,12 @@ export function MonitoringPage() {
                       />
                       <Tooltip
                         contentStyle={{
-                          background: '#0d1411',
-                          border: '1px solid #2a302e',
+                          background: chart.surface,
+                          border: `1px solid ${chart.grid}`,
                           borderRadius: 12,
                           fontSize: 12,
                         }}
-                        labelStyle={{ color: '#A1A1AA' }}
+                        labelStyle={{ color: chart.axis }}
                         formatter={(value, name) => [
                           `${Number(value)}%`,
                           name === 'cpu' ? 'Protsessor' : 'Xotira',
@@ -478,14 +479,14 @@ export function MonitoringPage() {
                       <Area
                         type="monotone"
                         dataKey="cpu"
-                        stroke="#38BDF8"
+                        stroke={chart.series[1]}
                         strokeWidth={2}
                         fill="url(#cpuFill)"
                       />
                       <Area
                         type="monotone"
                         dataKey="mem"
-                        stroke="#A78BFA"
+                        stroke={chart.series[3]}
                         strokeWidth={2}
                         fill="url(#memFill)"
                       />
@@ -495,11 +496,11 @@ export function MonitoringPage() {
 
                 <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-fg-muted">
                   <span className="flex items-center gap-1.5">
-                    <span className="size-2 rounded-full bg-[#38BDF8]" />
+                    <span className="size-2 rounded-full bg-chart-2" />
                     Protsessor
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="size-2 rounded-full bg-[#A78BFA]" />
+                    <span className="size-2 rounded-full bg-chart-4" />
                     Xotira
                   </span>
                   <span className="text-fg-dim">
