@@ -40,6 +40,7 @@ export const uz = {
     supportAction: "Qo'llab-quvvatlash",
     home: 'Bosh sahifa',
     notifications: 'Bildirishnomalar',
+    closeSidebar: 'Yon menyuni yopish',
     toggleSidebar: 'Yon menyuni ochish/yopish',
     profile: 'Profil',
     logout: 'Chiqish',

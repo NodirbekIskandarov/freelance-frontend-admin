@@ -1,34 +1,99 @@
-import { Suspense, useState } from 'react';
-import { Navigate, Outlet } from 'react-router';
+import { Suspense, useCallback, useState, useSyncExternalStore } from 'react';
+import { Navigate, Outlet, useLocation } from 'react-router';
 
+import { localizeHref } from '@/i18n/config';
+import { useT } from '@/i18n/I18nProvider';
 import { cn } from '@/lib/cn';
 import { tokenStore } from '@/store/api';
 
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
-import { localizeHref } from '@/i18n/config';
-import { useT } from '@/i18n/I18nProvider';
+
+/** Yon menyu kontent YONIDA sig'adigan kenglik. */
+const DESKTOP = '(min-width: 1024px)';
+
+/**
+ * Ekran keng-tor ekanini kuzatadi.
+ *
+ * `useSyncExternalStore`, effekt emas: qiymat brauzerda va uni effektda
+ * o'qib holatga yozish qo'shimcha render tug'diradi. Loyihadagi tema va
+ * til tanlagichlari ham shu naqshda.
+ */
+function useIsDesktop(): boolean {
+  const subscribe = useCallback((onChange: () => void) => {
+    const query = window.matchMedia(DESKTOP);
+    query.addEventListener('change', onChange);
+    return () => query.removeEventListener('change', onChange);
+  }, []);
+
+  return useSyncExternalStore(
+    subscribe,
+    () => window.matchMedia(DESKTOP).matches,
+    () => true,
+  );
+}
 
 export function AdminLayout() {
   const { m, locale } = useT();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { pathname } = useLocation();
+  const isDesktop = useIsDesktop();
 
   /*
-   * Token yo'q bo'lsa sahifa umuman render qilinmaydi.
+   * Telefonda menyu YOPIQ boshlanadi.
    *
-   * Faqat 401 javobiga tayanish yetarli emas edi: token'siz ochilgan
-   * sahifa avval bo'sh jadval va "0" ko'rsatkichlarni chizib, keyingina
-   * login sahifasiga sakrardi. Token bor-yo'g'i esa lokal tekshiruv —
-   * haqiqiy ruxsatni backend beradi va yaroqsiz token'da `baseQuery`
-   * `onAuthFailure` orqali baribir bu yerga qaytaradi.
+   * Ilgari u har doim ochiq edi va 244px kenglik 390px ekranda kontentga
+   * atigi ~146px qoldirardi — jadvallar ham, formalar ham siqilib,
+   * panelni telefonda ishlatib bo'lmasdi.
    */
+  const [sidebarOpen, setSidebarOpen] = useState(() =>
+    typeof window === 'undefined' ? true : window.matchMedia(DESKTOP).matches,
+  );
+
+  /*
+   * Boshqa sahifaga o'tilganda menyu yopiladi — faqat TELEFONDA.
+   *
+   * Render paytida, effektda emas: effekt bilan yangi sahifa bir kadr
+   * davomida ochiq menyu ostida chizilardi. Kompyuterda menyu joyida
+   * qoladi — u kontentni to'smaydi.
+   */
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (lastPathname !== pathname) {
+    setLastPathname(pathname);
+    if (!isDesktop) setSidebarOpen(false);
+  }
+
   if (!tokenStore.getAccessToken()) {
     return <Navigate to={localizeHref('/login', locale)} replace />;
   }
 
+  /** Telefonda menyu kontent USTIDAN ochiladi — yonida joy yo'q. */
+  const isDrawer = !isDesktop;
+  const hidden = isDrawer && !sidebarOpen;
+
   return (
     <div className="flex h-dvh overflow-hidden bg-canvas">
-      <Sidebar className={cn(!sidebarOpen && 'hidden')} />
+      {/* Ortidagi qatlam: menyu ochiq turganda tashqariga bosish uni
+          yopadi — telefonda "orqaga" tugmasidan boshqa yo'l qolmasdi. */}
+      {isDrawer && sidebarOpen && (
+        <button
+          type="button"
+          aria-label={m.layout.closeSidebar}
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-40 bg-black/60"
+        />
+      )}
+
+      <Sidebar
+        aria-hidden={hidden}
+        className={cn(
+          'transition-transform duration-200 lg:static lg:z-auto lg:translate-x-0 lg:transition-none',
+          isDrawer && 'fixed inset-y-0 left-0 z-50',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:hidden',
+          // Yopiq menyu ekrandan tashqarida turadi, lekin DOM'da qoladi —
+          // klaviatura fokusi u yerga tushib ketmasin.
+          hidden && 'pointer-events-none',
+        )}
+      />
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/*
@@ -40,7 +105,7 @@ export function AdminLayout() {
         <Topbar onToggleSidebar={() => setSidebarOpen((open) => !open)} />
 
         {/* Scroll faqat shu yerda — sidebar va topbar joyida qoladi. */}
-        <main className="flex-1 overflow-y-auto px-6 py-6">
+        <main className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6">
           <Suspense
             fallback={
               <div className="grid place-items-center py-24 text-sm text-fg-muted">

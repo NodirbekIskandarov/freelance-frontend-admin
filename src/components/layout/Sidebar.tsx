@@ -1,5 +1,5 @@
 import { ChevronDown, Headphones } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type ComponentProps } from 'react';
 import { useLocation } from 'react-router';
 import { NavLink } from '@/i18n/navigation';
 
@@ -143,7 +143,7 @@ function SupportCard() {
   );
 }
 
-export function Sidebar({ className }: { className?: string }) {
+export function Sidebar({ className, ...rest }: ComponentProps<'aside'>) {
   const { m } = useT();
   const { can, isError } = usePermissions();
 
@@ -168,6 +168,7 @@ export function Sidebar({ className }: { className?: string }) {
 
   return (
     <aside
+      {...rest}
       className={cn('flex w-sidebar shrink-0 flex-col border-r border-line bg-sidebar', className)}
     >
       <Logo />

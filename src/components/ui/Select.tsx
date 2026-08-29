@@ -195,7 +195,7 @@ export function Select({
 
       {open && anchor ? (
         <div
-          className="fixed z-100 w-max max-w-[min(22rem,80vw)] overflow-hidden rounded-control border border-line bg-card shadow-[0_12px_40px_rgba(0,0,0,0.45)]"
+          className="fixed z-100 w-max max-w-[min(22rem,80vw)] overflow-hidden rounded-control border border-line bg-card"
           style={{ top: anchor.top, left: anchor.left, minWidth: anchor.width }}
         >
           {searchable ? (

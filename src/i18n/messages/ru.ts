@@ -39,6 +39,7 @@ export const ru: Messages = {
     supportAction: 'Поддержка',
     home: 'Главная',
     notifications: 'Уведомления',
+    closeSidebar: 'Закрыть боковое меню',
     toggleSidebar: 'Открыть/закрыть боковое меню',
     profile: 'Профиль',
     logout: 'Выйти',
