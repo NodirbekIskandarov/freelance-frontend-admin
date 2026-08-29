@@ -274,7 +274,10 @@ export function DashboardPage() {
             <QueueCard
               label="Topshiriq arizalari"
               count={data.requests.assignment_pending}
-              to="/yuborilgan/topshiriqlar"
+              // `/yuborilgan/topshiriqlar` degan yo'l yo'q edi — karta
+              // 404 ga olib borardi. Topshiriq arizalari `topshiriqlar`
+              // ostida turadi.
+              to="/topshiriqlar/arizalar"
               icon={FileWarning}
             />
             <QueueCard
