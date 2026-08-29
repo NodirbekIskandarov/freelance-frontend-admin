@@ -95,58 +95,55 @@ function TopCard({
         <h2 className="text-[15px] font-semibold text-fg">
           {title} <span className="font-normal text-fg-muted">{subtitle}</span>
         </h2>
+        <p className="mt-0.5 text-[11px] text-fg-dim">{countHeader} · Daromad</p>
       </div>
 
       {rows.length === 0 ? (
         <p className="px-5 py-8 text-center text-xs text-fg-muted">Ma&apos;lumot yo&apos;q</p>
       ) : (
         /*
-          `table-fixed` shart: karta tor (~245px), avtomatik kenglikda
-          uchinchi ustun kartadan chiqib ketadi. Belgilangan kenglik bilan
-          nom qisqaradi, raqamlar esa to'liq ko'rinadi.
+          Jadval EMAS, oddiy qatorlar.
+          
+          Ilgari bu yerda `table-fixed` turardi: raqam ustunlari
+          `whitespace-nowrap` bilan belgilangan kengligidan oshib ketardi
+          va nom ustuni 7px gacha siqilib qolardi — matn esa o'z
+          katagidan tashqariga chiqib chizilardi. Egiluvchan qatorda
+          bunday siqilish bo'lmaydi: nom qolgan joyni oladi va sig'masa
+          uchta nuqta bilan qisqaradi.
         */
-        <table className="mt-4 w-full table-fixed text-xs">
-          <thead>
-            <tr className="border-b border-line text-[11px] text-fg-muted">
-              <th scope="col" className="px-2 pb-2 text-left font-medium">
-                Nomi
-              </th>
-              <th scope="col" className="w-11 px-1 pb-2 text-right font-medium">
-                {countHeader}
-              </th>
-              <th scope="col" className="w-[72px] px-2 pb-2 text-right font-medium">
-                Daromad
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, index) => (
-              <tr key={row.id} className="border-b border-line last:border-b-0">
-                <td className="px-2 py-2.5">
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-3 shrink-0 text-[11px] text-fg-dim">{index + 1}</span>
-                    <Avatar name={row.name} size="sm" className="size-5" />
-                    {/*
-                      Nom kesilmaydi, o'raladi. Izoh alohida qator emas,
-                      nomdan keyin qavsda: alohida qator bo'lsa tor ustunda
-                      har so'z bo'linib, qator balandligi uch barobar oshadi.
-                    */}
-                    <span className="min-w-0 leading-snug text-fg">
-                      {row.name}
-                      {row.note && <span className="text-fg-muted"> ({row.note})</span>}
-                    </span>
+        <ul className="mt-3 px-3 pb-2">
+          {rows.map((row, index) => (
+            <li
+              key={row.id}
+              className="flex items-start gap-2 border-b border-line py-2.5 last:border-b-0"
+            >
+              <span className="w-3 shrink-0 pt-0.5 text-[11px] text-fg-dim">{index + 1}</span>
+              <Avatar name={row.name} size="sm" className="mt-px size-5 shrink-0" />
+
+              <span className="min-w-0 flex-1">
+                {/* To'liq nom `title` da qoladi — qisqargani o'qib
+                    bo'lmaydigan bo'lib qolmasin. */}
+                <span className="block truncate text-xs text-fg" title={row.name}>
+                  {row.name}
+                </span>
+                {row.note && (
+                  <span className="block truncate text-[11px] text-fg-muted" title={row.note}>
+                    {row.note}
                   </span>
-                </td>
-                <td className="px-1 py-2.5 text-right whitespace-nowrap text-fg-soft">
+                )}
+              </span>
+
+              <span className="shrink-0 text-right">
+                <span className="block text-xs whitespace-nowrap text-fg-soft">
                   {formatSom(row.count)}
-                </td>
-                <td className="px-2 py-2.5 text-right whitespace-nowrap text-fg-soft">
+                </span>
+                <span className="block text-[11px] whitespace-nowrap text-fg-muted">
                   {formatDecimalSom(row.revenue)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </span>
+              </span>
+            </li>
+          ))}
+        </ul>
       )}
     </Card>
   );
@@ -210,7 +207,7 @@ export function ContentPage() {
         </div>
       ) : (
         <>
-          <section className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
+          <section className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7">
             <StatCard
               label="Institutlar"
               value={formatSom(data.universities.total)}
@@ -309,7 +306,7 @@ export function ContentPage() {
             </div>
           </Card>
 
-          <section className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <section className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
             <TopCard
               title="Top institutlar"
               subtitle="sotuv bo'yicha"
