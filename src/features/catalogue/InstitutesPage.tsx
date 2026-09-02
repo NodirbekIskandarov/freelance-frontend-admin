@@ -1,5 +1,7 @@
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { FileText, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+
+import { Link } from '@/i18n/navigation';
 
 import { Badge } from '@/components/ui/Badge';
 import { Button, IconButton } from '@/components/ui/Button';
@@ -14,6 +16,8 @@ import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { getApiErrorMessage } from '@/shared/api';
 import { CATALOGUE_ORDERING_OPTIONS, type University } from '@/shared/types/catalogue';
 
+import { useGetUniversityRequestsListQuery } from '@/features/adminRequests/adminRequestsApi';
+
 import { useDeleteUniversityMutation, useGetUniversitiesQuery } from './catalogueApi';
 import { DeleteCatalogueModal } from './DeleteCatalogueModal';
 import { UniversityBadge } from './UniversityPanel';
@@ -26,6 +30,20 @@ const activeOptions = [
 ];
 
 export function InstitutesPage() {
+  /*
+   * Javob kutayotgan arizalar SONI — `page_size: 1` bilan.
+   *
+   * Ro'yxatning o'zi kerak emas, faqat `count`. Fanlar ekranida ham
+   * shu naqsh: tugmadagi raqamsiz navbat borligi ekranga kirmaguncha
+   * bilinmasdi.
+   */
+  const { data: pendingRequests } = useGetUniversityRequestsListQuery({
+    status: 'pending',
+    page: 1,
+    page_size: 1,
+  });
+  const pendingCount = pendingRequests?.count ?? 0;
+
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
   const [city, setCity] = useState('all');
@@ -175,15 +193,37 @@ export function InstitutesPage() {
         title="Institutlar"
         breadcrumbs={[{ label: 'Bosh sahifa', to: '/' }, { label: 'Institutlar' }]}
         actions={
-          <Button
-            icon={<Plus className="size-4" strokeWidth={2} />}
-            onClick={() => {
-              setEditTarget(null);
-              setFormOpen(true);
-            }}
-          >
-            Yangi institut qo&apos;shish
-          </Button>
+          <>
+            {/*
+              Arizalar MENYUDA emas, shu yerda: ular institutlar bo'limining
+              bir qismi va alohida band bitta ish oqimini ikki joyga
+              uzoqlashtirardi. Fan va topshiriq arizalari ham xuddi shunday
+              o'z ekranidan ochiladi.
+            */}
+            <Link to="/institutlar/arizalar">
+              <Button variant="secondary" icon={<FileText className="size-4" />}>
+                Institut qo&apos;shish arizalari
+                {pendingCount > 0 && (
+                  <span
+                    aria-label={`${pendingCount} ta ariza javob kutmoqda`}
+                    className="ml-1.5 inline-flex min-w-5 items-center justify-center rounded-full bg-warning/20 px-1.5 py-0.5 text-[11px] font-semibold text-warning tabular-nums"
+                  >
+                    {pendingCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
+
+            <Button
+              icon={<Plus className="size-4" strokeWidth={2} />}
+              onClick={() => {
+                setEditTarget(null);
+                setFormOpen(true);
+              }}
+            >
+              Yangi institut qo&apos;shish
+            </Button>
+          </>
         }
       />
 
