@@ -1,3 +1,4 @@
+import { Paperclip } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
@@ -70,6 +71,33 @@ export function ReplyModal({
           <div className="bg-surface-soft rounded-control border border-line px-3.5 py-3">
             <p className="text-sm font-medium text-fg">{appeal.subject}</p>
             <p className="mt-1 text-sm whitespace-pre-line text-fg-soft">{appeal.message}</p>
+
+            {/*
+              Ilovalar javob maydonining TEPASIDA.
+
+              Operator eng ko'p so'raydigan narsa — skrinshot, va u
+              javobni yozishdan oldin ochilishi kerak. Yangi oynada:
+              fayl PDF ham, rasm ham bo'lishi mumkin va uni shu yerda
+              chizishga urinish ikkinchisini buzardi.
+            */}
+            {appeal.attachments.length > 0 && (
+              <ul className="mt-3 flex flex-wrap gap-2">
+                {appeal.attachments.map((attachment, index) => (
+                  <li key={attachment.id}>
+                    <a
+                      href={attachment.file}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1.5 rounded-control border border-line px-2.5 py-1.5 text-xs text-fg transition-colors hover:border-primary/40"
+                    >
+                      <Paperclip className="size-3.5 shrink-0" strokeWidth={1.75} />
+                      Fayl {index + 1}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+
             <p className="mt-2 text-xs text-fg-muted">
               {appeal.user.full_name || appeal.user.phone} · {appeal.user.email || '—'}
             </p>

@@ -1,4 +1,4 @@
-import { CircleCheck, Clock, Inbox, LifeBuoy, Reply, UserCheck } from 'lucide-react';
+import { CircleCheck, Clock, Inbox, LifeBuoy, Paperclip, Reply, UserCheck } from 'lucide-react';
 import { useState } from 'react';
 
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
@@ -81,8 +81,22 @@ export function AppealsPage() {
       className: 'max-w-[320px]',
       cell: (row) => (
         <span className="block">
-          <span className="block truncate font-medium text-fg" title={row.subject}>
-            {row.subject}
+          <span className="flex items-center gap-1.5">
+            <span className="min-w-0 truncate font-medium text-fg" title={row.subject}>
+              {row.subject}
+            </span>
+            {/* Skrinshot borligi navbatda KO'RINADI: fayl biriktirilgan
+                murojaat odatda tezroq hal bo'ladi va operator qaysi
+                birini oldin ochishini shundan biladi. */}
+            {row.attachments.length > 0 && (
+              <span
+                className="flex shrink-0 items-center gap-0.5 text-xs text-fg-muted"
+                title={`${row.attachments.length} ta fayl`}
+              >
+                <Paperclip className="size-3" strokeWidth={1.75} />
+                {row.attachments.length}
+              </span>
+            )}
           </span>
           <span className="block truncate text-xs text-fg-muted" title={row.message}>
             {row.message}

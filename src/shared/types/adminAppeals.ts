@@ -42,6 +42,13 @@ export interface AppealAuthor {
   full_name: string;
 }
 
+/** Foydalanuvchi murojaatga biriktirgan skrinshot yoki fayl. */
+export interface AppealAttachment {
+  id: string;
+  file: string;
+  created_at: string;
+}
+
 export interface AdminAppeal {
   id: string;
   reference: string;
@@ -53,6 +60,14 @@ export interface AdminAppeal {
   replied_at: string | null;
   replied_by: AppealAuthor | null;
   user: AppealAuthor;
+  /**
+   * Murojaatga ilova qilingan fayllar.
+   *
+   * Aynan shu narsa operator eng ko'p so'raydigan narsa edi
+   * («skrinshotini yuboring»), shuning uchun u javob oynasida
+   * matnning YONIDA turadi — alohida sahifada emas.
+   */
+  attachments: AppealAttachment[];
   created_at: string;
   updated_at: string;
 }
