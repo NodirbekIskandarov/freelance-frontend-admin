@@ -87,7 +87,10 @@ function LeafItem({
           itemBase,
           collapsed && 'justify-center px-0',
           isActive
-            ? 'bg-elevated font-medium text-primary'
+            ? // Yashil tus, kulrang emas: faol band panelning qolgan
+              // qismidan RANGI bilan ajralib tursin — kulrang fon
+              // shunchaki «ustiga borilgan» band bilan bir xil ko'rinardi.
+              'bg-primary/12 font-medium text-primary'
             : 'text-fg-muted hover:bg-elevated/60 hover:text-fg',
         )
       }

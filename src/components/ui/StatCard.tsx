@@ -2,6 +2,9 @@ import { ArrowDown, ArrowUp, Minus, type LucideIcon } from 'lucide-react';
 
 import { cn } from '@/lib/cn';
 
+/** Karta yuqori qirrasidagi yorug' chiziq — `Card` bilan bir xil. */
+const cardSheen = 'shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset]';
+
 /**
  * Ikonka chipining rangi. Dizaynda har karta o'z rangida:
  * yashil, ko'k, binafsha, to'q sariq, cyan, sariq.
@@ -65,34 +68,48 @@ export function StatCard({
   return (
     <div
       className={cn(
-        'flex items-start gap-4 rounded-card border border-line bg-card p-5',
+        'flex flex-col rounded-card border border-line bg-card p-4',
+        cardSheen,
         className,
       )}
     >
-      <span className={cn('grid size-12 shrink-0 place-items-center rounded-xl', iconTones[tone])}>
-        <Icon className="size-6" strokeWidth={1.75} />
+      {/*
+        Ikonka TEPADA, chapda emas.
+
+        Dashboarddagi ko'rsatkich kartalari bilan bir maromda: yorliq —
+        nom — qiymat — izoh. Ilgari ikonka 48px bo'lib chap tomonda
+        turardi va karta balandligini matnidan ko'ra o'zi belgilardi;
+        yonma-yon turgan to'rtta karta esa dashboarddagi o'ntasidan
+        boshqacha ko'rinardi.
+      */}
+      <span className={cn('grid size-8 w-fit place-items-center rounded-lg', iconTones[tone])}>
+        <Icon className="size-4" strokeWidth={1.75} />
       </span>
 
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm text-fg-muted">{label}</p>
-        <p className="mt-1 text-[26px] leading-tight font-semibold tracking-tight text-fg">
-          {value}
+      <p
+        className="mt-2.5 truncate text-xs text-fg-muted"
+        title={typeof label === 'string' ? label : undefined}
+      >
+        {label}
+      </p>
+
+      <p className="mt-1.5 text-[22px] leading-none font-semibold tracking-tight text-fg tabular-nums">
+        {value}
+      </p>
+
+      {trend && TrendIcon && (
+        <p className="mt-3 flex items-center gap-1 text-[11px]">
+          <TrendIcon className={cn('size-3 shrink-0', trendStyle.color)} strokeWidth={2.5} />
+          <span className={cn('font-medium tabular-nums', trendStyle.color)}>{trend.value}</span>
+          {trend.note && <span className="text-fg-muted">{trend.note}</span>}
         </p>
+      )}
 
-        {trend && TrendIcon && (
-          <p className="mt-1.5 flex items-center gap-1 text-[13px]">
-            <TrendIcon className={cn('size-3.5 shrink-0', trendStyle.color)} strokeWidth={2.5} />
-            <span className={cn('font-medium', trendStyle.color)}>{trend.value}</span>
-            {trend.note && <span className="text-fg-muted">{trend.note}</span>}
-          </p>
-        )}
-
-        {caption && (
-          <p className={cn('mt-1.5 text-[13px] font-medium', captionTones[caption.tone])}>
-            {caption.text}
-          </p>
-        )}
-      </div>
+      {caption && (
+        <p className={cn('mt-3 text-[11px] font-medium', captionTones[caption.tone])}>
+          {caption.text}
+        </p>
+      )}
     </div>
   );
 }
