@@ -75,6 +75,7 @@ export function Select({
   const [query, setQuery] = useState('');
   const [anchor, setAnchor] = useState<{ top: number; left: number; width: number } | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
   const selected = options.find((option) => option.value === value);
@@ -111,10 +112,18 @@ export function Select({
       if (event.key === 'Escape') setMenuOpen(false);
     }
     /*
-     * Ro'yxat `fixed` bilan chiziladi, ya'ni aylantirilsa tugmadan
-     * ajralib qolardi. Qayta hisoblash o'rniga yopamiz.
+     * Ro'yxat `fixed` bilan chiziladi, ya'ni TASHQARIDA aylantirilsa
+     * tugmadan ajralib qolardi. Qayta hisoblash o'rniga yopamiz.
+     *
+     * Ro'yxatning O'ZI bundan mustasno: `capture` bilan tinglash hujjatdagi
+     * har qanday aylantirishni, jumladan ro'yxat ichidagisini ham ushlardi
+     * va uzun ro'yxatni pastga surmoqchi bo'lgan odam uni yopib qo'yardi.
      */
-    function onScroll() {
+    function onScroll(event: Event) {
+      if (menuRef.current?.contains(event.target as Node)) return;
+      setMenuOpen(false);
+    }
+    function onResize() {
       setMenuOpen(false);
     }
 
@@ -122,13 +131,13 @@ export function Select({
     document.addEventListener('keydown', onKeyDown);
     // `capture` — ichki aylantiriladigan konteynerlar ham hisobga olinadi.
     window.addEventListener('scroll', onScroll, true);
-    window.addEventListener('resize', onScroll);
+    window.addEventListener('resize', onResize);
 
     return () => {
       document.removeEventListener('mousedown', onPointerDown);
       document.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('scroll', onScroll, true);
-      window.removeEventListener('resize', onScroll);
+      window.removeEventListener('resize', onResize);
     };
   }, [open]);
 
@@ -195,6 +204,7 @@ export function Select({
 
       {open && anchor ? (
         <div
+          ref={menuRef}
           className="fixed z-100 w-max max-w-[min(22rem,80vw)] overflow-hidden rounded-control border border-line bg-card"
           style={{ top: anchor.top, left: anchor.left, minWidth: anchor.width }}
         >
