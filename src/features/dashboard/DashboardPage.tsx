@@ -1,181 +1,503 @@
 import {
-  BookOpen,
-  Building2,
-  CircleDollarSign,
+  ArrowDown,
+  ArrowUp,
   ClipboardList,
   FileCheck2,
-  FileWarning,
-  Layers,
-  ShoppingCart,
+  Mail,
   TriangleAlert,
-  UserPlus,
-  UserRound,
-  Users,
+  type LucideIcon,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from '@/i18n/navigation';
 
-import { RevenueBarChart } from '@/components/charts/RevenueBarChart';
-import { SeriesLineChart } from '@/components/charts/SeriesLineChart';
-import { Card, CardHeader } from '@/components/ui/Card';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Select } from '@/components/ui/Select';
-import { StatCard } from '@/components/ui/StatCard';
-import { formatDecimalSom, formatSom } from '@/lib/format';
+import { GrowthLineChart } from '@/components/charts/GrowthLineChart';
+import { Sparkline } from '@/components/charts/Sparkline';
+import { SplitRevenueChart } from '@/components/charts/SplitRevenueChart';
+import { useChartTheme } from '@/components/charts/chartTheme';
+import { Card } from '@/components/ui/Card';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { cn } from '@/lib/cn';
+import { formatDecimalSom } from '@/lib/format';
 import { getApiErrorMessage } from '@/shared/api';
-import type { AdminDashboard } from '@/shared/types/adminDashboard';
+import {
+  OVERVIEW_PERIODS,
+  PERIOD_LABELS,
+  type AdminOverview,
+  type MetricGroup,
+  type OverviewMetric,
+  type OverviewPeriod,
+  type QueueBucket,
+} from '@/shared/types/adminOverview';
 
-import { useGetAdminDashboardQuery } from '../adminFreelance/adminFreelanceApi';
-import { DASHBOARD_DAYS } from './useQueueCounts';
+import { useGetAdminOverviewQuery } from './dashboardApi';
 
-const rangeOptions = [
-  { value: '7', label: '7 kunlik' },
-  { value: '30', label: '30 kunlik' },
-  { value: '90', label: '90 kunlik' },
-];
+const periodOptions = OVERVIEW_PERIODS.map((value) => ({ value, label: PERIOD_LABELS[value] }));
 
-function formatThousands(value: number): string {
-  if (value >= 1000) return `${(value / 1000).toFixed(2).replace(/\.?0+$/, '')}K`;
-  return String(value);
+/** «2 kun» / «6 soat» — kutish vaqti odam o'qiydigan shaklda. */
+function waitLabel(hours: number): string {
+  if (hours <= 0) return '—';
+  if (hours < 24) return `${hours} soat`;
+  return `${Math.round(hours / 24)} kun`;
 }
 
 /**
- * Y o'qi bo'linmalari ma'lumotdan hisoblanadi.
+ * Kutish qancha uzun bo'lsa, yorliq shuncha keskin.
  *
- * Ilgari ular qo'lda yozilgan edi (`[0, 250, ... 1500]`) — mock'da
- * qiymatlar shu oraliqda bo'lgani uchun mos kelardi. Haqiqiy
- * ma'lumotda kunlik son 0–2 atrofida va grafik butunlay tekis
- * chiziqqa aylanib qolardi.
+ * Chegaralar ish tartibidan: bir kundan oshgan navbat — kechikkan,
+ * sakkiz soatdan oshgani — e'tibor talab qiladi.
  */
-function ticksFor(max: number): number[] {
-  const top = Math.max(4, Math.ceil(max * 1.2));
-  const step = Math.ceil(top / 4);
-  return [0, step, step * 2, step * 3, step * 4];
+function waitTone(hours: number): string {
+  if (hours >= 24) return 'bg-danger/12 text-danger';
+  if (hours >= 8) return 'bg-warning/12 text-warning';
+  return 'bg-elevated text-fg-muted';
 }
 
-function CardSkeleton({ className }: { className?: string }) {
-  return <div className={`animate-pulse rounded-card border border-line bg-card ${className}`} />;
-}
-
-/**
- * Diqqat talab qiladigan navbat — nol bo'lsa ham ko'rsatiladi, lekin
- * noldan katta bo'lsa rangi bilan ajralib turadi va bosilsa o'sha
- * bo'limga olib boradi.
- */
 function QueueCard({
   label,
-  count,
+  unit,
+  bucket,
   to,
   icon: Icon,
 }: {
   label: string;
-  count: number;
+  unit: string;
+  bucket: QueueBucket;
   to: string;
-  icon: typeof Users;
+  icon: LucideIcon;
 }) {
-  const urgent = count > 0;
+  return (
+    <div className="rounded-control border border-line bg-card p-3.5">
+      <div className="flex items-center justify-between gap-2">
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="grid size-6 shrink-0 place-items-center rounded-md bg-elevated text-fg-muted">
+            <Icon className="size-3.5" strokeWidth={1.75} />
+          </span>
+          <span className="truncate text-sm font-medium text-fg">{label}</span>
+        </span>
+        <span
+          className={cn(
+            'shrink-0 rounded-badge px-2 py-0.5 text-[11px] font-medium tabular-nums',
+            waitTone(bucket.waiting_hours),
+          )}
+        >
+          {waitLabel(bucket.waiting_hours)}
+        </span>
+      </div>
+
+      <div className="mt-3 flex items-end justify-between gap-2">
+        <span className="text-sm text-fg-muted">
+          <span className="text-2xl font-semibold text-fg tabular-nums">{bucket.count}</span> {unit}
+        </span>
+        <Link to={to} className="text-xs font-medium text-primary hover:underline">
+          Ko&apos;rish →
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/** Navbat — ekranning eng tepasida, chunki u bugun qilinadigan ish. */
+function AttentionRow({ data }: { data: AdminOverview }) {
+  const { queue } = data;
 
   return (
-    <Link
-      to={to}
-      className={`flex items-center gap-3 rounded-card border p-4 transition-colors ${
-        urgent
-          ? 'border-warning/30 bg-warning/8 hover:bg-warning/12'
-          : 'border-line bg-card hover:bg-elevated'
-      }`}
+    <Card className="p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="flex items-center gap-2 text-sm font-semibold text-fg">
+          <span className="grid size-6 place-items-center rounded-md bg-warning/12 text-warning">
+            <TriangleAlert className="size-3.5" strokeWidth={2} />
+          </span>
+          E&apos;tiboringiz kerak
+          <span className="rounded-badge bg-elevated px-2 py-0.5 text-[11px] font-medium text-fg-muted tabular-nums">
+            {queue.total} ta ish
+          </span>
+        </p>
+        {queue.waiting_hours > 0 && (
+          <p className="text-xs text-fg-muted">
+            Eng eski ish {waitLabel(queue.waiting_hours)}dan beri kutmoqda
+          </p>
+        )}
+      </div>
+
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <QueueCard
+          label="Yechim moderatsiyasi"
+          unit="ta yechim"
+          bucket={queue.solutions}
+          to="/yechimlar"
+          icon={FileCheck2}
+        />
+        <QueueCard
+          label="Topshiriq arizalari"
+          unit="ta ariza"
+          bucket={queue.assignment_requests}
+          to="/topshiriqlar/arizalar"
+          icon={ClipboardList}
+        />
+        <QueueCard
+          label="Xarid shikoyati"
+          unit="ta nizo"
+          bucket={queue.disputes}
+          to="/xarid-shikoyatlari"
+          icon={TriangleAlert}
+        />
+        <QueueCard
+          label="Yangi murojaat"
+          unit="ta xat"
+          bucket={queue.appeals}
+          to="/murojaatlar"
+          icon={Mail}
+        />
+      </div>
+    </Card>
+  );
+}
+
+function Change({ value, className }: { value: number | null; className?: string }) {
+  if (value === null) return null;
+
+  const up = value >= 0;
+  const Icon = up ? ArrowUp : ArrowDown;
+
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-0.5 rounded-badge px-1.5 py-0.5 text-[11px] font-medium tabular-nums',
+        up ? 'bg-success/12 text-success' : 'bg-danger/12 text-danger',
+        className,
+      )}
     >
-      <span
-        className={`grid size-10 shrink-0 place-items-center rounded-control ${
-          urgent ? 'bg-warning/15 text-warning' : 'bg-elevated text-fg-muted'
-        }`}
-      >
-        <Icon className="size-5" strokeWidth={1.75} />
-      </span>
-      <span className="min-w-0">
-        <span className="block text-xl font-semibold text-fg tabular-nums">{count}</span>
-        <span className="block truncate text-xs text-fg-muted">{label}</span>
-      </span>
-    </Link>
+      <Icon className="size-3" strokeWidth={2.5} />
+      {Math.abs(value)}%
+    </span>
   );
 }
 
-/** Grafik nuqtalarini `SeriesLineChart` kutgan shaklga o'tkazadi. */
-function toSeries(
-  points: { date: string; count: number }[],
-  cumulative: boolean,
-): { date: string; primary: number; secondary: number }[] {
-  let running = 0;
-  return points.map((point) => {
-    running += point.count;
-    return {
-      date: point.date.slice(5),
-      primary: cumulative ? running : point.count,
-      secondary: point.count,
-    };
-  });
-}
+function RevenueCard({ data }: { data: AdminOverview }) {
+  const theme = useChartTheme();
+  const { revenue } = data;
 
-function Charts({ data }: { data: AdminDashboard }) {
-  const userSeries = toSeries(data.series.users, true);
-  const solutionSeries = toSeries(data.series.solutions, true);
-
-  const revenueSeries = data.series.orders.map((point) => ({
-    date: point.date.slice(5),
-    amount: Number(point.revenue),
-  }));
+  const legend = [
+    { label: 'Sotuvchilarga', value: revenue.seller_earning, color: theme.series[0] },
+    { label: 'Platforma komissiyasi', value: revenue.commission, color: theme.series[2] },
+    { label: 'Qaytarilgan', value: revenue.refunded, color: theme.series[1] },
+  ];
 
   return (
-    <>
-      <Card className="pb-5">
-        <CardHeader title="Foydalanuvchilar" />
-        <div className="px-5 pt-5">
-          <SeriesLineChart
-            data={userSeries}
-            primaryLabel="Jami (to'plangan)"
-            secondaryLabel="Kunlik yangi"
-            formatY={formatThousands}
-            yTicks={ticksFor(Math.max(...userSeries.map((p) => p.primary), 0))}
-          />
+    <Card className="p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-medium tracking-wider text-fg-muted uppercase">
+            Jami aylanma · {PERIOD_LABELS[data.period]}
+          </p>
+          <p className="mt-1.5 flex items-baseline gap-2">
+            <span className="text-[28px] leading-none font-semibold tracking-tight text-fg tabular-nums">
+              {formatDecimalSom(revenue.revenue).replace(" so'm", '')}
+            </span>
+            <span className="text-sm text-fg-muted">so&apos;m</span>
+            <Change value={revenue.change_percent} />
+          </p>
         </div>
-      </Card>
 
-      <Card className="pb-5">
-        <CardHeader title="Yechimlar" />
-        <div className="px-5 pt-5">
-          <SeriesLineChart
-            data={solutionSeries}
-            primaryLabel="Jami (to'plangan)"
-            secondaryLabel="Kunlik yangi"
-            yTicks={ticksFor(Math.max(...solutionSeries.map((p) => p.primary), 0))}
-          />
-        </div>
-      </Card>
+        <p className="text-right text-sm text-fg-muted">
+          <span className="block text-xl font-semibold text-fg tabular-nums">{revenue.orders}</span>
+          buyurtma
+        </p>
+      </div>
 
-      <Card className="pb-5">
-        <CardHeader title="Daromad" />
-        <div className="px-5 pt-5">
-          <RevenueBarChart data={revenueSeries} />
-        </div>
-      </Card>
-    </>
+      <div className="mt-4">
+        <SplitRevenueChart
+          buckets={revenue.buckets}
+          sellerLabel="Sotuvchilarga"
+          commissionLabel="Platforma komissiyasi"
+        />
+      </div>
+
+      {/* Ustunlar nimadan tuzilganini AYNAN shu yerda aytadi: ustun
+          balandligi aylanma, ranglari esa uning taqsimoti. */}
+      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line pt-4">
+        {legend.map((item) => (
+          <span key={item.label} className="flex items-center gap-2">
+            <span
+              aria-hidden
+              className="size-2 shrink-0 rounded-[3px]"
+              style={{ background: item.color }}
+            />
+            <span className="text-xs text-fg-muted">{item.label}</span>
+            <span className="text-sm font-medium text-fg tabular-nums">
+              {formatDecimalSom(item.value)}
+            </span>
+          </span>
+        ))}
+      </div>
+    </Card>
   );
+}
+
+function GrowthCard({ data }: { data: AdminOverview }) {
+  const [line, setLine] = useState<'users' | 'solutions'>('users');
+  const current = data.growth[line];
+
+  return (
+    <Card className="p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-medium tracking-wider text-fg-muted uppercase">
+            O&apos;sish dinamikasi · {PERIOD_LABELS[data.period]}
+          </p>
+          <p className="mt-1.5 flex items-baseline gap-2">
+            <span className="text-[28px] leading-none font-semibold tracking-tight text-fg tabular-nums">
+              {current.total}
+            </span>
+            <span className="text-sm text-fg-muted">
+              jami · {current.active} {line === 'users' ? 'faol' : 'sotuvda'}
+            </span>
+            {current.added > 0 && (
+              <span className="rounded-badge bg-success/12 px-1.5 py-0.5 text-[11px] font-medium text-success tabular-nums">
+                +{current.added}
+              </span>
+            )}
+          </p>
+        </div>
+
+        <SegmentedControl
+          aria-label="Grafik turi"
+          value={line}
+          onChange={setLine}
+          options={[
+            { value: 'users', label: 'Foydalanuvchilar' },
+            { value: 'solutions', label: 'Yechimlar' },
+          ]}
+        />
+      </div>
+
+      <div className="mt-4">
+        <GrowthLineChart
+          points={current.points}
+          label={line === 'users' ? 'Foydalanuvchilar' : 'Yechimlar'}
+        />
+      </div>
+    </Card>
+  );
+}
+
+const groupTones: Record<MetricGroup, string> = {
+  people: 'bg-info/12 text-info',
+  content: 'bg-purple/12 text-purple',
+  sales: 'bg-warning/12 text-warning',
+};
+
+const groupLabels: Record<MetricGroup, string> = {
+  people: 'ODAM',
+  content: 'KONTENT',
+  sales: 'SAVDO',
+};
+
+function MetricCard({ metric }: { metric: OverviewMetric }) {
+  const theme = useChartTheme();
+
+  /* Sparkline rangi ko'rsatkich guruhiga ergashadi — karta yorlig'i
+     bilan bir xil, ya'ni ikkisi bitta narsani aytadi. */
+  const sparkColor =
+    metric.group === 'sales'
+      ? theme.series[2]
+      : metric.group === 'content'
+        ? theme.series[3]
+        : theme.series[1];
+
+  return (
+    <Card className="flex flex-col p-4">
+      <span
+        className={cn(
+          'w-fit rounded-badge px-1.5 py-0.5 text-[10px] font-semibold tracking-wider',
+          groupTones[metric.group],
+        )}
+      >
+        {groupLabels[metric.group]}
+      </span>
+
+      <p className="mt-2 truncate text-xs text-fg-muted" title={metric.label}>
+        {metric.label}
+      </p>
+
+      <p className="mt-1.5 flex items-baseline gap-1.5">
+        <span className="text-[22px] leading-none font-semibold tracking-tight text-fg tabular-nums">
+          {metric.value}
+        </span>
+        {metric.unit && <span className="text-xs text-fg-muted">{metric.unit}</span>}
+      </p>
+
+      <div className="mt-3 flex items-end justify-between gap-2">
+        <span className="text-[11px] text-fg-muted tabular-nums">
+          {metric.change_percent !== null ? <Change value={metric.change_percent} /> : metric.note}
+        </span>
+        {metric.spark.length > 0 && (
+          <span className="h-8 w-16 shrink-0">
+            <Sparkline data={metric.spark} color={sparkColor} />
+          </span>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function TopSellersCard({ data }: { data: AdminOverview }) {
+  return (
+    <Card className="p-5">
+      <p className="text-sm font-semibold text-fg">Top sotuvchilar</p>
+      <p className="mt-1 text-xs text-fg-muted">
+        Daromad va sifat bir joyda — kimni rag&apos;batlantirish kerak.
+      </p>
+
+      {data.top_sellers.length === 0 ? (
+        <p className="mt-6 text-sm text-fg-muted">Bu davrda sotuv bo&apos;lmagan.</p>
+      ) : (
+        <table className="mt-4 w-full">
+          <thead>
+            <tr className="text-[10px] font-semibold tracking-wider text-fg-muted uppercase">
+              <th className="pb-2 text-left font-semibold">Muallif</th>
+              <th className="pb-2 text-right font-semibold">Yechim</th>
+              <th className="pb-2 text-right font-semibold">Baho</th>
+              <th className="pb-2 text-right font-semibold">Daromad</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-line">
+            {data.top_sellers.map((seller) => (
+              <tr key={seller.id}>
+                <td className="py-2.5 pr-3">
+                  <span className="block truncate text-sm font-medium text-fg">
+                    {seller.name || 'Noma’lum'}
+                  </span>
+                  <span className="block truncate text-[11px] text-fg-muted">
+                    {[seller.university, seller.course ? `${seller.course}-kurs` : '']
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </span>
+                </td>
+                <td className="py-2.5 text-right text-sm text-fg-soft tabular-nums">
+                  {seller.solutions}
+                </td>
+                <td className="py-2.5 text-right text-sm tabular-nums">
+                  {seller.rating === null ? (
+                    <span className="text-fg-muted">—</span>
+                  ) : (
+                    <span className={seller.rating >= 4.5 ? 'text-success' : 'text-warning'}>
+                      ★ {seller.rating.toFixed(1)}
+                    </span>
+                  )}
+                </td>
+                <td className="py-2.5 text-right text-sm font-medium text-fg tabular-nums">
+                  {formatDecimalSom(seller.earning).replace(" so'm", '')}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </Card>
+  );
+}
+
+function RetentionCard({ data }: { data: AdminOverview }) {
+  const { retention, quality } = data;
+
+  const rows = [
+    { label: '1 marta sotib olgan', bucket: retention.once, color: 'bg-fg-muted' },
+    { label: '2–3 marta', bucket: retention.repeat, color: 'bg-info' },
+    { label: '4+ marta', bucket: retention.loyal, color: 'bg-success' },
+    { label: "Sotuvchi ham bo'lgan", bucket: retention.also_sellers, color: 'bg-warning' },
+  ];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <Card className="p-5">
+        <p className="text-sm font-semibold text-fg">Xaridorlarning qaytishi</p>
+        <p className="mt-1 text-xs text-fg-muted">
+          Bir marta sotib olgan talaba yana keladimi — platformaning eng muhim ko&apos;rsatkichi.
+        </p>
+
+        <div className="mt-4 space-y-3">
+          {rows.map((row) => (
+            <div key={row.label}>
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-sm text-fg-soft">{row.label}</span>
+                <span className="text-sm tabular-nums">
+                  <span className="font-semibold text-fg">{row.bucket.count}</span>{' '}
+                  <span className="text-fg-muted">{row.bucket.percent}%</span>
+                </span>
+              </div>
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-elevated">
+                <div
+                  className={cn('h-full rounded-full', row.color)}
+                  style={{ width: `${row.bucket.percent}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <Card className="p-5">
+        <p className="text-sm font-semibold text-fg">Sifat va nizolar</p>
+
+        <div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div>
+            <p className="text-[10px] font-semibold tracking-wider text-fg-muted uppercase">
+              O&apos;rtacha baho
+            </p>
+            <p className="mt-1.5 text-xl font-semibold text-success tabular-nums">
+              {quality.rating === null ? '—' : quality.rating.toFixed(1)}
+              <span className="ml-1 text-xs font-normal text-fg-muted">/ 5</span>
+            </p>
+          </div>
+          <div>
+            <p className="text-[10px] font-semibold tracking-wider text-fg-muted uppercase">
+              Shikoyat
+            </p>
+            <p className="mt-1.5 text-xl font-semibold text-warning tabular-nums">
+              {quality.dispute_percent}
+              <span className="ml-1 text-xs font-normal text-fg-muted">% xaridlarda</span>
+            </p>
+          </div>
+          <div>
+            <p className="text-[10px] font-semibold tracking-wider text-fg-muted uppercase">
+              Pul qaytarilgan
+            </p>
+            <p className="mt-1.5 text-xl font-semibold text-danger tabular-nums">
+              {quality.refund_count}
+              <span className="ml-1 text-xs font-normal text-fg-muted">
+                ta · {formatDecimalSom(quality.refund_total).replace(" so'm", '')}
+              </span>
+            </p>
+          </div>
+          <div>
+            <p className="text-[10px] font-semibold tracking-wider text-fg-muted uppercase">
+              Qaror vaqti
+            </p>
+            <p className="mt-1.5 text-xl font-semibold text-fg tabular-nums">
+              {quality.decision_hours === null ? '—' : quality.decision_hours}
+              <span className="ml-1 text-xs font-normal text-fg-muted">soat o&apos;rtacha</span>
+            </p>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function Skeleton({ className }: { className?: string }) {
+  return <div className={cn('animate-pulse rounded-card border border-line bg-card', className)} />;
 }
 
 export function DashboardPage() {
   /*
-    Sukut bo'yicha 7 kun, 30 emas.
+    Sukut bo'yicha bir hafta.
 
-    Platformada ma'lumot yaqinda paydo bo'lgan: 30 kunlik oynada
-    grafikning katta qismi nolda yotgan tekis chiziq bo'lardi — u
-    trendni ko'rsatmaydi, faqat joy egallaydi. Tanlagich joyida:
-    uzunroq oyna kerak bo'lsa bir bosishda olinadi.
-
-    Qiymat sidebar bilan UMUMIY (`DASHBOARD_DAYS`) — ikkalasi bir xil
-    argument bilan so'rasa RTK Query bitta keshdan foydalanadi va
-    menyudagi navbat sonlari qo'shimcha so'rov tug'dirmaydi.
+    Bir kun juda qisqa (bitta sotuv ham foizni yuzga sakratadi), oy esa
+    juda sekin — kechagi o'zgarish o'ttiz kunlik o'rtachada ko'rinmaydi.
   */
-  const [days, setDays] = useState(String(DASHBOARD_DAYS));
-  const { data, isLoading, error } = useGetAdminDashboardQuery({ days: Number(days) });
+  const [period, setPeriod] = useState<OverviewPeriod>('7d');
+  const { data, isLoading, isFetching, error } = useGetAdminOverviewQuery(period);
 
   if (error) {
     return (
@@ -187,168 +509,71 @@ export function DashboardPage() {
 
   return (
     <>
-      <PageHeader
-        title="Dashboard"
-        subtitle="Platforma umumiy statistikasi"
-        actions={
-          <Select
-            aria-label="Sana oralig'i"
-            options={rangeOptions}
-            value={days}
-            onChange={(event) => setDays(event.target.value)}
-            className="w-40"
-          />
-        }
-      />
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-fg">Dashboard</h1>
+          <p className="mt-1 flex items-center gap-2 text-sm text-fg-muted">
+            <span
+              aria-hidden
+              className={cn(
+                'size-1.5 rounded-full',
+                isFetching ? 'animate-pulse bg-warning' : 'bg-success',
+              )}
+            />
+            {isFetching ? 'Yangilanmoqda…' : 'Ma’lumot joriy holatda'}
+          </p>
+        </div>
 
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {isLoading || !data ? (
-          Array.from({ length: 8 }, (_, index) => (
-            <CardSkeleton key={index} className="h-[118px]" />
-          ))
-        ) : (
-          <>
-            <StatCard
-              label="Jami foydalanuvchilar"
-              value={formatSom(data.users.total)}
-              icon={Users}
-              tone="success"
-              trend={{ direction: 'up', value: String(data.users.new_this_month), note: 'bu oy' }}
-            />
-            <StatCard
-              label="Faol foydalanuvchilar"
-              value={formatSom(data.users.active)}
-              icon={UserRound}
-              tone="info"
-            />
-            <StatCard
-              label="Xodimlar"
-              value={formatSom(data.users.staff)}
-              icon={UserPlus}
-              tone="purple"
-            />
-            <StatCard
-              label="E'lon qilingan yechimlar"
-              value={formatSom(data.solutions.published)}
-              icon={FileCheck2}
-              tone="cyan"
-            />
-            <StatCard
-              label="Institutlar"
-              value={formatSom(data.catalogue.universities)}
-              icon={Building2}
-              tone="orange"
-            />
-            <StatCard
-              label="Fanlar"
-              value={formatSom(data.catalogue.subjects)}
-              icon={BookOpen}
-              tone="info"
-            />
-            <StatCard
-              label="Topshiriq / variant"
-              value={`${data.catalogue.assignments} / ${data.catalogue.variants}`}
-              icon={Layers}
-              tone="purple"
-            />
-            <StatCard
-              label="Jami daromad"
-              value={formatDecimalSom(data.sales.revenue)}
-              icon={CircleDollarSign}
-              tone="success"
-              trend={{
-                direction: 'up',
-                value: formatDecimalSom(data.sales.revenue_this_month),
-                note: 'bu oy',
-              }}
-            />
-          </>
-        )}
-      </section>
+        <SegmentedControl
+          aria-label="Davr"
+          options={periodOptions}
+          value={period}
+          onChange={setPeriod}
+        />
+      </div>
 
-      {/* Moderatsiya navbatlari — dashboarddan to'g'ridan-to'g'ri o'tiladi. */}
-      <section className="mt-4">
-        {isLoading || !data ? (
-          <CardSkeleton className="h-[92px]" />
-        ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <QueueCard
-              label="Kutilayotgan yechimlar"
-              count={data.solutions.pending}
-              to="/yechimlar"
-              icon={FileCheck2}
-            />
-            <QueueCard
-              label="Fan arizalari"
-              count={data.requests.subject_pending}
-              to="/fanlar/arizalar"
-              icon={ClipboardList}
-            />
-            <QueueCard
-              label="Topshiriq arizalari"
-              count={data.requests.assignment_pending}
-              // `/yuborilgan/topshiriqlar` degan yo'l yo'q edi — karta
-              // 404 ga olib borardi. Topshiriq arizalari `topshiriqlar`
-              // ostida turadi.
-              to="/topshiriqlar/arizalar"
-              icon={FileWarning}
-            />
-            <QueueCard
-              label="Shikoyatlar"
-              count={data.requests.report_pending}
-              to="/shikoyatlar"
-              icon={TriangleAlert}
-            />
+      {isLoading || !data ? (
+        <div className="mt-4 flex flex-col gap-4">
+          <Skeleton className="h-[184px]" />
+          <div className="grid gap-4 xl:grid-cols-2">
+            <Skeleton className="h-[360px]" />
+            <Skeleton className="h-[360px]" />
           </div>
-        )}
-      </section>
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+            {Array.from({ length: 10 }, (_, index) => (
+              <Skeleton key={index} className="h-[132px]" />
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="mt-4 flex flex-col gap-4">
+          <AttentionRow data={data} />
 
-      <section className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-3">
-        {isLoading || !data ? (
-          Array.from({ length: 3 }, (_, index) => (
-            <CardSkeleton key={index} className="h-[340px]" />
-          ))
-        ) : (
-          <Charts data={data} />
-        )}
-      </section>
+          <div className="grid gap-4 xl:grid-cols-2">
+            <RevenueCard data={data} />
+            <GrowthCard data={data} />
+          </div>
 
-      <section className="mt-4">
-        {isLoading || !data ? (
-          <CardSkeleton className="h-[160px]" />
-        ) : (
-          <Card className="pb-5">
-            <CardHeader title="Sotuvlar" />
-            <div className="mt-5 grid grid-cols-1 gap-4 px-5 lg:grid-cols-4">
-              {[
-                { label: 'Buyurtmalar', value: formatSom(data.sales.orders), icon: ShoppingCart },
-                {
-                  label: 'Bu oyda',
-                  value: formatSom(data.sales.orders_this_month),
-                  icon: ShoppingCart,
-                },
-                {
-                  label: 'Platforma komissiyasi',
-                  value: formatDecimalSom(data.sales.commission),
-                  icon: CircleDollarSign,
-                },
-                {
-                  label: 'Sotuvchilarga',
-                  value: formatDecimalSom(data.sales.seller_earning),
-                  icon: CircleDollarSign,
-                },
-              ].map((item) => (
-                <div key={item.label} className="rounded-card border border-line bg-canvas p-5">
-                  <p className="text-sm text-fg-muted">{item.label}</p>
-                  <p className="mt-2 text-[22px] leading-tight font-semibold tracking-tight whitespace-nowrap text-fg">
-                    {item.value}
-                  </p>
-                </div>
+          <section>
+            <p className="text-sm font-semibold text-fg">
+              Platforma ko&apos;rsatkichlari{' '}
+              <span className="ml-1 rounded-badge bg-elevated px-2 py-0.5 text-[11px] font-medium text-fg-muted">
+                {PERIOD_LABELS[data.period]}
+              </span>
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-5">
+              {data.metrics.map((metric) => (
+                <MetricCard key={metric.key} metric={metric} />
               ))}
             </div>
-          </Card>
-        )}
-      </section>
+          </section>
+
+          <div className="grid gap-4 xl:grid-cols-2">
+            <TopSellersCard data={data} />
+            <RetentionCard data={data} />
+          </div>
+        </div>
+      )}
     </>
   );
 }
