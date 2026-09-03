@@ -11,7 +11,7 @@ import { useState } from 'react';
 import { Link } from '@/i18n/navigation';
 
 import { GrowthLineChart } from '@/components/charts/GrowthLineChart';
-import { Sparkline } from '@/components/charts/Sparkline';
+import { BarSparkline } from '@/components/charts/BarSparkline';
 import { SplitRevenueChart } from '@/components/charts/SplitRevenueChart';
 import { useChartTheme } from '@/components/charts/chartTheme';
 import { Card } from '@/components/ui/Card';
@@ -33,6 +33,14 @@ import { useGetAdminOverviewQuery } from './dashboardApi';
 
 const periodOptions = OVERVIEW_PERIODS.map((value) => ({ value, label: PERIOD_LABELS[value] }));
 
+/** Ustunlar qaysi bo'lakda — davr tanlagichi bilan birga o'zgaradi. */
+function bucketCaption(period: OverviewPeriod): string {
+  if (period === 'today') return 'Soatlik aylanma';
+  if (period === '30d') return 'Haftalik aylanma';
+  if (period === 'all') return 'Oylik aylanma';
+  return 'Kunlik aylanma';
+}
+
 /** «2 kun» / «6 soat» — kutish vaqti odam o'qiydigan shaklda. */
 function waitLabel(hours: number): string {
   if (hours <= 0) return '—';
@@ -40,16 +48,28 @@ function waitLabel(hours: number): string {
   return `${Math.round(hours / 24)} kun`;
 }
 
+type QueueTone = 'neutral' | 'info' | 'danger';
+
+const queueTones: Record<QueueTone | 'warning', string> = {
+  neutral: 'bg-elevated text-fg-muted',
+  info: 'bg-info/12 text-info',
+  warning: 'bg-warning/12 text-warning',
+  danger: 'bg-danger/12 text-danger',
+};
+
 /**
- * Kutish qancha uzun bo'lsa, yorliq shuncha keskin.
+ * Yorliq rangi ikki narsadan kelib chiqadi: ish TURI va KUTISH vaqti.
  *
- * Chegaralar ish tartibidan: bir kundan oshgan navbat — kechikkan,
- * sakkiz soatdan oshgani — e'tibor talab qiladi.
+ * Nizo bir soat kutgan bo'lsa ham qizil — u har doim shoshilinch. Yechim
+ * moderatsiyasi esa vaqt o'tgani sari keskinlashadi: sakkiz soatdan
+ * oshsa sariq, bir kundan oshsa qizil. Faqat vaqtga qarasak nizo
+ * boshqalar bilan bir xil ko'rinardi; faqat turga qarasak ikki kundan
+ * beri yotgan navbat sezilmasdi.
  */
-function waitTone(hours: number): string {
-  if (hours >= 24) return 'bg-danger/12 text-danger';
-  if (hours >= 8) return 'bg-warning/12 text-warning';
-  return 'bg-elevated text-fg-muted';
+function waitTone(hours: number, tone: QueueTone): string {
+  if (tone === 'danger' || hours >= 24) return queueTones.danger;
+  if (hours >= 8) return queueTones.warning;
+  return queueTones[tone];
 }
 
 function QueueCard({
@@ -58,18 +78,22 @@ function QueueCard({
   bucket,
   to,
   icon: Icon,
+  tone,
 }: {
   label: string;
   unit: string;
   bucket: QueueBucket;
   to: string;
   icon: LucideIcon;
+  tone: QueueTone;
 }) {
   return (
     <div className="rounded-control border border-line bg-card p-3.5">
       <div className="flex items-center justify-between gap-2">
         <span className="flex min-w-0 items-center gap-2">
-          <span className="grid size-6 shrink-0 place-items-center rounded-md bg-elevated text-fg-muted">
+          <span
+            className={cn('grid size-6 shrink-0 place-items-center rounded-md', queueTones[tone])}
+          >
             <Icon className="size-3.5" strokeWidth={1.75} />
           </span>
           <span className="truncate text-sm font-medium text-fg">{label}</span>
@@ -77,7 +101,7 @@ function QueueCard({
         <span
           className={cn(
             'shrink-0 rounded-badge px-2 py-0.5 text-[11px] font-medium tabular-nums',
-            waitTone(bucket.waiting_hours),
+            waitTone(bucket.waiting_hours, tone),
           )}
         >
           {waitLabel(bucket.waiting_hours)}
@@ -124,6 +148,7 @@ function AttentionRow({ data }: { data: AdminOverview }) {
           label="Yechim moderatsiyasi"
           unit="ta yechim"
           bucket={queue.solutions}
+          tone="neutral"
           to="/yechimlar"
           icon={FileCheck2}
         />
@@ -131,6 +156,7 @@ function AttentionRow({ data }: { data: AdminOverview }) {
           label="Topshiriq arizalari"
           unit="ta ariza"
           bucket={queue.assignment_requests}
+          tone="info"
           to="/topshiriqlar/arizalar"
           icon={ClipboardList}
         />
@@ -138,6 +164,7 @@ function AttentionRow({ data }: { data: AdminOverview }) {
           label="Xarid shikoyati"
           unit="ta nizo"
           bucket={queue.disputes}
+          tone="danger"
           to="/xarid-shikoyatlari"
           icon={TriangleAlert}
         />
@@ -145,6 +172,7 @@ function AttentionRow({ data }: { data: AdminOverview }) {
           label="Yangi murojaat"
           unit="ta xat"
           bucket={queue.appeals}
+          tone="info"
           to="/murojaatlar"
           icon={Mail}
         />
@@ -177,11 +205,16 @@ function RevenueCard({ data }: { data: AdminOverview }) {
   const theme = useChartTheme();
   const { revenue } = data;
 
+  /* Uch qator uch xil narsani aytadi: ustunning ikki bo'lagi va
+     ulardan tashqarida qaytib ketgan pul. Qaytarilgan pul QIZIL —
+     u aylanmaning bo'lagi emas, uning teskarisi. */
   const legend = [
     { label: 'Sotuvchilarga', value: revenue.seller_earning, color: theme.series[0] },
     { label: 'Platforma komissiyasi', value: revenue.commission, color: theme.series[2] },
-    { label: 'Qaytarilgan', value: revenue.refunded, color: theme.series[1] },
+    { label: 'Qaytarilgan', value: revenue.refunded, color: theme.danger },
   ];
+
+  const sellerPercent = Math.max(0, Math.round(100 - revenue.commission_percent));
 
   return (
     <Card className="p-5">
@@ -213,9 +246,32 @@ function RevenueCard({ data }: { data: AdminOverview }) {
         />
       </div>
 
-      {/* Ustunlar nimadan tuzilganini AYNAN shu yerda aytadi: ustun
-          balandligi aylanma, ranglari esa uning taqsimoti. */}
-      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line pt-4">
+      {/* Ustun nimadan tuzilgani — grafikning O'ZI ostida, ulushi bilan.
+          Pastdagi qator esa summalar: bittasi shaklni, ikkinchisi
+          miqdorni tushuntiradi. */}
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px]">
+        <span className="font-medium tracking-wider text-fg-muted uppercase">
+          {bucketCaption(data.period)}
+        </span>
+        <span className="flex items-center gap-1.5 text-fg-soft">
+          <span
+            aria-hidden
+            className="size-2 shrink-0 rounded-[3px]"
+            style={{ background: theme.series[0] }}
+          />
+          Sotuvchilarga ({sellerPercent}%)
+        </span>
+        <span className="flex items-center gap-1.5 text-fg-soft">
+          <span
+            aria-hidden
+            className="size-2 shrink-0 rounded-[3px]"
+            style={{ background: theme.series[2] }}
+          />
+          Platforma komissiyasi ({Math.round(revenue.commission_percent)}%)
+        </span>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line pt-3">
         {legend.map((item) => (
           <span key={item.label} className="flex items-center gap-2">
             <span
@@ -235,6 +291,7 @@ function RevenueCard({ data }: { data: AdminOverview }) {
 }
 
 function GrowthCard({ data }: { data: AdminOverview }) {
+  const theme = useChartTheme();
   const [line, setLine] = useState<'users' | 'solutions'>('users');
   const current = data.growth[line];
 
@@ -277,6 +334,17 @@ function GrowthCard({ data }: { data: AdminOverview }) {
           label={line === 'users' ? 'Foydalanuvchilar' : 'Yechimlar'}
         />
       </div>
+
+      {/* Chiziq TO'PLANGAN jami ekanini aytish shart: usiz uni kunlik
+          qo'shilganlar deb o'qish mumkin va grafik ma'nosini yo'qotadi. */}
+      <div className="mt-3 flex items-center gap-2 text-[11px] text-fg-soft">
+        <span
+          aria-hidden
+          className="h-[3px] w-4 shrink-0 rounded-full"
+          style={{ background: theme.series[0] }}
+        />
+        Jami (to&apos;plangan)
+      </div>
     </Card>
   );
 }
@@ -293,7 +361,15 @@ const groupLabels: Record<MetricGroup, string> = {
   sales: 'SAVDO',
 };
 
-function MetricCard({ metric }: { metric: OverviewMetric }) {
+/** Davr so'zi — «+4» ni «+4 bu hafta» qiladi. */
+const periodNotes: Record<OverviewPeriod, string> = {
+  today: 'bugun',
+  '7d': 'bu hafta',
+  '30d': 'bu oy',
+  all: 'jami',
+};
+
+function MetricCard({ metric, period }: { metric: OverviewMetric; period: OverviewPeriod }) {
   const theme = useChartTheme();
 
   /* Sparkline rangi ko'rsatkich guruhiga ergashadi — karta yorlig'i
@@ -304,6 +380,11 @@ function MetricCard({ metric }: { metric: OverviewMetric }) {
       : metric.group === 'content'
         ? theme.series[3]
         : theme.series[1];
+
+  /* «+4» o'z-o'zicha savol qoldiradi — qachondan beri to'rtta? Davr
+     so'zi javobni yoniga qo'yadi. Boshqa shakldagi izohlar («7 faol»)
+     tegilmaydi. */
+  const note = metric.note.startsWith('+') ? `${metric.note} ${periodNotes[period]}` : metric.note;
 
   return (
     <Card className="flex flex-col p-4">
@@ -327,15 +408,14 @@ function MetricCard({ metric }: { metric: OverviewMetric }) {
         {metric.unit && <span className="text-xs text-fg-muted">{metric.unit}</span>}
       </p>
 
-      <div className="mt-3 flex items-end justify-between gap-2">
+      {/* `mt-auto`: izoh va grafik kartaning PASTIGA yopishadi, ya'ni
+          yonma-yon turgan o'nta kartada ular bitta chiziqda bo'ladi —
+          nomi ikki qatorli kartada ham. */}
+      <div className="mt-auto flex items-end justify-between gap-2 pt-3">
         <span className="text-[11px] text-fg-muted tabular-nums">
-          {metric.change_percent !== null ? <Change value={metric.change_percent} /> : metric.note}
+          {metric.change_percent !== null ? <Change value={metric.change_percent} /> : note}
         </span>
-        {metric.spark.length > 0 && (
-          <span className="h-8 w-16 shrink-0">
-            <Sparkline data={metric.spark} color={sparkColor} />
-          </span>
-        )}
+        {metric.spark.length > 0 && <BarSparkline data={metric.spark} color={sparkColor} />}
       </div>
     </Card>
   );
@@ -563,7 +643,7 @@ export function DashboardPage() {
             </p>
             <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-5">
               {data.metrics.map((metric) => (
-                <MetricCard key={metric.key} metric={metric} />
+                <MetricCard key={metric.key} metric={metric} period={data.period} />
               ))}
             </div>
           </section>

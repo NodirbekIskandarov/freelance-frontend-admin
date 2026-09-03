@@ -24,6 +24,7 @@ const FALLBACKS: Record<string, string> = {
   '--color-chart-2': '#3b82f6',
   '--color-chart-3': '#f59e0b',
   '--color-chart-4': '#a78bfa',
+  '--color-danger': '#f87171',
 };
 
 /** Bitta tokenning hisoblangan qiymati (test muhitida — zaxira). */
@@ -39,6 +40,14 @@ export interface ChartTheme {
   surface: string;
   /** Bir xil ko'rsatkich hamma grafikda bir xil rangda bo'lishi uchun. */
   series: [string, string, string, string];
+  /**
+   * Yo'qotishlar uchun — qaytarilgan pul, rad etilgan yechim.
+   *
+   * `series` ichida emas: u ketma-ket ko'rsatkichlar uchun va undan
+   * navbatdagi rang olinganda «qaytarilgan» tasodifan yashil bo'lib
+   * qolishi mumkin edi.
+   */
+  danger: string;
 }
 
 function snapshot(): ChartTheme {
@@ -52,6 +61,7 @@ function snapshot(): ChartTheme {
       readToken('--color-chart-3'),
       readToken('--color-chart-4'),
     ],
+    danger: readToken('--color-danger'),
   };
 }
 
