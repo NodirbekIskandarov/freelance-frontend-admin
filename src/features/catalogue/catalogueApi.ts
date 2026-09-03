@@ -3,6 +3,9 @@ import type {
   Direction,
   Faculty,
   Subject,
+  SubjectCategoriesQuery,
+  SubjectCategory,
+  SubjectCategoryWriteRequest,
   SubjectsQuery,
   SubjectWriteRequest,
   UniversitiesQuery,
@@ -144,6 +147,45 @@ export const catalogueApi = baseApi.injectEndpoints({
       query: (params) => ({ url: '/directions/', params }),
       keepUnusedDataFor: REFERENCE_CACHE_SECONDS,
     }),
+
+    /**
+     * Fan toifalari — global tasnif.
+     *
+     * Admin ro'yxati (`/admin/...`) ishlatiladi, ochiq ro'yxat emas:
+     * panelda o'chirilgan toifalar ham ko'rinishi kerak, aks holda
+     * ularni qayta yoqib bo'lmasdi.
+     */
+    getSubjectCategories: build.query<ApiPaginated<SubjectCategory>, SubjectCategoriesQuery | void>(
+      {
+        query: (params) => ({ url: '/admin/subject-categories/', params: params ?? undefined }),
+        providesTags: ['SubjectCategory'],
+      },
+    ),
+
+    createSubjectCategory: build.mutation<SubjectCategory, SubjectCategoryWriteRequest>({
+      query: (body) => ({ url: '/admin/subject-categories/', method: 'POST', body }),
+      // Fan formasidagi tanlagich ham shu ro'yxatdan oziqlanadi.
+      invalidatesTags: ['SubjectCategory'],
+    }),
+
+    updateSubjectCategory: build.mutation<
+      SubjectCategory,
+      { id: string; body: SubjectCategoryWriteRequest }
+    >({
+      query: ({ id, body }) => ({
+        url: `/admin/subject-categories/${id}/`,
+        method: 'PATCH',
+        body,
+      }),
+      // Nomi o'zgarsa fanlar ro'yxatidagi ustun ham eskiradi.
+      invalidatesTags: ['SubjectCategory', 'Subject'],
+    }),
+
+    deleteSubjectCategory: build.mutation<void, string>({
+      query: (id) => ({ url: `/admin/subject-categories/${id}/`, method: 'DELETE' }),
+      // O'chirish fanlarni toifasiz qoldiradi — ular ham yangilanishi kerak.
+      invalidatesTags: ['SubjectCategory', 'Subject'],
+    }),
   }),
 });
 
@@ -158,5 +200,9 @@ export const {
   useUpdateSubjectMutation,
   useDeleteSubjectMutation,
   useGetFacultiesQuery,
+  useGetSubjectCategoriesQuery,
+  useCreateSubjectCategoryMutation,
+  useUpdateSubjectCategoryMutation,
+  useDeleteSubjectCategoryMutation,
   useGetDirectionsQuery,
 } = catalogueApi;

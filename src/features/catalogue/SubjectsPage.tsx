@@ -25,7 +25,7 @@ import {
 
 import {
   useDeleteSubjectMutation,
-  useGetDirectionsQuery,
+  useGetSubjectCategoriesQuery,
   useGetSubjectsQuery,
   useGetUniversityQuery,
 } from './catalogueApi';
@@ -87,7 +87,7 @@ export function SubjectsPage() {
   const [search, setSearch] = useState('');
   const [course, setCourse] = useState('all');
   const [semester, setSemester] = useState('all');
-  const [direction, setDirection] = useState('all');
+  const [category, setCategory] = useState('all');
 
   const [formOpen, setFormOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Subject | null>(null);
@@ -119,20 +119,21 @@ export function SubjectsPage() {
     setPage(1);
     setCourse('all');
     setSemester('all');
-    setDirection('all');
+    setCategory('all');
     setSearch('');
   }, [university?.id]);
 
   /*
-   * Yo'nalishlar tanlangan institutniki: usiz ro'yxatda boshqa
-   * institutlarning yo'nalishlari ham chiqib, bir xil nom takrorlanardi.
-   * Ustiga, boshqa institutning yo'nalishi bo'yicha filtrlash hech
-   * qachon natija bermasdi.
+   * Toifalar universitetdan MUSTAQIL so'raladi.
+   *
+   * Ilgari bu yerda tanlangan institutning yo'nalishlari turardi va filtr
+   * institut tanlanmaguncha umuman ko'rinmasdi. Toifa esa global: «Aniq
+   * fanlar» bo'yicha filtrlash butun katalog bo'ylab ma'noli.
    */
-  const { data: directions } = useGetDirectionsQuery(
-    { page_size: 200, university: university?.id ?? '' },
-    { skip: !university },
-  );
+  const { data: categoryPage } = useGetSubjectCategoriesQuery({
+    page_size: 200,
+    is_active: true,
+  });
 
   /*
    * Institut tanlanmagan bo'lsa ham so'raladi — u shu yerda FILTR, majburiy
@@ -146,7 +147,7 @@ export function SubjectsPage() {
     ...(debouncedSearch ? { search: debouncedSearch } : {}),
     ...(course !== 'all' ? { course: Number(course) } : {}),
     ...(semester !== 'all' ? { semester: Number(semester) } : {}),
-    ...(direction !== 'all' ? { direction } : {}),
+    ...(category !== 'all' ? { category } : {}),
   });
 
   const [deleteSubject, deleteState] = useDeleteSubjectMutation();
@@ -163,9 +164,9 @@ export function SubjectsPage() {
     setDeleteTarget(null);
   }
 
-  const directionOptions = [
-    { value: 'all', label: "Barcha yo'nalishlar" },
-    ...(directions?.results ?? []).map((item) => ({ value: item.id, label: item.name })),
+  const categoryOptions = [
+    { value: 'all', label: 'Barcha toifalar' },
+    ...(categoryPage?.results ?? []).map((item) => ({ value: item.id, label: item.name })),
   ];
 
   const columns: Column<Subject>[] = [
@@ -420,21 +421,17 @@ export function SubjectsPage() {
                   className="w-48"
                 />
 
-                {/*
-                      Yo'nalish faqat institut tanlanganda: usiz ro'yxatda
-                      barcha institutlarning yo'nalishlari chiqib, bir xil nom
-                      takrorlanardi.
-                    */}
-                {university && directionOptions.length > 1 ? (
+                {/* Institut tanlanmagan bo'lsa ham ko'rinadi: toifa global. */}
+                {categoryOptions.length > 1 ? (
                   <Select
-                    aria-label="Yo'nalish bo'yicha filtr"
+                    aria-label="Toifa bo'yicha filtr"
                     /* Uzun ro'yxatda aylantirishdan ko'ra yozib topish tezroq. */
-                    searchable={directionOptions.length > 8}
-                    searchPlaceholder="Yo'nalish nomi..."
-                    options={directionOptions}
-                    value={direction}
+                    searchable={categoryOptions.length > 8}
+                    searchPlaceholder="Toifa nomi..."
+                    options={categoryOptions}
+                    value={category}
                     onChange={(event) => {
-                      setDirection(event.target.value);
+                      setCategory(event.target.value);
                       setPage(1);
                     }}
                     className="w-52"

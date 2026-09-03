@@ -74,6 +74,7 @@ export const ru: Messages = {
     content: 'Управление контентом',
     institutes: 'Вузы',
     subjects: 'Предметы',
+    subjectCategories: 'Категории предметов',
     assignments: 'Задания',
     variants: 'Варианты',
     submittedSubjects: 'Присланные предметы',

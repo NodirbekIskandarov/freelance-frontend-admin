@@ -31,6 +31,9 @@ function courseLine(row: AdminSubjectRequest): string | null {
 }
 
 const columns: Column<AdminSubjectRequest>[] = [
+  /* Toifa ustuni: moderator qaror qilishdan oldin arizachi nimani
+     tanlaganini ko'rishi kerak — u eng ko'p tuzatiladigan maydon. */
+
   {
     key: 'name',
     header: 'Fan nomi',
@@ -39,6 +42,14 @@ const columns: Column<AdminSubjectRequest>[] = [
       <span className="block truncate font-medium text-fg" title={row.name}>
         {row.name}
       </span>
+    ),
+  },
+  {
+    key: 'category',
+    header: 'Toifa',
+    hideOnMobile: true,
+    cell: (row) => (
+      <span className="whitespace-nowrap text-fg-soft">{row.category_name || '—'}</span>
     ),
   },
   {
@@ -231,11 +242,11 @@ export function SubjectRequestsPage() {
           isLoading={approveState.isLoading}
           error={approveState.error}
           onClose={() => setApproveTarget(null)}
-          onConfirm={async (names) => {
+          onConfirm={async (values) => {
             if (!approveTarget) return;
 
             try {
-              await approve({ id: approveTarget.id, ...names }).unwrap();
+              await approve({ id: approveTarget.id, ...values }).unwrap();
             } catch {
               return;
             }

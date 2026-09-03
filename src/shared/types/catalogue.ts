@@ -71,8 +71,9 @@ export interface Subject {
   id: string;
   university: string;
   university_name: string;
-  direction: string | null;
-  direction_name: string;
+  /** Fanning TOIFASI — global tasnif, universitetning yo'nalishi emas. */
+  category: string | null;
+  category_name: string | null;
   name: string;
   name_uz: string | null;
   name_ru: string | null;
@@ -91,8 +92,8 @@ export interface Subject {
 export interface SubjectWriteRequest {
   university: string;
   name: string;
-  /** Ixtiyoriy, lekin berilsa O'SHA universitetga tegishli bo'lishi shart. */
-  direction?: string | null;
+  /** Ixtiyoriy. Toifa global, shuning uchun universitet bilan bog'liq emas. */
+  category?: string | null;
   name_ru?: string;
   course?: number | null;
   semester?: number | null;
@@ -108,7 +109,7 @@ export interface UniversitiesQuery extends ApiListQuery {
 
 export interface SubjectsQuery extends ApiListQuery {
   university?: string;
-  direction?: string;
+  category?: string;
   course?: number;
   semester?: number;
   source?: SubjectSource;
@@ -150,3 +151,35 @@ export const UNIVERSITY_PANEL_ORDERING = {
   /** Fanlar ekrani uchun — fani ko'pi tepada. */
   bySubjects: '-subject_count,-assignment_count,short_name',
 } as const;
+
+/**
+ * Fan toifasi — «Aniq fanlar», «Tibbiyot», «IT»…
+ *
+ * `Direction` dan farqi: u bitta universitetning bitta fakultetiga
+ * tegishli, toifa esa GLOBAL. «Oliy matematika» qayerda o'qitilmasin,
+ * aniq fan — shuning uchun katalog filtri uni bir marta ko'rsatadi.
+ */
+export interface SubjectCategory {
+  id: string;
+  name: string;
+  name_uz: string | null;
+  name_ru: string | null;
+  /** Manzil va filtrlar uchun barqaror identifikator; nomi o'zgarsa ham qoladi. */
+  slug: string;
+  /** Qo'lda tartib: eng ko'p tanlanadigani alifbo ostida ko'milib qolmasin. */
+  position: number;
+  is_active: boolean;
+  /** Toifa ortida nechta fan turgani — o'chirishdan oldin bilish kerak. */
+  subject_count?: number;
+}
+
+export interface SubjectCategoryWriteRequest {
+  name: string;
+  name_ru?: string;
+  position?: number;
+  is_active?: boolean;
+}
+
+export interface SubjectCategoriesQuery extends ApiListQuery {
+  is_active?: boolean;
+}

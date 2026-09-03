@@ -65,7 +65,7 @@ export const adminRequestsApi = baseApi.injectEndpoints({
      */
     approveSubjectRequest: build.mutation<
       AdminSubjectRequest,
-      { id: string; name?: string; name_ru?: string }
+      { id: string; name?: string; name_ru?: string; category?: string | null }
     >({
       query: ({ id, ...body }) => ({
         url: `/admin/subject-requests/${id}/approve/`,
@@ -73,7 +73,14 @@ export const adminRequestsApi = baseApi.injectEndpoints({
         body,
       }),
       onQueryStarted: optimisticRemove('getSubjectRequestsList'),
-      invalidatesTags: [{ type: 'Request', id: 'SUBJECT' }, 'Subject', 'Dashboard'],
+      // Toifa ham berilishi mumkin — toifalar ro'yxatidagi `subject_count`
+      // eskiradi.
+      invalidatesTags: [
+        { type: 'Request', id: 'SUBJECT' },
+        'Subject',
+        'SubjectCategory',
+        'Dashboard',
+      ],
     }),
 
     rejectSubjectRequest: build.mutation<AdminSubjectRequest, { id: string; reason: string }>({

@@ -47,6 +47,7 @@ export const baseApi = createApi({
     'Product',
     'Institute',
     'Subject',
+    'SubjectCategory',
     'Task',
     'Solution',
     'Variant',

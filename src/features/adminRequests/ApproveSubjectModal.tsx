@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/Field';
+import { Select } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
+import { useGetSubjectCategoriesQuery } from '@/features/catalogue/catalogueApi';
 import { getApiErrorMessage } from '@/shared/api';
 import type { AdminSubjectRequest } from '@/shared/types/adminRequests';
 
@@ -27,12 +29,28 @@ export function ApproveSubjectModal({
   request: AdminSubjectRequest | null;
   isLoading: boolean;
   error?: unknown;
-  onConfirm: (names: { name: string; name_ru: string }) => void;
+  onConfirm: (values: { name: string; name_ru: string; category: string | null }) => void;
   onClose: () => void;
 }) {
   const [name, setName] = useState('');
   const [nameRu, setNameRu] = useState('');
+  const [category, setCategory] = useState('');
   const [touched, setTouched] = useState(false);
+
+  /*
+   * Toifalar arizadan MUSTAQIL so'raladi va faqat oyna ochilganda.
+   *
+   * Bu moderator eng ko'p tuzatadigan maydon: arizachi fanni biladi,
+   * tasnifni esa har doim ham emas.
+   */
+  const { data: categoryPage } = useGetSubjectCategoriesQuery(
+    { page_size: 200, is_active: true },
+    { skip: request === null },
+  );
+  const categoryOptions = [
+    { value: '', label: 'Toifasiz' },
+    ...(categoryPage?.results ?? []).map((item) => ({ value: item.id, label: item.name })),
+  ];
 
   useEffect(() => {
     if (!request) return;
@@ -41,6 +59,9 @@ export function ApproveSubjectModal({
     // yoki ruschasini yozib, o'zbekchasini qayta yozishi mumkin.
     setName(request.name);
     setNameRu('');
+    // Arizachi tanlagan toifa oldindan qo'yiladi — moderator faqat
+    // xato bo'lsa tegadi.
+    setCategory(request.category ?? '');
     setTouched(false);
   }, [request]);
 
@@ -50,7 +71,7 @@ export function ApproveSubjectModal({
     setTouched(true);
     if (!name.trim()) return;
 
-    onConfirm({ name: name.trim(), name_ru: nameRu.trim() });
+    onConfirm({ name: name.trim(), name_ru: nameRu.trim(), category: category || null });
   }
 
   return (
@@ -90,6 +111,22 @@ export function ApproveSubjectModal({
           hint="Ixtiyoriy — bilmasangiz bo'sh qoldiring, keyin tahrirlash mumkin."
           onChange={(event) => setNameRu(event.target.value)}
         />
+
+        <div>
+          <span className="mb-2 block text-sm font-medium text-fg-soft">Fan toifasi</span>
+          <Select
+            aria-label="Fan toifasi"
+            className="w-full"
+            searchable={categoryOptions.length > 8}
+            searchPlaceholder="Toifa nomi..."
+            options={categoryOptions}
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+          />
+          <p className="mt-1.5 text-xs text-fg-muted">
+            Arizachi tanlagani oldindan qo&apos;yilgan — xato bo&apos;lsa tuzating.
+          </p>
+        </div>
 
         {error !== undefined && error !== null && (
           <p

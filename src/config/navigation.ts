@@ -15,6 +15,7 @@ import {
   KeyRound,
   Landmark,
   LayoutGrid,
+  Tags,
   LifeBuoy,
   MessageSquare,
   ScrollText,
@@ -145,6 +146,19 @@ export const navigation: NavGroup[] = [
         label: (m) => m.nav.subjects,
         to: '/fanlar',
         icon: LayoutGrid,
+        permission: 'catalogue.view',
+      },
+      /*
+       * Fan toifalari — ALOHIDA band, institutlar ostida emas.
+       *
+       * Toifa universitetning yo'nalishi emas: u butun katalog uchun
+       * bitta. Uni institutlar ichiga yashirish aynan shu chalkashlikni
+       * qayta tug'dirardi.
+       */
+      {
+        label: (m) => m.nav.subjectCategories,
+        to: '/fan-toifalari',
+        icon: Tags,
         permission: 'catalogue.view',
       },
       {

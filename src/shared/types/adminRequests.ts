@@ -14,6 +14,9 @@ export interface AdminSubjectRequest {
   university_name: string;
   university_short_name: string;
   name: string;
+  /** Arizachi tanlagan toifa — moderator uni tuzatishi mumkin. */
+  category: string | null;
+  category_name: string | null;
   course: number | null;
   semester: number | null;
   /** Arizachining o'z izohi — moderator uchun kontekst. */

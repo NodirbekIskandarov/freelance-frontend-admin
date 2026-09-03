@@ -75,6 +75,7 @@ export const uz = {
     content: 'Kontent boshqaruvi',
     institutes: 'Institutlar',
     subjects: 'Fanlar',
+    subjectCategories: 'Fan toifalari',
     assignments: 'Topshiriqlar',
     variants: 'Variantlar',
     submittedSubjects: 'Yuborilgan fanlar',

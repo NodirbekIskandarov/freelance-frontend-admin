@@ -10,29 +10,10 @@ import { COURSE_OPTIONS, SEMESTER_OPTIONS, type Subject } from '@/shared/types/c
 
 import {
   useCreateSubjectMutation,
-  useGetDirectionsQuery,
+  useGetSubjectCategoriesQuery,
   useGetUniversitiesQuery,
   useUpdateSubjectMutation,
 } from './catalogueApi';
-
-/**
- * Yo'nalish universitetga BEVOSITA bog'lanmagan: universitet → fakultet
- * → yo'nalish. Backend "yo'nalish o'sha universitetga tegishli bo'lsin"
- * deb talab qiladi.
- *
- * Oldin ro'yxat ikki bosqichda yig'ilardi (avval fakultetlar, keyin butun
- * yo'nalishlar ro'yxati va uni qo'lda saralash). Endi `/directions/`
- * `?university=` ni o'zi qabul qiladi — bitta so'rov, ortiqcha ma'lumot
- * tortilmaydi.
- */
-function useDirectionsForUniversity(universityId: string, enabled: boolean) {
-  const { data, isLoading } = useGetDirectionsQuery(
-    { page_size: 200, university: universityId },
-    { skip: !enabled || !universityId },
-  );
-
-  return { directions: data?.results ?? [], isLoading };
-}
 
 /** Izoh maydonining chegarasi — backend ham shu sonni tekshiradi. */
 const MAX_DESCRIPTION = 300;
@@ -59,7 +40,7 @@ export function SubjectFormModal({
   );
 
   const [university, setUniversity] = useState('');
-  const [direction, setDirection] = useState('');
+  const [category, setCategory] = useState('');
   const [name, setName] = useState('');
   const [nameRu, setNameRu] = useState('');
   const [course, setCourse] = useState('');
@@ -68,13 +49,22 @@ export function SubjectFormModal({
   const [isActive, setIsActive] = useState(true);
   const [touched, setTouched] = useState(false);
 
-  const { directions } = useDirectionsForUniversity(university, open);
+  /*
+   * Toifalar ro'yxati universitetga BOG'LIQ EMAS — u global. Ilgari bu
+   * yerda `?university=` bilan yo'nalishlar so'ralardi va institut
+   * tanlanmaguncha maydon umuman ishlamasdi.
+   */
+  const { data: categoryPage } = useGetSubjectCategoriesQuery(
+    { page_size: 200, is_active: true },
+    { skip: !open },
+  );
+  const categories = categoryPage?.results ?? [];
 
   useEffect(() => {
     if (!open) return;
 
     setUniversity(subject?.university ?? defaultUniversityId ?? '');
-    setDirection(subject?.direction ?? '');
+    setCategory(subject?.category ?? '');
     /*
      * `name` joriy tilga qarab yechilgan qiymat, `name_uz` esa ustunning
      * o'zi. Tahrirlashda ustun kerak: aks holda ruscha interfeysda
@@ -97,9 +87,9 @@ export function SubjectFormModal({
     })),
   ];
 
-  const directionOptions = [
-    { value: '', label: "Yo'nalishsiz" },
-    ...directions.map((item) => ({ value: item.id, label: item.name })),
+  const categoryOptions = [
+    { value: '', label: 'Toifasiz' },
+    ...categories.map((item) => ({ value: item.id, label: item.name })),
   ];
 
   const universityError = touched && !university ? 'Institutni tanlang' : undefined;
@@ -116,9 +106,9 @@ export function SubjectFormModal({
       university,
       name: name.trim(),
       name_ru: nameRu.trim(),
-      // Bo'sh tanlov `null` bo'lib ketadi — backend `direction` ni
+      // Bo'sh tanlov `null` bo'lib ketadi — backend `category` ni
       // ixtiyoriy deb belgilagan, bo'sh SATR esa UUID sifatida rad etilardi.
-      direction: direction || null,
+      category: category || null,
       course: course ? Number(course) : null,
       semester: semester ? Number(semester) : null,
       description: description.trim(),
@@ -166,32 +156,31 @@ export function SubjectFormModal({
             searchPlaceholder="Institut nomi..."
             options={universityOptions}
             value={university}
-            onChange={(event) => {
-              setUniversity(event.target.value);
-              // Institut o'zgarsa eski yo'nalish endi mos kelmaydi.
-              setDirection('');
-            }}
+            /* Toifa TOZALANMAYDI: u global va institut o'zgargani bilan
+               kuchini yo'qotmaydi. Yo'nalish paytida tozalash kerak edi —
+               u boshqa universitetning fakultetiga tegishli edi. */
+            onChange={(event) => setUniversity(event.target.value)}
           />
           {universityError && <p className="mt-1.5 text-xs text-danger">{universityError}</p>}
         </div>
 
         <div>
           <span className="mb-2 block text-sm font-medium text-fg-soft">
-            Yo&apos;nalish (ixtiyoriy)
+            Fan toifasi (ixtiyoriy)
           </span>
           <Select
-            aria-label="Yo'nalish"
+            aria-label="Fan toifasi"
             className="w-full"
-            searchable={directionOptions.length > 8}
-            searchPlaceholder="Yo'nalish nomi..."
-            options={directionOptions}
-            value={direction}
-            disabled={!university || directions.length === 0}
-            onChange={(event) => setDirection(event.target.value)}
+            searchable={categoryOptions.length > 8}
+            searchPlaceholder="Toifa nomi..."
+            options={categoryOptions}
+            value={category}
+            /* Institut tanlangani SHART EMAS: toifa global. */
+            onChange={(event) => setCategory(event.target.value)}
           />
-          {university && directions.length === 0 && (
+          {categories.length === 0 && (
             <p className="mt-1.5 text-xs text-fg-muted">
-              Bu institutda yo&apos;nalishlar hali qo&apos;shilmagan.
+              Toifalar hali qo&apos;shilmagan — «Fan toifalari» bo&apos;limidan qo&apos;shing.
             </p>
           )}
         </div>
