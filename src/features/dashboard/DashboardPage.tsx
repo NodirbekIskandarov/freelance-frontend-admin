@@ -349,10 +349,18 @@ function GrowthCard({ data }: { data: AdminOverview }) {
   );
 }
 
+/*
+ * Guruh yorlig'i — RANGSIZ.
+ *
+ * Ilgari har guruh o'z rangida edi (ko'k / binafsha / sariq) va natijada
+ * sahifadagi eng rangli narsa eng kam ma'lumot tashiydigan narsa bo'lib
+ * qolgandi: yorliq raqamni emas, faqat uning turkumini aytadi. Turkum
+ * matnning o'zida yozilgan, unga rang kerak emas.
+ */
 const groupTones: Record<MetricGroup, string> = {
-  people: 'bg-info/12 text-info',
-  content: 'bg-purple/12 text-purple',
-  sales: 'bg-warning/12 text-warning',
+  people: 'bg-neutral-quiet text-fg-dim',
+  content: 'bg-neutral-quiet text-fg-dim',
+  sales: 'bg-neutral-quiet text-fg-dim',
 };
 
 const groupLabels: Record<MetricGroup, string> = {

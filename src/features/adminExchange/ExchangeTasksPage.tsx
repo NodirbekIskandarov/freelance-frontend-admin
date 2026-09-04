@@ -32,7 +32,7 @@ import { useGetAdminTasksQuery, useGetAdminTaskStatsQuery } from './adminExchang
 const statusTones: Record<TaskStatus, BadgeTone> = {
   open: 'info',
   in_progress: 'warning',
-  delivered: 'purple',
+  delivered: 'primary',
   completed: 'success',
   cancelled: 'danger',
 };
@@ -191,7 +191,7 @@ export function ExchangeTasksPage() {
               label="Kafolatdagi pul"
               value={stats ? formatDecimalSom(stats.escrow_held) : '—'}
               icon={Banknote}
-              tone="purple"
+              tone="primary"
             />
             <StatCard
               label="Komissiya"

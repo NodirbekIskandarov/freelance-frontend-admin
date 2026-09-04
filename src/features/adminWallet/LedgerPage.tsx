@@ -180,7 +180,7 @@ export function LedgerPage() {
               label="Sof"
               value={formatDecimalSom(totals.data?.net ?? '0')}
               icon={Scale}
-              tone="purple"
+              tone="primary"
             />
           </section>
 

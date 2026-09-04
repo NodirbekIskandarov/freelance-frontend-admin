@@ -17,14 +17,21 @@ import { subscribeToTheme } from '@/lib/theme';
  */
 
 const FALLBACKS: Record<string, string> = {
-  '--color-fg-muted': '#97a09b',
-  '--color-line': '#2e3431',
-  '--color-card': '#191f1c',
-  '--color-chart-1': '#10b981',
-  '--color-chart-2': '#3b82f6',
-  '--color-chart-3': '#f59e0b',
-  '--color-chart-4': '#a78bfa',
+  '--color-fg-muted': '#8a948f',
+  /* Chegara tokeni SHAFFOF (`rgb(255 255 255 / .09)`). Zaxira esa qat'iy
+     bo'lishi kerak: u faqat brauzersiz muhitda ishlatiladi va u yerda
+     ostidagi sirt noma'lum. Qiymat qorong'i karta ustidagi hisoblangan
+     natijaga teng. */
+  '--color-line': '#262c29',
+  '--color-card': '#151b18',
+  '--color-chart-1': '#34d399',
+  '--color-chart-2': '#60a5fa',
+  '--color-chart-3': '#fbbf24',
+  '--color-chart-4': '#a5b4fc',
+  '--color-chart-5': '#5eead4',
+  '--color-chart-6': '#fda4af',
   '--color-danger': '#f87171',
+  '--color-surface-hover': 'rgba(255,255,255,0.035)',
 };
 
 /** Bitta tokenning hisoblangan qiymati (test muhitida — zaxira). */
@@ -48,6 +55,8 @@ export interface ChartTheme {
    * qolishi mumkin edi.
    */
   danger: string;
+  /** Ustun ustiga kelganda ortidagi yorug'lik — `--color-surface-hover`. */
+  hover: string;
 }
 
 function snapshot(): ChartTheme {
@@ -62,6 +71,7 @@ function snapshot(): ChartTheme {
       readToken('--color-chart-4'),
     ],
     danger: readToken('--color-danger'),
+    hover: readToken('--color-surface-hover'),
   };
 }
 

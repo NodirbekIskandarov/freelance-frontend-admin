@@ -2,21 +2,21 @@ import { ArrowDown, ArrowUp, Minus, type LucideIcon } from 'lucide-react';
 
 import { cn } from '@/lib/cn';
 
-/** Karta yuqori qirrasidagi yorug' chiziq — `Card` bilan bir xil. */
-const cardSheen = 'shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset]';
-
 /**
- * Ikonka chipining rangi. Dizaynda har karta o'z rangida:
- * yashil, ko'k, binafsha, to'q sariq, cyan, sariq.
+ * Ikonka chipining rangi.
+ *
+ * Faqat aksent va to'rt semantik ohang. Ilgari bu yerda binafsha, to'q
+ * sariq va moviy ham bor edi va har karta «o'z rangida» chizilardi —
+ * ya'ni rang hech nimani anglatmasdi, shunchaki kartalarni bir-biridan
+ * ajratardi. Buni chegara ham uddalaydi.
  */
 const iconTones = {
-  success: 'bg-success/12 text-success',
-  info: 'bg-info/12 text-info',
-  purple: 'bg-purple/12 text-purple',
-  orange: 'bg-orange/12 text-orange',
-  cyan: 'bg-cyan/12 text-cyan',
-  warning: 'bg-warning/12 text-warning',
-  danger: 'bg-danger/12 text-danger',
+  primary: 'bg-primary-quiet text-primary',
+  success: 'bg-success-quiet text-success',
+  info: 'bg-info-quiet text-info',
+  warning: 'bg-warning-quiet text-warning',
+  danger: 'bg-danger-quiet text-danger',
+  neutral: 'bg-neutral-quiet text-neutral',
 } as const;
 
 export type StatTone = keyof typeof iconTones;
@@ -68,8 +68,8 @@ export function StatCard({
   return (
     <div
       className={cn(
-        'flex flex-col rounded-card border border-line bg-card p-4',
-        cardSheen,
+        'flex flex-col rounded-card border border-line-subtle bg-card p-4',
+        'shadow-card',
         className,
       )}
     >

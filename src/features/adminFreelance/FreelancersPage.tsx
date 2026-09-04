@@ -33,7 +33,7 @@ const statusTones: Record<FreelancerStatus, BadgeTone> = {
   none: 'neutral',
   pending: 'warning',
   active: 'success',
-  suspended: 'orange',
+  suspended: 'warning',
   rejected: 'danger',
 };
 
@@ -130,7 +130,7 @@ export function FreelancersPage() {
         <span className="flex items-center gap-1.5">
           <Badge tone={statusTones[row.status]}>{FREELANCER_STATUS_LABELS[row.status]}</Badge>
           {row.status === 'active' && (
-            <Badge tone={row.availability === 'available' ? 'success' : 'orange'}>
+            <Badge tone={row.availability === 'available' ? 'success' : 'neutral'}>
               {AVAILABILITY_LABELS[row.availability]}
             </Badge>
           )}

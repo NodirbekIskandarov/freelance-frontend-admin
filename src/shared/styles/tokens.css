@@ -1,160 +1,204 @@
 /*
  * Yopamiz.uz admin — dizayn tokenlari (Tailwind v4, CSS-first).
  *
- * Palitra `Yopamiz-uz-main` loyihasidagi admin panelidan olingan: u
- * yashil-qora (`#070b09` fon, `#0d1411` karta, emerald urg'u), oldingi
- * nusxa esa ko'k-qora edi. Ranglar o'sha loyihaning `admin-ui.tsx` va
- * `admin-theme-root.tsx` fayllaridan aynan ko'chirildi.
+ * Yo'nalish: «yumshoq». Deyarli qora, ozgina yashil qiyshiq maydon; karta
+ * undan BITTA sezilarli qadam bilan ko'tariladi va ustiga soch tolasidek
+ * ingichka chegara tushadi. Ilgari teskari edi — sirtlar bir-biriga juda
+ * yaqin (#0f1512 / #141a17 / #191f1c), chegaralar esa juda yorug'
+ * (#2e3431) bo'lgani uchun panel qatlam emas, qora varaqqa chizilgan
+ * kulrang ramkalar bo'lib ko'rinardi.
  *
- * Chegaralar u yerda `white/[0.06]`, `white/[0.08]` ko'rinishida — bu
- * yerda ular karta foni ustida hisoblangan qat'iy qiymatlar, chunki
- * tokenlar shaffoflikni qo'llab-quvvatlamaydi.
- *
- * Nomlash: Tailwind v4 `--color-X` dan `bg-X` / `text-X` / `border-X` yasaydi,
- * shuning uchun nomlar qisqa va utility'ga to'g'ridan-to'g'ri mos.
+ * Nomlash Tailwind v4 ga bog'langan: `--color-X` dan `bg-X` / `text-X` /
+ * `border-X` yasaladi. Shuning uchun nomlar qisqa va utility'ga
+ * to'g'ridan-to'g'ri mos — `--bg-canvas` kabi nomlar chiroyliroq, lekin
+ * ular bilan birorta utility ishlamas edi.
  *
  * DIQQAT: bu fayl `web` loyihasidagi nusxasidan ATAYLAB farq qiladi —
- * admin va sayt turli dizaynga ega. Sinxronlash `api/`, `types/`, `mocks/`
- * papkalariga tegishli, tokenlarga emas.
+ * admin va sayt turli dizaynga ega.
  */
 
 @theme {
-  /* --- Brend / accent: Tailwind emerald (shablonda ham shu) --- */
-  --color-brand-50: #ecfdf5;
-  --color-brand-100: #d1fae5;
-  --color-brand-200: #a7f3d0;
-  --color-brand-300: #6ee7b7;
-  --color-brand-400: #34d399;
-  --color-brand-500: #10b981;
-  --color-brand-600: #059669;
-  --color-brand-700: #047857;
-  --color-brand-800: #065f46;
-  --color-brand-900: #064e3b;
+  /* ---------------------------------------------------------------------
+   * Sirtlar
+   *
+   * Qadamlar o'lchangan: canvas L*≈5.5 → card L*≈9.5 → elevated L*≈13.
+   * Har qadam ko'zga tashlanadi, lekin hech biri kulrangga aylanmaydi.
+   * Yashil qiyshiqlik saqlandi (g > r, b ≈ r+3): brend rangi shu va
+   * neytral kulrang panelning o'zini boshqa mahsulotga aylantirardi.
+   * ------------------------------------------------------------------- */
+  --color-canvas: #0e1311; /* body */
+  --color-sidebar: #111614;
+  --color-topbar: #0e1311;
+  --color-card: #151b18;
+  --color-elevated: #1b2320; /* menyu, modal, faol qator */
+  --color-input: #121917;
 
-  /* --- Fon qatlamlari ---
-   *
-   * Butun shkala qora poldan ko'tarildi. Ilgari `canvas` L*=2.7, `card`
-   * esa L*=5.7 edi — orasidagi farq 3 birlik, ya'ni ekranda deyarli yo'q:
-   * kartalar sirt bo'lib emas, bitta qora varaqda chizilgan chegaralar
-   * bo'lib ko'rinardi. Endi qadamlar sezilarli (canvas 6.2 → card 11.1 →
-   * elevated 15.4) va panel qatlamli o'qiladi.
-   *
-   * Yashil qiyshiqlik SAQLANDI (g ≈ r+6, b ≈ r+3) — brend rangi shu va
-   * uni neytral kulrangga almashtirish panelning o'zini o'zgartirardi.
-   */
-  --color-canvas: #0f1512; /* body */
-  --color-sidebar: #141a17;
-  --color-topbar: #0f1512;
-  --color-card: #191f1c;
-  --color-elevated: #222825; /* sidebar faol element, hover */
-  --color-input: #141a17;
+  /* Hover/faol sirt — RANG emas, yorug'lik qo'shimchasi. Shu sababli u
+     qaysi sirt ustida bo'lishidan qat'i nazar bir xil ishlaydi. */
+  --color-surface-hover: rgb(255 255 255 / 0.035);
+  --color-surface-active: rgb(255 255 255 / 0.06);
 
-  /* --- Chegara: karta foni ustida ko'rinadigan ikki bosqich --- */
-  --color-line: #2e3431;
-  --color-line-strong: #444a47;
+  /* ---------------------------------------------------------------------
+   * Chegaralar — soch tolasi, kulrang chiziq emas.
+   *
+   * Qat'iy hex emas, SHAFFOF oq. Sabab: bitta qiymat canvas, karta va
+   * modal ustida ham to'g'ri chiqadi. Ilgari bu yerda «tokenlar
+   * shaffoflikni qo'llab-quvvatlamaydi» deb yozilgan edi — bu noto'g'ri,
+   * Tailwind v4 uchun token oddiy CSS qiymati.
+   * ------------------------------------------------------------------- */
+  --color-line-subtle: rgb(255 255 255 / 0.06);
+  --color-line: rgb(255 255 255 / 0.09);
+  --color-line-strong: rgb(255 255 255 / 0.14);
 
-  /* --- Matn ---
+  /* ---------------------------------------------------------------------
+   * Matn
    *
-   * `fg` sof oq EMAS. Oq qora fonda 18.7:1 beradi — bu o'qish uchun
-   * kerakli chegaradan ancha yuqori va uzoq qarab ishlaganda harflar
-   * atrofida yorug'lik "yoyilib" ko'rinadi. 14:1 bir xil aniq, lekin
-   * ko'zni charchatmaydi.
-   *
-   * Shkala zinc (ko'kish) dan neytral-yashilga o'tdi: fon yashil
-   * qiyshiq, matn esa ko'kish edi va ikkalasi bir-biriga qarshi turardi.
-   */
-  --color-fg: #e8ece9;
-  --color-fg-soft: #c2cac6;
-  --color-fg-muted: #97a09b;
-  --color-fg-dim: #79837e;
+   * `fg` sof oq EMAS: oq bu fonda 17:1 beradi va uzoq ishlaganda harflar
+   * atrofida yorug'lik yoyilib ko'rinadi. 13:1 bir xil aniq, ko'z esa
+   * charchamaydi.
+   * ------------------------------------------------------------------- */
+  --color-fg: #e6ebe8;
+  --color-fg-soft: #b7c1bc;
+  --color-fg-muted: #8a948f;
+  --color-fg-dim: #6b7570;
 
-  /* --- Shrift ---
+  /* ---------------------------------------------------------------------
+   * Aksent — bitta. Yashil.
    *
-   * Inter: o'zbek lotin va kirill to'liq qamrab olingan, admin
-   * jadvallarida raqamlari aniq ajraladi. Tizim shrifti zaxirada —
-   * fayl kelmasa sahifa baribir o'qiladi.
-   */
+   * `quiet` va `line` — badge va faol menyu uchun: to'ldirilgan blok
+   * o'rniga 12% fon + 22% chegara + to'yingan matn. Ekranda to'ldirilgan
+   * to'yingan blok FAQAT bitta bo'lishi kerak — asosiy tugma.
+   * ------------------------------------------------------------------- */
+  --color-primary: #10b981;
+  --color-primary-hover: #34d399;
+  --color-primary-active: #059669;
+  --color-primary-quiet: rgb(16 185 129 / 0.12);
+  --color-primary-line: rgb(16 185 129 / 0.22);
+
+  /* Aksent fonidagi matn. Qorong'ida bu QORA: #10b981 ustida qora 7.3:1
+     beradi, oq esa 2.5:1 — ya'ni oq yorliq o'qilmasdi. */
+  --color-on-accent: #04140e;
+
+  /* ---------------------------------------------------------------------
+   * Semantik ranglar — to'rttasi va neytral, boshqasi yo'q.
+   *
+   * Ilgari sakkizta ohang ishlatilardi (yashil, ko'k, sariq, qizil,
+   * binafsha, to'q sariq, moviy, pushti). Sakkizta rangdan olti-yettisi
+   * hech qanday holatni anglatmasdi — ular shunchaki «boshqa» degan
+   * ma'noni berardi va shu sababli ekranning eng rangli joyi eng kam
+   * ma'lumot tashiydigan joy bo'lib qolgandi.
+   * ------------------------------------------------------------------- */
+  --color-success: #4ade80;
+  --color-success-quiet: rgb(74 222 128 / 0.12);
+  --color-success-line: rgb(74 222 128 / 0.22);
+
+  --color-warning: #fbbf24;
+  --color-warning-quiet: rgb(251 191 36 / 0.12);
+  --color-warning-line: rgb(251 191 36 / 0.22);
+
+  --color-danger: #f87171;
+  --color-danger-quiet: rgb(248 113 113 / 0.12);
+  --color-danger-line: rgb(248 113 113 / 0.22);
+
+  --color-info: #60a5fa;
+  --color-info-quiet: rgb(96 165 250 / 0.12);
+  --color-info-line: rgb(96 165 250 / 0.22);
+
+  --color-neutral: #9ca3af;
+  --color-neutral-quiet: rgb(255 255 255 / 0.06);
+  --color-neutral-line: rgb(255 255 255 / 0.10);
+
+  /* ---------------------------------------------------------------------
+   * To'ldirilgan sirtlar uchun ALOHIDA, to'qroq ranglar.
+   *
+   * Yuqoridagi semantik ranglar qorong'i kartada MATN bo'lib ishlatiladi
+   * va o'sha yerda yorug' bo'lishi kerak. Xuddi shu rang tugma foni
+   * bo'lib, ustida oq yorliq turganda kontrast yetmaydi:
+   *
+   *     #4ade80 + oq = 1.9:1     #f87171 + oq = 2.6:1   (AA talabi 4.5:1)
+   *
+   * Shuning uchun to'ldirilgan holat o'z tokenini oladi.
+   * ------------------------------------------------------------------- */
+  --color-primary-solid: #047857;
+  --color-primary-solid-hover: #059669;
+  --color-primary-solid-active: #065f46;
+  --color-danger-solid: #dc2626;
+  --color-success-solid: #15803d;
+
+  /* ---------------------------------------------------------------------
+   * Grafik ketma-ketligi — UI palitrasidan AJRALGAN.
+   *
+   * Interfeysda binafsha/to'q sariq/moviy yo'q, lekin grafikda ketma-ket
+   * qatorlarni ajratish uchun ko'proq rang kerak. Ular bo'g'iq: grafik
+   * ma'lumotni ko'rsatishi kerak, e'tiborni tortishi emas.
+   *
+   * Ma'noga bog'langan, chaqiruvchining xohishiga emas: to'plangan
+   * qiymat doim 1-rang, kunlik oqim doim 2-rang.
+   * ------------------------------------------------------------------- */
+  --color-chart-1: #34d399;
+  --color-chart-2: #60a5fa;
+  --color-chart-3: #fbbf24;
+  --color-chart-4: #a5b4fc;
+  --color-chart-5: #5eead4;
+  --color-chart-6: #fda4af;
+
+  /* ---------------------------------------------------------------------
+   * Shrift
+   * ------------------------------------------------------------------- */
   --font-sans:
     'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, sans-serif;
 
-  /* --- Grafik ketma-ketliklari ---
+  /* ---------------------------------------------------------------------
+   * Radius
    *
-   * Ma'noga bog'langan, chaqiruvchining xohishiga emas: to'plangan
-   * qiymat doim 1-rang, kunlik oqim doim 2-rang. Ilgari har grafik
-   * o'zicha tanlardi va bitta ekranda «kunlik yangi» ko'k, ikkinchisida
-   * «jami» ko'k bo'lib qolgandi — ya'ni rang hech nima anglatmasdi.
-   */
-  --color-chart-1: #10b981;
-  --color-chart-2: #3b82f6;
-  --color-chart-3: #f59e0b;
-  --color-chart-4: #a78bfa;
-
-  /* --- Holat ranglari --- */
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-info: #3b82f6;
-  --color-purple: #a855f7;
-  --color-orange: #f97316;
-  --color-cyan: #06b6d4;
-
-  /* --- Radius ---
-   *
-   * Sayt bilan bir xil nisbatda (~30%) kichraytirilgan: burchaklar juda
-   * dumaloq edi. Badge dumaloqligicha qoladi — u shakli bilan tanaladi.
-   */
-  --radius-control: 0.375rem;
-  --radius-card: 0.6875rem;
+   * Yumshoqlik his-tuyg'usining yarmi shu yerdan keladi. Ilgari karta
+   * 11px, boshqaruv 6px edi — burchaklar «o'tkir» ko'rinardi.
+   * ------------------------------------------------------------------- */
+  --radius-xs: 0.375rem; /* 6px  — checkbox, kichik belgi */
+  --radius-control: 0.625rem; /* 10px — tugma, input, select */
+  --radius-card: 0.875rem; /* 14px — karta, panel */
+  --radius-modal: 1.125rem; /* 18px — modal, katta qatlam */
   --radius-badge: 9999px;
-  --radius-modal: 0.6875rem;
 
-  /* --- Soya ---
+  /* ---------------------------------------------------------------------
+   * Balandlik
    *
-   * Kartada soya YO'Q: panel qorong'i va u yerda soya baribir ko'rinmasdi,
-   * faqat chegaralarni loyqalashtirardi. Ustidan suzib chiqadigan qatlamlar
-   * (menyu, modal) saqlanadi — ular fonda nima borligini ajratib turishi
-   * kerak, aks holda matn matn ustiga tushib qoladi.
+   * Qorong'ida qattiq soya ko'rinmaydi — u faqat chegarani loyqalatadi.
+   * Shuning uchun karta ikki qismdan ko'tariladi: ichkarida 2% oq chiziq
+   * (yuqori qirra yorishadi) va pastda juda tarqoq qora yoyilma.
+   * ------------------------------------------------------------------- */
+  --shadow-card:
+    0 1px 0 rgb(255 255 255 / 0.02) inset, 0 8px 24px -16px rgb(0 0 0 / 0.8);
+  --shadow-dropdown: 0 16px 40px -12px rgb(0 0 0 / 0.7);
+  --shadow-modal: 0 32px 80px -20px rgb(0 0 0 / 0.8);
+
+  /* ---------------------------------------------------------------------
+   * Harakat — qisqa va yumshoq, hech qachon sakramaydigan.
+   * ------------------------------------------------------------------- */
+  --ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* ---------------------------------------------------------------------
+   * Layout o'lchamlari
+   * ------------------------------------------------------------------- */
+  --spacing-sidebar: 15.5rem; /* 248px */
+  --spacing-topbar: 3.5rem; /* 56px */
+}
+
+/*
+ * Tailwind utility'siga aylanmaydigan, faqat CSS ichida ishlatiladigan
+ * qiymatlar. `@theme` ga solinsa Tailwind ular uchun keraksiz utility
+ * sinflari yasardi.
+ */
+:root {
+  --dur-fast: 120ms;
+  --dur: 160ms;
+
+  /*
+   * Fokus halqasi: ikki qatlam. Ichkarisi maydon rangida — halqa
+   * elementga yopishib qolmaydi; tashqarisi aksent chizig'i.
    */
-  --shadow-card: none;
-  --shadow-dropdown: 0 10px 30px rgb(0 0 0 / 0.5);
-  --shadow-modal: 0 25px 60px rgb(0 0 0 / 0.6);
-
-  /* --- Layout o'lchamlari (o'lchangan) --- */
-  --spacing-sidebar: 15.25rem; /* 244px */
-  --spacing-topbar: 4.125rem; /* 66px */
-}
-
-/*
- * Semantik qatlam. Komponentlar `brand-600` emas, `primary` ga tayanadi —
- * brend rangi almashsa faqat shu yer o'zgaradi.
- */
-@theme inline {
-  --color-primary: var(--color-brand-600);
-  --color-primary-hover: var(--color-brand-500);
-  --color-primary-active: var(--color-brand-700);
-}
-
-/*
- * To'ldirilgan tugmalar uchun alohida, TO'QROQ soyalar.
- *
- * Aksent ranglari qorong'i kartada asosan MATN bo'lib ishlatiladi
- * (`text-primary` 52 joyda, `text-success`/`text-danger` 111 joyda) va
- * u yerda ular yorug' bo'lishi kerak. Xuddi shu rang tugma foni bo'lib,
- * ustida oq yorliq turganda esa kontrast yetmaydi:
- *
- *     emerald-600 + oq = 3.77:1     red-500 + oq = 3.76:1
- *     green-500  + oq = 2.28:1      (AA talabi — 4.5:1)
- *
- * Aksentning o'zini to'qlashtirish 163 joydagi matnni buzardi, shuning
- * uchun tugma foniga o'z tokeni berildi.
- */
-@theme {
-  --color-primary-solid: #047857; /* emerald-700 — oq bilan 5.48:1 */
-  --color-primary-solid-hover: #059669;
-  --color-primary-solid-active: #065f46;
-  --color-danger-solid: #dc2626; /* red-600 — 4.83:1 */
-  --color-success-solid: #15803d; /* green-700 — 5.02:1 */
+  --ring: 0 0 0 2px var(--color-canvas), 0 0 0 4px var(--color-primary-line);
 }
 
 /*
@@ -165,49 +209,75 @@
  * ellik fayl emas.
  *
  * `@theme` ichida emas, oddiy CSS blokida: Tailwind `@theme` ni `:root`
- * ga chiqaradi va shart bilan qayta yozib bo'lmaydi. Bu blok esa
- * undan keyin va aniqroq selektor bilan turadi.
+ * ga chiqaradi va shart bilan qayta yozib bo'lmaydi. Bu blok esa undan
+ * keyin va aniqroq selektor bilan turadi.
  */
 :root[data-theme='light'] {
-  --color-canvas: #fafaf9;
+  --color-canvas: #f6f7f6;
   --color-sidebar: #ffffff;
   --color-topbar: #ffffff;
   --color-card: #ffffff;
-  --color-elevated: #f4f4f5;
+  --color-elevated: #ffffff;
   --color-input: #ffffff;
 
-  --color-line: #e4e4e7;
-  --color-line-strong: #d4d4d8;
+  --color-surface-hover: rgb(0 0 0 / 0.03);
+  --color-surface-active: rgb(0 0 0 / 0.05);
 
-  --color-fg: #18181b;
-  --color-fg-soft: #3f3f46;
-  --color-fg-muted: #52525b;
-  --color-fg-dim: #8b8b93;
+  --color-line-subtle: rgb(0 0 0 / 0.06);
+  --color-line: rgb(0 0 0 / 0.09);
+  --color-line-strong: rgb(0 0 0 / 0.14);
 
-  /* Yorug' fonda aksent to'qroq bo'lishi kerak — emerald-500 oq ustida
-     3:1 ham bermaydi. */
+  --color-fg: #16211c;
+  --color-fg-soft: #414b46;
+  --color-fg-muted: #656f6a;
+  --color-fg-dim: #8b948f;
+
+  /* Yorug' fonda aksent to'qroq bo'lishi kerak: #10b981 oq ustida 2.1:1
+     beradi va matn bo'lib o'qilmaydi. */
   --color-primary: #047857;
   --color-primary-hover: #059669;
   --color-primary-active: #065f46;
+  --color-primary-quiet: rgb(4 120 87 / 0.10);
+  --color-primary-line: rgb(4 120 87 / 0.22);
+  --color-on-accent: #ffffff;
+
+  --color-success: #15803d;
+  --color-success-quiet: rgb(21 128 61 / 0.10);
+  --color-success-line: rgb(21 128 61 / 0.22);
+
+  --color-warning: #b45309;
+  --color-warning-quiet: rgb(180 83 9 / 0.10);
+  --color-warning-line: rgb(180 83 9 / 0.22);
+
+  --color-danger: #b91c1c;
+  --color-danger-quiet: rgb(185 28 28 / 0.10);
+  --color-danger-line: rgb(185 28 28 / 0.22);
+
+  --color-info: #1d4ed8;
+  --color-info-quiet: rgb(29 78 216 / 0.10);
+  --color-info-line: rgb(29 78 216 / 0.22);
+
+  --color-neutral: #52525b;
+  --color-neutral-quiet: rgb(0 0 0 / 0.05);
+  --color-neutral-line: rgb(0 0 0 / 0.10);
+
   --color-primary-solid: #047857;
   --color-primary-solid-hover: #059669;
   --color-primary-solid-active: #065f46;
-
-  --color-success: #15803d;
-  --color-warning: #b45309;
-  --color-danger: #b91c1c;
-  --color-info: #1d4ed8;
-  --color-purple: #7e22ce;
-  --color-orange: #c2410c;
-  --color-cyan: #0e7490;
+  --color-danger-solid: #b91c1c;
+  --color-success-solid: #15803d;
 
   --color-chart-1: #059669;
   --color-chart-2: #2563eb;
   --color-chart-3: #d97706;
-  --color-chart-4: #7c3aed;
+  --color-chart-4: #6366f1;
+  --color-chart-5: #0d9488;
+  --color-chart-6: #e11d48;
 
   /* Oq kartada soya yana ma'noga ega — qorong'ida u ko'rinmasdi. */
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.06);
-  --shadow-dropdown: 0 10px 30px rgb(0 0 0 / 0.12);
-  --shadow-modal: 0 25px 60px rgb(0 0 0 / 0.18);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.05), 0 1px 3px -1px rgb(0 0 0 / 0.04);
+  --shadow-dropdown: 0 16px 40px -12px rgb(0 0 0 / 0.14);
+  --shadow-modal: 0 32px 80px -20px rgb(0 0 0 / 0.20);
+
+  --ring: 0 0 0 2px var(--color-canvas), 0 0 0 4px var(--color-primary-line);
 }

@@ -250,7 +250,7 @@ export function UsersPage() {
               label="Faol"
               value={statValue(activeCount)}
               icon={UserRoundCheck}
-              tone="purple"
+              tone="primary"
             />
             <StatCard label="Kutilmoqda" value={statValue(pendingCount)} icon={Clock} tone="info" />
             <StatCard

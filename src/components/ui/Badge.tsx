@@ -14,8 +14,6 @@ const tones = {
   warning: 'bg-warning/15 text-warning',
   danger: 'bg-danger/15 text-danger',
   info: 'bg-info/15 text-info',
-  purple: 'bg-purple/15 text-purple',
-  orange: 'bg-orange/15 text-orange',
   neutral: 'bg-fg/10 text-fg-muted',
   primary: 'bg-primary/15 text-primary',
 } as const;

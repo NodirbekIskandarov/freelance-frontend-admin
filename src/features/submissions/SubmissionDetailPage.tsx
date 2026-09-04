@@ -556,7 +556,7 @@ export function SubmissionDetailPage() {
                   {selectedVariant ? `${selectedVariant.number}-variant javoblari` : 'Javoblar'}
                   {/* Talab: nechta odam shu variantga yechim so'ragan. */}
                   {selectedVariant && selectedVariant.request_count > 0 && (
-                    <Badge tone="orange">{selectedVariant.request_count} ta so&apos;rov</Badge>
+                    <Badge tone="warning">{selectedVariant.request_count} ta so&apos;rov</Badge>
                   )}
                   {selectedVariant && capacityLeft === 0 && (
                     <Badge tone="neutral">Chop etish chegarasi to&apos;lgan</Badge>

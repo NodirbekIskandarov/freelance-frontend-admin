@@ -214,7 +214,7 @@ export function AppealsPage() {
               label="Ko'rib chiqilmoqda"
               value={stats ? formatSom(stats.in_review) : '—'}
               icon={Clock}
-              tone="purple"
+              tone="info"
             />
             <StatCard
               label="Hal qilindi"

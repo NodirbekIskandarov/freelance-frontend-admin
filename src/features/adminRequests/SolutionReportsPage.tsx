@@ -27,7 +27,7 @@ const columns: Column<AdminSolutionReport>[] = [
   {
     key: 'reason',
     header: 'Sabab',
-    cell: (row) => <Badge tone="orange">{REPORT_REASON_LABELS[row.reason] ?? row.reason}</Badge>,
+    cell: (row) => <Badge tone="warning">{REPORT_REASON_LABELS[row.reason] ?? row.reason}</Badge>,
   },
   {
     key: 'description',

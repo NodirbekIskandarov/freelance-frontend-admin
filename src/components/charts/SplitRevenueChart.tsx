@@ -78,7 +78,7 @@ export function SplitRevenueChart({
           domain={domain}
         />
         <Tooltip
-          cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+          cursor={{ fill: theme.hover }}
           content={<ChartTooltip formatter={formatSom} />}
           isAnimationActive={false}
         />

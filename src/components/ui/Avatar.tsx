@@ -14,13 +14,12 @@ const sizes = {
  * Dizaynda harf-avatarlar turli rangda (qizil, binafsha, ko'k, sariq...).
  */
 const palette = [
-  'bg-danger/80',
-  'bg-purple/80',
-  'bg-info/80',
-  'bg-warning/80',
-  'bg-success/80',
-  'bg-cyan/80',
-  'bg-orange/80',
+  'bg-chart-1/80',
+  'bg-chart-2/80',
+  'bg-chart-3/80',
+  'bg-chart-4/80',
+  'bg-chart-5/80',
+  'bg-chart-6/80',
 ];
 
 /** Ismdan barqaror rang tanlaydi — bir foydalanuvchi doim bir xil rangda. */

@@ -259,7 +259,7 @@ export function ContentPage() {
               label="Topshiriqlar"
               value={formatSom(data.assignments.total)}
               icon={ClipboardList}
-              tone="bg-purple/12 text-purple"
+              tone="bg-info-quiet text-info"
               details={data.assignments.by_type.slice(0, 3).map((row) => ({
                 label: assignmentTypeLabel(row.type, row.label),
                 value: formatSom(row.count),
@@ -289,7 +289,7 @@ export function ContentPage() {
               label="Talab"
               value={formatSom(data.demand.total)}
               icon={Users}
-              tone="bg-orange/12 text-orange"
+              tone="bg-neutral-quiet text-neutral"
               details={[
                 { label: 'Kutilmoqda', value: formatSom(data.demand.waiting) },
                 { label: 'Javob berilgan', value: formatSom(data.demand.answered) },
@@ -299,7 +299,7 @@ export function ContentPage() {
               label="Sotuvlar"
               value={formatSom(data.sales.orders_total)}
               icon={ShoppingCart}
-              tone="bg-cyan/12 text-cyan"
+              tone="bg-primary-quiet text-primary"
               details={[
                 { label: 'Bu oy', value: formatSom(data.sales.orders_this_month) },
                 { label: 'Bugun', value: formatSom(data.sales.orders_today) },
@@ -415,17 +415,17 @@ export function ContentPage() {
                 <StatusRow
                   label="Arxivlangan"
                   value={formatSom(data.solutions.archived)}
-                  tone="bg-purple"
+                  tone="bg-info"
                 />
                 <StatusRow
                   label="Yechim so'ralgan"
                   value={formatSom(data.variants.requested)}
-                  tone="bg-orange"
+                  tone="bg-neutral"
                 />
                 <StatusRow
                   label="Jami komissiya"
                   value={formatDecimalSom(data.sales.commission_total)}
-                  tone="bg-cyan"
+                  tone="bg-primary"
                 />
               </ul>
             </Card>

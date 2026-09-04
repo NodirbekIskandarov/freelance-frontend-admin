@@ -21,12 +21,12 @@ const PAGE_SIZE = 8;
  * renderda bir xil chiqadi.
  */
 const TONES = [
-  'bg-emerald-500/15 text-emerald-400',
-  'bg-sky-500/15 text-sky-400',
-  'bg-violet-500/15 text-violet-400',
-  'bg-amber-500/15 text-amber-400',
-  'bg-rose-500/15 text-rose-400',
-  'bg-cyan-500/15 text-cyan-400',
+  'bg-chart-1/15 text-chart-1',
+  'bg-chart-2/15 text-chart-2',
+  'bg-chart-3/15 text-chart-3',
+  'bg-chart-4/15 text-chart-4',
+  'bg-chart-5/15 text-chart-5',
+  'bg-chart-6/15 text-chart-6',
 ];
 
 export function UniversityBadge({

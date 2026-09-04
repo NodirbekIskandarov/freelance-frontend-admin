@@ -2,16 +2,16 @@ import type { ReactNode } from 'react';
 
 import { cn } from '@/lib/cn';
 
-/**
- * Yuqori qirradagi ingichka yorug' chiziq — shablondagi admin kartasida
- * shunday. U kartani fondan ajratib, «ko'tarilgan» ko'rinish beradi;
- * faqat chegara bilan karta tekis qog'ozdek turardi.
+/*
+ * Kartaning ko'tarilishi `--shadow-card` tokenida: yuqori qirradagi
+ * ingichka yorug' chiziq va pastdagi juda tarqoq yoyilma. Ilgari u shu
+ * yerda `shadow-[...rgba(255,255,255,0.04)...]` bo'lib yozilgan edi va
+ * mavzuga ergashmasdi — yorug' mavzuda oq karta ustiga oq chiziq
+ * tushardi.
  */
-const cardSheen = 'shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset]';
-
 export function Card({ className, children }: { className?: string; children: ReactNode }) {
   return (
-    <div className={cn('rounded-card border border-line bg-card', cardSheen, className)}>
+    <div className={cn('rounded-card border border-line-subtle bg-card shadow-card', className)}>
       {children}
     </div>
   );
