@@ -66,7 +66,10 @@ export function AssignmentsPage() {
   }, [universityFromUrl]);
 
   const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(20);
+  /* O'nta: topshiriq qatori ikki qatorli (nomi va fan · kurs · semestr),
+     ya'ni yigirmatasi ekranga sig'maydi va ro'yxatning oxirini ko'rish
+     uchun har safar pastga aylantirishga to'g'ri kelardi. */
+  const [perPage, setPerPage] = useState(10);
   const [subject, setSubject] = useState(subjectParam ?? 'all');
   const [course, setCourse] = useState('all');
   const [semester, setSemester] = useState('all');
