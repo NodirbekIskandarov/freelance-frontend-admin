@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
 import { useEffect, useRef, type ReactNode } from 'react';
 
+import { Tooltip } from '@/components/ui/Tooltip';
 import { cn } from '@/lib/cn';
 
 /**
@@ -98,18 +99,20 @@ export function Modal({
           {description && <p className="mt-1 text-[13px] text-fg-muted">{description}</p>}
         </div>
 
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Yopish (Esc)"
-          className={cn(
-            '-mt-1 -mr-1 grid size-8 shrink-0 place-items-center rounded-control text-fg-muted',
-            'transition-colors duration-(--dur) ease-soft outline-none',
-            'hover:bg-surface-hover hover:text-fg focus-visible:shadow-(--ring)',
-          )}
-        >
-          <X className="size-4" strokeWidth={1.75} />
-        </button>
+        <Tooltip label="Yopish (Esc)" placement="left">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Yopish (Esc)"
+            className={cn(
+              '-mt-1 -mr-1 grid size-8 shrink-0 place-items-center rounded-control text-fg-muted',
+              'transition-colors duration-(--dur) ease-soft outline-none',
+              'hover:bg-surface-hover hover:text-fg focus-visible:shadow-(--ring)',
+            )}
+          >
+            <X className="size-4" strokeWidth={1.75} />
+          </button>
+        </Tooltip>
       </div>
 
       <div className="max-h-[60dvh] overflow-y-auto px-5 py-5 sm:max-h-[70vh] sm:px-6 sm:py-6">

@@ -108,7 +108,7 @@ export function DisputeDetailPage() {
     return (
       <>
         <PageHeader title="Shikoyat" breadcrumbs={crumbs} />
-        <div className="h-64 animate-pulse rounded-card bg-elevated" />
+        <div className="h-64 bg-skeleton rounded-card" />
       </>
     );
   }
@@ -191,7 +191,7 @@ export function DisputeDetailPage() {
                     href={item.file}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-9 items-center gap-1.5 rounded-control border border-line px-3 text-xs font-medium text-fg-soft transition-colors hover:bg-elevated hover:text-fg"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-control border border-line px-3 text-xs font-medium text-fg-soft transition-colors hover:bg-surface-hover hover:text-fg"
                   >
                     <Download className="size-3.5" strokeWidth={1.75} />
                     Dalil {index + 1}
@@ -289,7 +289,7 @@ export function DisputeDetailPage() {
                         'flex cursor-pointer items-start gap-2.5 rounded-control border px-3.5 py-3 transition-colors',
                         isSelected
                           ? 'border-primary/60 bg-primary/8'
-                          : 'border-line hover:bg-elevated',
+                          : 'border-line hover:bg-surface-hover',
                       )}
                     >
                       <input

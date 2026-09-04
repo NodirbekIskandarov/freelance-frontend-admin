@@ -60,7 +60,7 @@ export function StaffPage() {
   );
 
   if (permissionsLoading) {
-    return <div className="h-64 animate-pulse rounded-card bg-elevated" />;
+    return <div className="h-64 bg-skeleton rounded-card" />;
   }
 
   if (!isSuperuser) {

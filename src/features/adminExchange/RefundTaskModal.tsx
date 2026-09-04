@@ -65,7 +65,7 @@ export function RefundTaskModal({
     >
       <div className="flex flex-col gap-4">
         {task && (
-          <div className="bg-surface-soft rounded-control border border-line px-3.5 py-3 text-sm">
+          <div className="rounded-control border border-line bg-input px-3.5 py-3 text-sm">
             <p className="text-fg">
               Qaytariladigan summa:{' '}
               <span className="font-semibold">{formatDecimalSom(task.agreed_price)}</span>

@@ -173,7 +173,7 @@ export function AssignmentDetailPage() {
     return (
       <>
         <PageHeader title="Topshiriq" breadcrumbs={crumbs} />
-        <div className="h-64 animate-pulse rounded-card bg-elevated" />
+        <div className="h-64 bg-skeleton rounded-card" />
       </>
     );
   }

@@ -126,10 +126,10 @@ export function UniversityPanel({
             onClick={() => onSelect(null)}
             aria-current={selectedId === null}
             className={cn(
-              'flex w-full items-center gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-colors',
+              'flex w-full items-center gap-2.5 rounded-control border px-3 py-2.5 text-left transition-colors',
               selectedId === null
                 ? 'border-primary/50 bg-primary/10'
-                : 'border-transparent hover:border-line hover:bg-elevated/60',
+                : 'border-transparent hover:border-line hover:bg-surface-hover',
             )}
           >
             <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
@@ -148,7 +148,7 @@ export function UniversityPanel({
 
         {isLoading ? (
           Array.from({ length: 5 }, (_, index) => (
-            <div key={index} className="h-[68px] animate-pulse rounded-lg bg-elevated/60" />
+            <div key={index} className="h-[68px] bg-skeleton rounded-control" />
           ))
         ) : universities.length === 0 ? (
           <p className="px-3 py-8 text-center text-[13px] text-fg-muted">Institut topilmadi</p>
@@ -163,10 +163,10 @@ export function UniversityPanel({
                 onClick={() => onSelect(university)}
                 aria-current={active}
                 className={cn(
-                  'flex w-full items-start gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-colors',
+                  'flex w-full items-start gap-2.5 rounded-control border px-3 py-2.5 text-left transition-colors',
                   active
                     ? 'border-primary/50 bg-primary/10'
-                    : 'border-transparent hover:border-line hover:bg-elevated/60',
+                    : 'border-transparent hover:border-line hover:bg-surface-hover',
                 )}
               >
                 <UniversityBadge university={university} logo={university.logo} />

@@ -79,7 +79,7 @@ export function WithdrawalNoteModal({
     >
       <div className="flex flex-col gap-4">
         {action && (
-          <div className="bg-surface-soft rounded-control border border-line px-3.5 py-3 text-sm">
+          <div className="rounded-control border border-line bg-input px-3.5 py-3 text-sm">
             <p className="text-fg">
               {WITHDRAWAL_METHOD_LABELS[action.row.method]}:{' '}
               <span className="font-mono">{action.row.destination}</span>

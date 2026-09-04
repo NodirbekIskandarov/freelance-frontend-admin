@@ -90,7 +90,7 @@ export function SolutionDetailPage() {
     return (
       <>
         <PageHeader title="Yechim" breadcrumbs={crumbs()} />
-        <div className="h-64 animate-pulse rounded-card bg-elevated" />
+        <div className="h-64 bg-skeleton rounded-card" />
       </>
     );
   }
@@ -199,7 +199,7 @@ export function SolutionDetailPage() {
                 href={data.file}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex h-10 items-center gap-2 rounded-control border border-line bg-card px-4 text-sm font-medium text-fg-soft transition-colors hover:bg-elevated hover:text-fg"
+                className="inline-flex h-10 items-center gap-2 rounded-control border border-line bg-card px-4 text-sm font-medium text-fg-soft transition-colors hover:bg-surface-hover hover:text-fg"
               >
                 <Download className="size-4" strokeWidth={1.75} />
                 Faylni yuklab olish

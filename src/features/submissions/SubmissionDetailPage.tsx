@@ -376,7 +376,7 @@ export function SubmissionDetailPage() {
             <div className="mt-4 flex flex-col gap-1">
               {assignments.isLoading ? (
                 Array.from({ length: 6 }, (_, index) => (
-                  <div key={index} className="h-12 animate-pulse rounded-control bg-elevated" />
+                  <div key={index} className="h-12 bg-skeleton rounded-control" />
                 ))
               ) : assignments.data?.results.length === 0 ? (
                 <p className="py-6 text-center text-sm text-fg-muted">Topshiriq yo&apos;q</p>
@@ -394,7 +394,7 @@ export function SubmissionDetailPage() {
                         'flex items-start gap-2.5 rounded-control border px-3 py-2 text-left transition-colors',
                         isSelected
                           ? 'border-primary/50 bg-primary/8'
-                          : 'border-transparent hover:bg-elevated',
+                          : 'border-transparent hover:bg-surface-hover',
                       )}
                     >
                       <span className="min-w-0 flex-1">
@@ -507,10 +507,7 @@ export function SubmissionDetailPage() {
                 <div className="mt-2.5 flex flex-wrap gap-2">
                   {variants.isLoading ? (
                     Array.from({ length: 5 }, (_, index) => (
-                      <div
-                        key={index}
-                        className="h-8 w-20 animate-pulse rounded-control bg-elevated"
-                      />
+                      <div key={index} className="h-8 w-20 bg-skeleton rounded-control" />
                     ))
                   ) : variants.data?.length === 0 ? (
                     <p className="text-sm text-fg-muted">Variant yo&apos;q</p>
@@ -528,7 +525,7 @@ export function SubmissionDetailPage() {
                             'flex items-center gap-1.5 rounded-control border px-3 py-1.5 text-sm transition-colors',
                             isSelected
                               ? 'border-primary/50 bg-primary/10 font-medium text-primary'
-                              : 'border-line text-fg-soft hover:bg-elevated',
+                              : 'border-line text-fg-soft hover:bg-surface-hover',
                           )}
                         >
                           {item.number}-variant

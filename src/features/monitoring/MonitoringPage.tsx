@@ -230,8 +230,8 @@ export function MonitoringPage() {
         </Card>
       ) : isLoading || !data ? (
         <div className="grid gap-4">
-          <div className="h-24 animate-pulse rounded-card bg-elevated" />
-          <div className="h-72 animate-pulse rounded-card bg-elevated" />
+          <div className="h-24 bg-skeleton rounded-card" />
+          <div className="h-72 bg-skeleton rounded-card" />
         </div>
       ) : (
         <div className="grid gap-4">

@@ -62,7 +62,7 @@ export function WalletTransactionsModal({
       ) : isLoading ? (
         <div className="flex flex-col gap-2">
           {Array.from({ length: 5 }, (_, index) => (
-            <div key={index} className="bg-surface-soft h-14 animate-pulse rounded-control" />
+            <div key={index} className="h-14 bg-skeleton rounded-control" />
           ))}
         </div>
       ) : !data || data.results.length === 0 ? (

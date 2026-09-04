@@ -56,7 +56,7 @@ export function SubmissionUniversityPanel({
             'flex items-center gap-2.5 rounded-control border px-3 py-2 text-left transition-colors',
             selectedId === 'all'
               ? 'border-primary/50 bg-primary/8'
-              : 'border-transparent hover:bg-elevated',
+              : 'border-transparent hover:bg-surface-hover',
           )}
         >
           <Sparkles className="size-5 shrink-0 text-primary" strokeWidth={1.75} />
@@ -80,7 +80,7 @@ export function SubmissionUniversityPanel({
 
         {isLoading
           ? Array.from({ length: 8 }, (_, index) => (
-              <div key={index} className="h-11 animate-pulse rounded-control bg-elevated" />
+              <div key={index} className="h-11 bg-skeleton rounded-control" />
             ))
           : visible.map((item) => {
               const isSelected = item.id === selectedId;
@@ -96,7 +96,7 @@ export function SubmissionUniversityPanel({
                     'flex items-center gap-2.5 rounded-control border px-3 py-2 text-left transition-colors',
                     isSelected
                       ? 'border-primary/50 bg-primary/8'
-                      : 'border-transparent hover:bg-elevated',
+                      : 'border-transparent hover:bg-surface-hover',
                   )}
                 >
                   <Avatar name={item.short_name || item.name} size="sm" className="size-6" />

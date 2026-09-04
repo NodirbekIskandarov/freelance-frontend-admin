@@ -162,7 +162,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
                     'flex w-full items-center gap-2 rounded-control px-3 py-2 text-left text-sm transition-colors',
                     index === selected
                       ? 'bg-elevated text-fg'
-                      : 'text-fg-soft hover:bg-elevated/60',
+                      : 'text-fg-soft hover:bg-surface-hover',
                   )}
                 >
                   <span className="min-w-0 flex-1 truncate">{entry.label}</span>

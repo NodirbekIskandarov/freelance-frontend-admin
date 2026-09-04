@@ -68,7 +68,7 @@ export function ReplyModal({
     >
       <div className="flex flex-col gap-4">
         {appeal && (
-          <div className="bg-surface-soft rounded-control border border-line px-3.5 py-3">
+          <div className="rounded-control border border-line bg-input px-3.5 py-3">
             <p className="text-sm font-medium text-fg">{appeal.subject}</p>
             <p className="mt-1 text-sm whitespace-pre-line text-fg-soft">{appeal.message}</p>
 

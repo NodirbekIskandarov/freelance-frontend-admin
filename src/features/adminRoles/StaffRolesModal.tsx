@@ -79,7 +79,7 @@ export function StaffRolesModal({
       }
     >
       <div className="flex flex-col gap-4">
-        <p className="bg-surface-soft rounded-control border border-line px-3.5 py-3 text-sm text-fg-soft">
+        <p className="rounded-control border border-line bg-input px-3.5 py-3 text-sm text-fg-soft">
           Saqlash xodimning rollarini <b className="text-fg">aynan shu tanlovga</b> almashtiradi.
           Hech narsa tanlanmasa, uning barcha rollari olib tashlanadi.
         </p>
@@ -87,7 +87,7 @@ export function StaffRolesModal({
         {isLoading ? (
           <div className="flex flex-col gap-2">
             {Array.from({ length: 4 }, (_, index) => (
-              <div key={index} className="h-14 animate-pulse rounded-control bg-elevated" />
+              <div key={index} className="h-14 bg-skeleton rounded-control" />
             ))}
           </div>
         ) : !roles || roles.results.length === 0 ? (

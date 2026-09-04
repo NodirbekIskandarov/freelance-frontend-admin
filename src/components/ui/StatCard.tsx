@@ -82,7 +82,7 @@ export function StatCard({
         yonma-yon turgan to'rtta karta esa dashboarddagi o'ntasidan
         boshqacha ko'rinardi.
       */}
-      <span className={cn('grid size-8 w-fit place-items-center rounded-lg', iconTones[tone])}>
+      <span className={cn('grid size-8 w-fit place-items-center rounded-control', iconTones[tone])}>
         <Icon className="size-4" strokeWidth={1.75} />
       </span>
 

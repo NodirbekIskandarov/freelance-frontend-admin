@@ -15,6 +15,7 @@ import { Link } from '@/i18n/navigation';
 import { Avatar } from '@/components/ui/Avatar';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Select } from '@/components/ui/Select';
 import { cn } from '@/lib/cn';
@@ -125,7 +126,7 @@ function TopRowBody({ row, index }: { row: TopRow; index: number }) {
   return (
     <Link
       to={row.to}
-      className="-mx-2 flex items-start gap-2 rounded-control px-2 py-2.5 transition-colors hover:bg-elevated"
+      className="-mx-2 flex items-start gap-2 rounded-control px-2 py-2.5 transition-colors hover:bg-surface-hover"
     >
       {body}
     </Link>
@@ -230,8 +231,8 @@ export function ContentPage() {
 
       {isLoading || !data ? (
         <div className="flex flex-col gap-4">
-          <div className="h-40 animate-pulse rounded-card border border-line bg-card" />
-          <div className="h-80 animate-pulse rounded-card border border-line bg-card" />
+          <Skeleton className="h-40 rounded-card" />
+          <Skeleton className="h-80 rounded-card" />
         </div>
       ) : (
         <>

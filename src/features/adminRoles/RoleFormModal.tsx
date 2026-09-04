@@ -158,7 +158,7 @@ export function RoleFormModal({
           {catalogueLoading ? (
             <div className="flex flex-col gap-2">
               {Array.from({ length: 4 }, (_, index) => (
-                <div key={index} className="h-24 animate-pulse rounded-control bg-elevated" />
+                <div key={index} className="h-24 bg-skeleton rounded-control" />
               ))}
             </div>
           ) : (

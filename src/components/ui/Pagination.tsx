@@ -1,5 +1,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+import { Tooltip } from '@/components/ui/Tooltip';
+
 import { cn } from '@/lib/cn';
 
 import { Select } from './Select';
@@ -68,18 +70,20 @@ export function Pagination({
 
       <div className="flex items-center gap-4">
         <nav aria-label="Sahifalar" className="flex items-center gap-1.5">
-          <button
-            type="button"
-            aria-label="Oldingi sahifa"
-            disabled={page <= 1}
-            onClick={() => onPageChange(page - 1)}
-            className={cn(
-              buttonBase,
-              'border border-line text-fg-muted hover:bg-surface-hover hover:text-fg',
-            )}
-          >
-            <ChevronLeft className="size-4" strokeWidth={2} />
-          </button>
+          <Tooltip label="Oldingi sahifa">
+            <button
+              type="button"
+              aria-label="Oldingi sahifa"
+              disabled={page <= 1}
+              onClick={() => onPageChange(page - 1)}
+              className={cn(
+                buttonBase,
+                'border border-line text-fg-muted hover:bg-surface-hover hover:text-fg',
+              )}
+            >
+              <ChevronLeft className="size-4" strokeWidth={2} />
+            </button>
+          </Tooltip>
 
           {items.map((item, index) =>
             item === '…' ? (
@@ -111,18 +115,20 @@ export function Pagination({
             ),
           )}
 
-          <button
-            type="button"
-            aria-label="Keyingi sahifa"
-            disabled={page >= totalPages}
-            onClick={() => onPageChange(page + 1)}
-            className={cn(
-              buttonBase,
-              'border border-line text-fg-muted hover:bg-surface-hover hover:text-fg',
-            )}
-          >
-            <ChevronRight className="size-4" strokeWidth={2} />
-          </button>
+          <Tooltip label="Keyingi sahifa">
+            <button
+              type="button"
+              aria-label="Keyingi sahifa"
+              disabled={page >= totalPages}
+              onClick={() => onPageChange(page + 1)}
+              className={cn(
+                buttonBase,
+                'border border-line text-fg-muted hover:bg-surface-hover hover:text-fg',
+              )}
+            >
+              <ChevronRight className="size-4" strokeWidth={2} />
+            </button>
+          </Tooltip>
         </nav>
 
         {perPage !== undefined && onPerPageChange ? (

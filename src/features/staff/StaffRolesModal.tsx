@@ -94,7 +94,7 @@ export function StaffRolesModal({
       {rolesLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 4 }, (_, index) => (
-            <div key={index} className="h-12 animate-pulse rounded-control bg-elevated" />
+            <div key={index} className="h-12 bg-skeleton rounded-control" />
           ))}
         </div>
       ) : (roles?.results ?? []).length === 0 ? (
@@ -111,7 +111,7 @@ export function StaffRolesModal({
                 key={role.id}
                 className={cn(
                   'flex cursor-pointer items-start gap-3 rounded-control border px-3.5 py-2.5 transition-colors',
-                  checked ? 'border-primary/50 bg-primary/8' : 'border-line hover:bg-elevated',
+                  checked ? 'border-primary/50 bg-primary/8' : 'border-line hover:bg-surface-hover',
                 )}
               >
                 <input

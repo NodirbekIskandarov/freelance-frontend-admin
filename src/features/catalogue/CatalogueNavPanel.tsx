@@ -119,10 +119,10 @@ export function CatalogueNavPanel({
             onClick={() => (showSubjects ? onSelectSubject(null) : switchLevel(null))}
             aria-current={showSubjects ? subjectId === null : university === null}
             className={cn(
-              'flex w-full items-center gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-colors',
+              'flex w-full items-center gap-2.5 rounded-control border px-3 py-2.5 text-left transition-colors',
               (showSubjects ? subjectId === null : university === null)
                 ? 'border-primary/50 bg-primary/10'
-                : 'border-transparent hover:border-line hover:bg-elevated/60',
+                : 'border-transparent hover:border-line hover:bg-surface-hover',
             )}
           >
             <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
@@ -143,7 +143,7 @@ export function CatalogueNavPanel({
 
         {active.isLoading ? (
           Array.from({ length: 5 }, (_, index) => (
-            <div key={index} className="h-[68px] animate-pulse rounded-lg bg-elevated/60" />
+            <div key={index} className="h-[68px] bg-skeleton rounded-control" />
           ))
         ) : showSubjects ? (
           (subjects.data?.results ?? []).length === 0 ? (
@@ -159,10 +159,10 @@ export function CatalogueNavPanel({
                   onClick={() => onSelectSubject(item)}
                   aria-current={selected}
                   className={cn(
-                    'flex w-full flex-col items-start rounded-lg border px-3 py-2.5 text-left transition-colors',
+                    'flex w-full flex-col items-start rounded-control border px-3 py-2.5 text-left transition-colors',
                     selected
                       ? 'border-primary/50 bg-primary/10'
-                      : 'border-transparent hover:border-line hover:bg-elevated/60',
+                      : 'border-transparent hover:border-line hover:bg-surface-hover',
                   )}
                 >
                   <span
@@ -196,7 +196,7 @@ export function CatalogueNavPanel({
               key={item.id}
               type="button"
               onClick={() => switchLevel(item)}
-              className="flex w-full items-start gap-2.5 rounded-lg border border-transparent px-3 py-2.5 text-left transition-colors hover:border-line hover:bg-elevated/60"
+              className="flex w-full items-start gap-2.5 rounded-control border border-transparent px-3 py-2.5 text-left transition-colors hover:border-line hover:bg-surface-hover"
             >
               <UniversityBadge university={item} logo={item.logo} />
 

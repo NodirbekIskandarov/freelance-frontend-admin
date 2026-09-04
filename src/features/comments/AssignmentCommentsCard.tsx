@@ -67,7 +67,7 @@ export function AssignmentCommentsCard({ assignmentId }: { assignmentId: string 
       ) : isLoading ? (
         <div className="mt-4 space-y-2">
           {Array.from({ length: 3 }, (_, index) => (
-            <div key={index} className="h-14 animate-pulse rounded-control bg-elevated" />
+            <div key={index} className="h-14 bg-skeleton rounded-control" />
           ))}
         </div>
       ) : comments.length === 0 ? (

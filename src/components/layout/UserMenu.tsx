@@ -64,7 +64,7 @@ export function UserMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
-        className="flex items-center gap-2.5 rounded-control py-1.5 pr-2 pl-1.5 transition-colors hover:bg-elevated"
+        className="flex items-center gap-2.5 rounded-control py-1.5 pr-2 pl-1.5 transition-colors hover:bg-surface-hover"
       >
         <Avatar name={displayName} />
         <span className="hidden text-left leading-tight sm:block">

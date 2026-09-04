@@ -60,7 +60,7 @@ export function TaskDetailModal({
       {task && (
         <div className="flex max-h-[65vh] flex-col gap-5 overflow-y-auto">
           {task.description && (
-            <p className="bg-surface-soft rounded-control border border-line px-3.5 py-3 text-sm whitespace-pre-line text-fg-soft">
+            <p className="rounded-control border border-line bg-input px-3.5 py-3 text-sm whitespace-pre-line text-fg-soft">
               {task.description}
             </p>
           )}
@@ -107,7 +107,7 @@ export function TaskDetailModal({
                 href={task.task_file}
                 target="_blank"
                 rel="noreferrer"
-                className="hover:bg-surface-soft inline-flex items-center gap-1.5 rounded-control border border-line px-3 py-2 text-sm text-fg"
+                className="inline-flex items-center gap-1.5 rounded-control border border-line px-3 py-2 text-sm text-fg hover:bg-surface-hover"
               >
                 <Download className="size-4" strokeWidth={1.75} />
                 Topshiriq fayli
@@ -118,7 +118,7 @@ export function TaskDetailModal({
                 href={task.delivery_file}
                 target="_blank"
                 rel="noreferrer"
-                className="hover:bg-surface-soft inline-flex items-center gap-1.5 rounded-control border border-line px-3 py-2 text-sm text-fg"
+                className="inline-flex items-center gap-1.5 rounded-control border border-line px-3 py-2 text-sm text-fg hover:bg-surface-hover"
               >
                 <Download className="size-4" strokeWidth={1.75} />
                 Topshirilgan ish

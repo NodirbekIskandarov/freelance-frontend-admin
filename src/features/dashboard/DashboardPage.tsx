@@ -609,7 +609,7 @@ function RetentionCard({ data }: { data: AdminOverview }) {
 }
 
 function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse rounded-card border border-line bg-card', className)} />;
+  return <div className={cn('bg-skeleton rounded-card', className)} />;
 }
 
 export function DashboardPage() {
