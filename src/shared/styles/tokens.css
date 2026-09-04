@@ -229,7 +229,9 @@
   --color-fg: #16211c;
   --color-fg-soft: #414b46;
   --color-fg-muted: #656f6a;
-  --color-fg-dim: #8b948f;
+  /* O'lchangan: #8b948f maydon foni ustida 2.91:1 berardi — xira matn
+     uchun talab 3:1. Bu qiymat 3.23:1. */
+  --color-fg-dim: #828c87;
 
   /* Yorug' fonda aksent to'qroq bo'lishi kerak: #10b981 oq ustida 2.1:1
      beradi va matn bo'lib o'qilmaydi. */
@@ -240,13 +242,17 @@
   --color-primary-line: rgb(4 120 87 / 0.22);
   --color-on-accent: #ffffff;
 
-  --color-success: #15803d;
-  --color-success-quiet: rgb(21 128 61 / 0.1);
-  --color-success-line: rgb(21 128 61 / 0.22);
+  /* Chip matni O'Z 10% foni ustida o'qilishi kerak — u yerda fon oq
+     emas, ozgina bo'yalgan. O'lchangan: #15803d 4.38:1 berardi (talab
+     4.5), bu qiymat 5.15:1. */
+  --color-success: #137334;
+  --color-success-quiet: rgb(19 115 52 / 0.1);
+  --color-success-line: rgb(19 115 52 / 0.22);
 
-  --color-warning: #b45309;
-  --color-warning-quiet: rgb(180 83 9 / 0.1);
-  --color-warning-line: rgb(180 83 9 / 0.22);
+  /* #b45309 → 4.39:1, bu qiymat → 5.23:1. */
+  --color-warning: #a04a08;
+  --color-warning-quiet: rgb(160 74 8 / 0.1);
+  --color-warning-line: rgb(160 74 8 / 0.22);
 
   --color-danger: #b91c1c;
   --color-danger-quiet: rgb(185 28 28 / 0.1);

@@ -124,13 +124,18 @@ export function InstitutesPage() {
     {
       key: 'index',
       header: '#',
-      className: 'w-12 tabular-nums text-fg-dim',
+      /* Kim haqidagi qator ekanini bildiradigan ikki ustun chapga
+         yopishadi: usiz o'ngga surilgan jadvalda «Faol» va sana
+         qatorlari kimga tegishli ekani ko'rinmay qolardi. */
+      stickyLeft: true,
+      className: 'left-0 w-12 tabular-nums text-fg-dim',
       cell: (_row, index) => (page - 1) * perPage + index + 1,
     },
     {
       key: 'name',
       header: 'Institut nomi',
-      className: 'max-w-[280px]',
+      stickyLeft: true,
+      className: 'left-12 max-w-[280px]',
       cell: (row) => (
         <span className="flex items-center gap-2.5">
           <UniversityBadge university={row} logo={row.logo} />

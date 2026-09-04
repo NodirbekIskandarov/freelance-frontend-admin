@@ -685,7 +685,7 @@ export function DashboardPage() {
                 {PERIOD_LABELS[data.period]}
               </span>
             </p>
-            <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-5">
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {data.metrics.map((metric) => (
                 <MetricCard key={metric.key} metric={metric} period={data.period} />
               ))}

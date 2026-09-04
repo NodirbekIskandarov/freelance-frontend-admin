@@ -1,9 +1,10 @@
 import { ChevronsUpDown, ChevronUp, Inbox } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { useSyncExternalStore, type ReactNode } from 'react';
 
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Skeleton, SkeletonText } from '@/components/ui/Skeleton';
 import { cn } from '@/lib/cn';
+import { getDensity, subscribeToDensity } from '@/lib/density';
 
 export type SortDirection = 'asc' | 'desc';
 
@@ -27,6 +28,18 @@ export interface Column<T> {
    * boshqarish uchun har safar o'ngga surish kerak bo'lardi.
    */
   sticky?: boolean;
+  /**
+   * CHAP chetga yopishadi — jadval gorizontal siljiganda ham ko'rinadi.
+   *
+   * Kim haqidagi qator ekanini bildiradigan ustun uchun: usiz o'ngga
+   * surilgan jadvalda «Faol» va «14.02.2026» qatorlari kimga tegishli
+   * ekani ko'rinmay qolardi.
+   *
+   * Chapdan qancha turishini ustunning O'ZI `className` da beradi
+   * (`left-0`, `left-12`): kengliklar sahifaga qarab farq qiladi va
+   * ularni bu yerdan bilib bo'lmaydi.
+   */
+  stickyLeft?: boolean;
   /**
    * Telefondagi karta ko'rinishida SARLAVHA bo'ladi. Ko'rsatilmasa
    * birinchi ustun olinadi.
@@ -59,8 +72,14 @@ interface TableProps<T> {
   density?: 'normal' | 'compact';
 }
 
+/*
+ * `compact` — ustun ko'p bo'lgan jadvallar uchun (freelancerlar: 11 ustun).
+ * `normal` va `dense` esa foydalanuvchining zichlik tanloviga ergashadi:
+ * qulay 52px, zich 40px.
+ */
 const densityStyles = {
   normal: { head: 'px-4 py-3 text-[11px]', cell: 'px-4 py-3 text-[13px]' },
+  dense: { head: 'px-4 py-2 text-[11px]', cell: 'px-4 py-1.5 text-[13px]' },
   // Sarlavha shrifti kataknikidan kichik: 11 ustunli jadvalda eng keng
   // sarlavhalar ("Pasport/ID rasmi", "Bajarilgan ishlar") jadval kengligini
   // belgilab qo'yadi va oxirgi ustunni ekrandan chiqarib yuboradi.
@@ -83,6 +102,12 @@ const densityStyles = {
 const stickyCell =
   'sticky right-0 z-10 bg-card before:pointer-events-none before:absolute before:inset-y-0 before:-left-3 before:w-3 before:bg-gradient-to-l before:from-card before:to-transparent before:content-[""]';
 const stickyHead = 'sticky right-0 z-10 bg-card';
+
+/* Chapdagi yopishgan ustun: o'ng chetida ortida yana ustun borligini
+   bildiradigan yumshoq soya. */
+const stickyLeftCell =
+  'sticky z-10 bg-card before:pointer-events-none before:absolute before:inset-y-0 before:-right-3 before:w-3 before:bg-gradient-to-r before:from-card before:to-transparent before:content-[""]';
+const stickyLeftHead = 'sticky z-10 bg-card';
 
 const alignClass = {
   left: 'text-left',
@@ -111,7 +136,15 @@ export function Table<T>({
   onRowClick,
   density = 'normal',
 }: TableProps<T>) {
-  const spacing = densityStyles[density];
+  /*
+   * Ustuni ko'p jadval (`compact`) foydalanuvchi tanlovidan QAT'I NAZAR
+   * zich qoladi — u yerda keng qator ustunlarni ekrandan chiqarib
+   * yuboradi. Qolgan jadvallar tanlovga ergashadi.
+   */
+  const preference = useSyncExternalStore(subscribeToDensity, getDensity, () => 'comfortable');
+  const resolved =
+    density === 'compact' ? 'compact' : preference === 'compact' ? 'dense' : 'normal';
+  const spacing = densityStyles[resolved];
 
   const primaryColumn = columns.find((column) => column.primary) ?? columns[0];
   const cardColumns = columns.filter((column) => column !== primaryColumn && !column.hideOnMobile);
@@ -196,6 +229,8 @@ export function Table<T>({
                       spacing.head,
                       alignClass[column.align ?? 'left'],
                       column.sticky && stickyHead,
+                      column.stickyLeft && stickyLeftHead,
+                      column.stickyLeft && column.className,
                       column.headerClassName,
                     )}
                   >
@@ -277,7 +312,8 @@ export function Table<T>({
                     // Hover har qatorda, bosiladiganida ham, bosilmaydiganida
                     // ham: u ko'zni qatorda ushlab turadi, «bu qator bosiladi»
                     // degani emas. Zebra YO'Q — u hoverni yutib yuboradi.
-                    'h-13 border-b border-line-subtle last:border-b-0',
+                    resolved === 'dense' ? 'h-10' : 'h-13',
+                    'border-b border-line-subtle last:border-b-0',
                     'transition-colors duration-(--dur) ease-soft hover:bg-surface-hover',
                     // Halqa ICHKARIDA: qator butun kenglikni egallaydi va
                     // tashqi halqa qo'shni qatorlar ostida qolib ketardi.
@@ -293,6 +329,7 @@ export function Table<T>({
                         spacing.cell,
                         alignClass[column.align ?? 'left'],
                         column.sticky && stickyCell,
+                        column.stickyLeft && stickyLeftCell,
                         column.className,
                       )}
                     >

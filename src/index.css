@@ -174,3 +174,36 @@
     transform: none;
   }
 }
+
+/*
+ * Harakat kamaytirilgan bo'lsa — SILJISH VA KATTALASHUV o'chadi.
+ *
+ * Rang o'tishlari QOLADI: ular vestibulyar noqulaylik tug'dirmaydi va
+ * tugma bosilgan-bosilmaganini aynan o'sha o'tish ko'rsatadi. Komponentlar
+ * `motion-safe:` bilan chaqiradi, bu esa qolganini yopadi.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/*
+ * Fokus halqasi — HAR BIR fokuslanadigan element uchun.
+ *
+ * `outline`, `box-shadow` emas: `overflow: hidden` li konteyner ichida
+ * soya kesilib qolardi, outline esa kesilmaydi. Shakl elementnikini
+ * takrorlaydi — dumaloq tugmada to'rtburchak ramka begona ko'rinardi.
+ */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: inherit;
+  }
+}

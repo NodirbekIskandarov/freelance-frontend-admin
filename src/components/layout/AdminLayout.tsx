@@ -12,8 +12,15 @@ import { CommandPalette } from './CommandPalette';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 
-/** Yon menyu kontent YONIDA sig'adigan kenglik. */
-const DESKTOP = '(min-width: 1024px)';
+/**
+ * Yon menyu kontent YONIDA sig'adigan kenglik.
+ *
+ * 900px — undan tor ekranda menyu kontent ustidan ochiladi (tortma).
+ * 1200px — undan tor, lekin 900 dan keng ekranda menyu 64px chiziqqa
+ * yig'iladi: yorliqlar joy oladi, jadval esa allaqachon siqilgan.
+ */
+const DESKTOP = '(min-width: 900px)';
+const WIDE = '(min-width: 1200px)';
 
 /**
  * Ekran keng-tor ekanini kuzatadi.
@@ -22,16 +29,19 @@ const DESKTOP = '(min-width: 1024px)';
  * o'qib holatga yozish qo'shimcha render tug'diradi. Loyihadagi tema va
  * til tanlagichlari ham shu naqshda.
  */
-function useIsDesktop(): boolean {
-  const subscribe = useCallback((onChange: () => void) => {
-    const query = window.matchMedia(DESKTOP);
-    query.addEventListener('change', onChange);
-    return () => query.removeEventListener('change', onChange);
-  }, []);
+function useMedia(query: string): boolean {
+  const subscribe = useCallback(
+    (onChange: () => void) => {
+      const media = window.matchMedia(query);
+      media.addEventListener('change', onChange);
+      return () => media.removeEventListener('change', onChange);
+    },
+    [query],
+  );
 
   return useSyncExternalStore(
     subscribe,
-    () => window.matchMedia(DESKTOP).matches,
+    () => window.matchMedia(query).matches,
     () => true,
   );
 }
@@ -39,7 +49,8 @@ function useIsDesktop(): boolean {
 export function AdminLayout() {
   const { m, locale } = useT();
   const { pathname } = useLocation();
-  const isDesktop = useIsDesktop();
+  const isDesktop = useMedia(DESKTOP);
+  const isWide = useMedia(WIDE);
 
   /*
    * Telefonda menyu YOPIQ boshlanadi.
@@ -115,11 +126,13 @@ export function AdminLayout() {
       */}
       <Sidebar
         aria-hidden={hidden}
-        collapsed={isDesktop && !sidebarOpen}
+        /* Tor ekranda menyu O'ZI yig'iladi — ochiq qoldirilsa
+           jadvalga 600px dan kam joy qolardi. */
+        collapsed={isDesktop && (!sidebarOpen || !isWide)}
         className={cn(
-          'transition-transform duration-200 lg:static lg:z-auto lg:translate-x-0 lg:transition-none',
+          'transition-transform duration-200 min-[900px]:static min-[900px]:z-auto min-[900px]:translate-x-0 min-[900px]:transition-none',
           isDrawer && 'fixed inset-y-0 left-0 z-50',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full min-[900px]:translate-x-0',
           // Telefonda yopiq menyu ekrandan tashqarida turadi, lekin
           // DOM'da qoladi — klaviatura fokusi u yerga tushib ketmasin.
           hidden && 'pointer-events-none',

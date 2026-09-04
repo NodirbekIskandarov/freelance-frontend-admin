@@ -75,7 +75,15 @@ export function Modal({
         if (event.target === dialogRef.current) onClose();
       }}
       className={cn(
-        'm-auto w-full rounded-modal border border-line bg-elevated p-0 text-fg shadow-modal',
+        'w-full border border-line bg-elevated p-0 text-fg shadow-modal',
+        /*
+          Telefonda modal PASTKI VARAQ bo'ladi: ekran o'rtasidagi kichik
+          oyna 390px da chetlarida 8px joy qoldirardi va baribir deyarli
+          butun ekranni egallardi — lekin bosh barmoq yetmaydigan
+          balandlikda.
+        */
+        'mt-auto mb-0 max-h-[92dvh] rounded-t-modal rounded-b-none',
+        'sm:m-auto sm:max-h-none sm:rounded-modal',
         // Fon xiralashadi — ortidagi jadval matni modal chekkasida
         // o'qilib turmasin. `open:` — animatsiya faqat ochilganda.
         'backdrop:bg-black/60 backdrop:backdrop-blur-[6px]',
@@ -84,7 +92,7 @@ export function Modal({
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-4 border-b border-line-subtle px-6 py-5">
+      <div className="flex items-start justify-between gap-4 border-b border-line-subtle px-5 py-4 sm:px-6 sm:py-5">
         <div className="min-w-0">
           <h2 className="text-base font-semibold text-fg">{title}</h2>
           {description && <p className="mt-1 text-[13px] text-fg-muted">{description}</p>}
@@ -104,12 +112,14 @@ export function Modal({
         </button>
       </div>
 
-      <div className="max-h-[70vh] overflow-y-auto px-6 py-6">{children}</div>
+      <div className="max-h-[60dvh] overflow-y-auto px-5 py-5 sm:max-h-[70vh] sm:px-6 sm:py-6">
+        {children}
+      </div>
 
       {/* Tugmalar qatori YOPISHGAN: uzun formada u aylantirilib
           ko'rinmas joyga tushib ketardi va odam «Saqlash» ni qidirardi. */}
       {footer && (
-        <div className="sticky bottom-0 flex flex-wrap items-center justify-end gap-2 border-t border-line-subtle bg-elevated px-6 py-4">
+        <div className="sticky bottom-0 flex flex-wrap items-center justify-end gap-2 border-t border-line-subtle bg-elevated px-5 py-4 sm:px-6">
           {footer}
         </div>
       )}
