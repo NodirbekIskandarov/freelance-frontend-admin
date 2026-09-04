@@ -13,7 +13,7 @@ export function DateCell({ value }: { value: string | null | undefined }) {
   if (!value) return <span className="text-fg-dim">—</span>;
 
   return (
-    <span className="block tabular-nums whitespace-nowrap">
+    <span className="block whitespace-nowrap tabular-nums">
       <span className="block text-[13px] text-fg-soft">{formatDate(value)}</span>
       <span className="block text-[11px] text-fg-dim">{formatTime(value)}</span>
     </span>

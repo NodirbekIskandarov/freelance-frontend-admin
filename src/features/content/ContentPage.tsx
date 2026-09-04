@@ -14,6 +14,7 @@ import { SalesAreaChart } from '@/components/charts/SalesAreaChart';
 import { Link } from '@/i18n/navigation';
 import { Avatar } from '@/components/ui/Avatar';
 import { Card, CardHeader } from '@/components/ui/Card';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Select } from '@/components/ui/Select';
 import { cn } from '@/lib/cn';
@@ -202,9 +203,9 @@ export function ContentPage() {
 
   if (error) {
     return (
-      <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-        {getApiErrorMessage(error)}
-      </div>
+      <Card>
+        <ErrorState message={getApiErrorMessage(error)} />
+      </Card>
     );
   }
 

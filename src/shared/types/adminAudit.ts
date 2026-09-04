@@ -111,6 +111,71 @@ export const AUDIT_ACTION_GROUPS: { label: string; actions: AuditAction[] }[] = 
   { label: 'Murojaatlar', actions: ['appeal_taken', 'appeal_answered'] },
 ];
 
+/**
+ * Amal kodidan O'ZBEKCHA yorliqqa.
+ *
+ * Backend `action_display` ni ham qaytaradi, lekin u ingliz tilida
+ * (`Section updated`) yoki umuman kodning o'zi (`assignment_created`)
+ * bo'lib chiqadi. Panelda ishlayotgan odam uchun bu ikkalasi ham begona:
+ * jurnalning butun ma'nosi — «kim nima qilgani» ni O'QIB tushunish.
+ *
+ * Ro'yxatda yo'q kod uchun `auditActionLabel` kodning o'zini emas,
+ * uni o'qiladigan holga keltirilgan ko'rinishini qaytaradi.
+ */
+export const AUDIT_ACTION_LABELS: Record<string, string> = {
+  university_created: 'Institut qo‘shildi',
+  university_updated: 'Institut tahrirlandi',
+  university_deleted: 'Institut o‘chirildi',
+  subject_created: 'Fan qo‘shildi',
+  subject_updated: 'Fan tahrirlandi',
+  subject_deleted: 'Fan o‘chirildi',
+  assignment_created: 'Topshiriq qo‘shildi',
+  assignment_updated: 'Topshiriq tahrirlandi',
+  assignment_deleted: 'Topshiriq o‘chirildi',
+  variant_created: 'Variant qo‘shildi',
+  variant_updated: 'Variant tahrirlandi',
+  variant_deleted: 'Variant o‘chirildi',
+
+  university_request_approved: 'Institut arizasi tasdiqlandi',
+  university_request_rejected: 'Institut arizasi rad etildi',
+  subject_request_approved: 'Fan arizasi tasdiqlandi',
+  subject_request_rejected: 'Fan arizasi rad etildi',
+  assignment_request_approved: 'Topshiriq arizasi tasdiqlandi',
+  assignment_request_rejected: 'Topshiriq arizasi rad etildi',
+
+  solution_approved: 'Yechim tasdiqlandi',
+  solution_rejected: 'Yechim rad etildi',
+  solution_published: 'Yechim sotuvga chiqarildi',
+  solution_archived: 'Yechim arxivlandi',
+  report_approved: 'Shikoyat qanoatlantirildi',
+  report_rejected: 'Shikoyat rad etildi',
+
+  application_approved: 'Freelancer arizasi tasdiqlandi',
+  application_rejected: 'Freelancer arizasi rad etildi',
+  freelancer_suspended: 'Freelancer to‘xtatildi',
+  freelancer_reinstated: 'Freelancer tiklandi',
+  task_refunded: 'Vazifa puli qaytarildi',
+
+  wallet_adjusted: 'Hamyon tuzatildi',
+  wallet_frozen: 'Hamyon muzlatildi',
+  wallet_unfrozen: 'Hamyon muzlatishdan chiqarildi',
+  withdrawal_paid: 'Pul yechish to‘landi',
+  withdrawal_rejected: 'Pul yechish rad etildi',
+
+  appeal_taken: 'Murojaat olindi',
+  appeal_answered: 'Murojaatga javob berildi',
+};
+
+/** Noma'lum kod ham o'qiladigan bo'lsin: `some_action` → `Some action`. */
+export function auditActionLabel(action: string, fallback?: string): string {
+  const known = AUDIT_ACTION_LABELS[action];
+  if (known) return known;
+  if (fallback && !/^[a-z0-9_]+$/.test(fallback)) return fallback;
+
+  const words = action.replace(/_/g, ' ').trim();
+  return words ? words.charAt(0).toUpperCase() + words.slice(1) : action;
+}
+
 export interface AuditLog {
   id: string;
   action: AuditAction;

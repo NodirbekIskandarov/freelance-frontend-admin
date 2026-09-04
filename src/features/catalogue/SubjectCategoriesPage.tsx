@@ -2,11 +2,13 @@ import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { Badge } from '@/components/ui/Badge';
-import { Button, IconButton } from '@/components/ui/Button';
+import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
+import { RowActions } from '@/components/ui/RowActions';
 import { Table, type Column } from '@/components/ui/Table';
 import { formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
@@ -112,26 +114,25 @@ export function SubjectCategoriesPage() {
       align: 'right',
       sticky: true,
       cell: (row) => (
-        <span className="flex items-center justify-end gap-2">
-          <IconButton
-            label={`${row.name} — tahrirlash`}
-            size="sm"
-            onClick={() => {
-              setEditTarget(row);
-              setFormOpen(true);
-            }}
-          >
-            <Pencil className="size-4" strokeWidth={1.75} />
-          </IconButton>
-          <IconButton
-            label={`${row.name} — o'chirish`}
-            tone="danger"
-            size="sm"
-            onClick={() => setDeleteTarget(row)}
-          >
-            <Trash2 className="size-4" strokeWidth={1.75} />
-          </IconButton>
-        </span>
+        <RowActions
+          inlineCount={1}
+          actions={[
+            {
+              label: `${row.name} — tahrirlash`,
+              icon: <Pencil className="size-4" strokeWidth={1.75} />,
+              onSelect: () => {
+                setEditTarget(row);
+                setFormOpen(true);
+              },
+            },
+            {
+              label: `${row.name} — o'chirish`,
+              icon: <Trash2 className="size-4" strokeWidth={1.75} />,
+              onSelect: () => setDeleteTarget(row),
+              destructive: true,
+            },
+          ]}
+        />
       ),
     },
   ];
@@ -155,9 +156,9 @@ export function SubjectCategoriesPage() {
       />
 
       {error ? (
-        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card>
+          <ErrorState message={getApiErrorMessage(error)} />
+        </Card>
       ) : (
         <>
           <p className="mb-4 max-w-2xl text-sm text-fg-muted">

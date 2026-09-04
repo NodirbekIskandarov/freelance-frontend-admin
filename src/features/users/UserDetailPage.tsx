@@ -7,6 +7,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Badge, VerificationBadge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { InfoList, InfoRow } from '@/components/ui/InfoRow';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { formatDateTime } from '@/lib/format';
@@ -48,9 +49,9 @@ export function UserDetailPage() {
     return (
       <>
         <PageHeader title="Foydalanuvchi" breadcrumbs={crumbs} />
-        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card>
+          <ErrorState message={getApiErrorMessage(error)} />
+        </Card>
       </>
     );
   }

@@ -2,15 +2,23 @@ import { useState } from 'react';
 
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
+import { DateCell } from '@/components/ui/Cells';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Select } from '@/components/ui/Select';
+import { TableToolbar } from '@/components/ui/TableToolbar';
 import { Table, type Column } from '@/components/ui/Table';
-import { formatDateTime, formatSom } from '@/lib/format';
+import { formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { getApiErrorMessage } from '@/shared/api';
-import { AUDIT_ACTION_GROUPS, type AuditAction, type AuditLog } from '@/shared/types/adminAudit';
+import {
+  auditActionLabel,
+  AUDIT_ACTION_GROUPS,
+  type AuditAction,
+  type AuditLog,
+} from '@/shared/types/adminAudit';
 
 import { useGetAuditLogsQuery } from './adminAuditApi';
 
@@ -30,7 +38,10 @@ function toneFor(action: AuditAction): BadgeTone {
 const actionOptions = [
   { value: 'all', label: 'Barcha amallar' },
   ...AUDIT_ACTION_GROUPS.flatMap((group) =>
-    group.actions.map((action) => ({ value: action, label: `${group.label}: ${action}` })),
+    group.actions.map((action) => ({
+      value: action,
+      label: `${group.label}: ${auditActionLabel(action)}`,
+    })),
   ),
 ];
 
@@ -64,13 +75,21 @@ export function AuditPage() {
     ...(debouncedSearch ? { search: debouncedSearch } : {}),
   });
 
+  /* Sukut qiymatidan farq qiladigan filtrlar soni — «hammasi»
+     hisoblanmaydi. */
+  const activeFilterCount = [search, action !== 'all' ? action : ''].filter(Boolean).length;
+
+  function resetFilters() {
+    setSearch('');
+    setAction('all');
+    setPage(1);
+  }
+
   const columns: Column<AuditLog>[] = [
     {
       key: 'created_at',
       header: 'Vaqt',
-      cell: (row) => (
-        <span className="whitespace-nowrap text-fg-muted">{formatDateTime(row.created_at)}</span>
-      ),
+      cell: (row) => <DateCell value={row.created_at} />,
     },
     {
       key: 'actor',
@@ -82,7 +101,9 @@ export function AuditPage() {
     {
       key: 'action',
       header: 'Amal',
-      cell: (row) => <Badge tone={toneFor(row.action)}>{row.action_display}</Badge>,
+      cell: (row) => (
+        <Badge tone={toneFor(row.action)}>{auditActionLabel(row.action, row.action_display)}</Badge>
+      ),
     },
     {
       key: 'target',
@@ -134,34 +155,40 @@ export function AuditPage() {
       />
 
       {error ? (
-        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card>
+          <ErrorState message={getApiErrorMessage(error)} />
+        </Card>
       ) : (
         <>
-          <section className="flex flex-wrap items-center gap-3">
-            <Select
-              aria-label="Amal bo'yicha filtr"
-              options={actionOptions}
-              value={action}
-              onChange={(event) => {
-                setAction(event.target.value);
-                setPage(1);
-              }}
-              className="w-72"
-            />
+          <TableToolbar
+            activeFilters={activeFilterCount}
+            onResetFilters={resetFilters}
+            filters={
+              <>
+                <Select
+                  aria-label="Amal bo'yicha filtr"
+                  options={actionOptions}
+                  value={action}
+                  onChange={(event) => {
+                    setAction(event.target.value);
+                    setPage(1);
+                  }}
+                  className="w-72"
+                />
 
-            <div className="ml-auto">
-              <SearchInput
-                value={search}
-                onChange={(event) => {
-                  setSearch(event.target.value);
-                  setPage(1);
-                }}
-                className="w-72"
-              />
-            </div>
-          </section>
+                <div className="ml-auto">
+                  <SearchInput
+                    value={search}
+                    onChange={(event) => {
+                      setSearch(event.target.value);
+                      setPage(1);
+                    }}
+                    className="w-72"
+                  />
+                </div>
+              </>
+            }
+          />
 
           <Card className="mt-4 overflow-hidden">
             <Table

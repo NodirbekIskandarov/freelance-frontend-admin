@@ -4,14 +4,18 @@ import { useSearchParams } from 'react-router';
 import { Link, useLocaleNavigate } from '@/i18n/navigation';
 
 import { Badge } from '@/components/ui/Badge';
-import { Button, IconButton } from '@/components/ui/Button';
+import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { DateCell } from '@/components/ui/Cells';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Select } from '@/components/ui/Select';
+import { RowActions } from '@/components/ui/RowActions';
+import { TableToolbar } from '@/components/ui/TableToolbar';
 import { Table, type Column } from '@/components/ui/Table';
-import { formatDateTime, formatSom } from '@/lib/format';
+import { formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { useGetAssignmentRequestsListQuery } from '@/features/adminRequests/adminRequestsApi';
 import { CatalogueNavPanel } from '@/features/catalogue/CatalogueNavPanel';
@@ -134,6 +138,27 @@ export function AssignmentsPage() {
     setFormOpen(true);
   }
 
+  /* Sukut qiymatidan farq qiladigan filtrlar soni — «hammasi»
+     hisoblanmaydi. */
+  const activeFilterCount = [
+    search,
+    subject !== 'all' ? subject : '',
+    course !== 'all' ? course : '',
+    semester !== 'all' ? semester : '',
+    type !== 'all' ? type : '',
+    active !== 'all' ? active : '',
+  ].filter(Boolean).length;
+
+  function resetFilters() {
+    setSearch('');
+    setSubject('all');
+    setCourse('all');
+    setSemester('all');
+    setType('all');
+    setActive('all');
+    setPage(1);
+  }
+
   const columns: Column<Assignment>[] = [
     {
       key: 'index',
@@ -233,9 +258,7 @@ export function AssignmentsPage() {
     {
       key: 'created_at',
       header: "Qo'shilgan sana",
-      cell: (row) => (
-        <span className="whitespace-nowrap text-fg-muted">{formatDateTime(row.created_at)}</span>
-      ),
+      cell: (row) => <DateCell value={row.created_at} />,
     },
     {
       key: 'actions',
@@ -244,32 +267,27 @@ export function AssignmentsPage() {
       // O'ng chetga yopishadi — jadval siljiganda ham ko'rinadi.
       sticky: true,
       cell: (row) => (
-        <span className="flex items-center justify-end gap-2">
-          <IconButton
-            label={`${row.title} — variantlar`}
-            tone="success"
-            size="sm"
-            onClick={() => void navigate(`/topshiriqlar/${row.id}`)}
-          >
-            <Eye className="size-4" strokeWidth={1.75} />
-          </IconButton>
-          <IconButton
-            label={`${row.title} — tahrirlash`}
-            tone="warning"
-            size="sm"
-            onClick={() => openEdit(row)}
-          >
-            <Pencil className="size-4" strokeWidth={1.75} />
-          </IconButton>
-          <IconButton
-            label={`${row.title} — o'chirish`}
-            tone="danger"
-            size="sm"
-            onClick={() => setDeleteTarget(row)}
-          >
-            <Trash2 className="size-4" strokeWidth={1.75} />
-          </IconButton>
-        </span>
+        <RowActions
+          inlineCount={1}
+          actions={[
+            {
+              label: `${row.title} — variantlar`,
+              icon: <Eye className="size-4" strokeWidth={1.75} />,
+              onSelect: () => void navigate(`/topshiriqlar/${row.id}`),
+            },
+            {
+              label: `${row.title} — tahrirlash`,
+              icon: <Pencil className="size-4" strokeWidth={1.75} />,
+              onSelect: () => openEdit(row),
+            },
+            {
+              label: `${row.title} — o'chirish`,
+              icon: <Trash2 className="size-4" strokeWidth={1.75} />,
+              onSelect: () => setDeleteTarget(row),
+              destructive: true,
+            },
+          ]}
+        />
       ),
     },
   ];
@@ -325,79 +343,85 @@ export function AssignmentsPage() {
 
         <div className="min-w-0 flex-1">
           {error ? (
-            <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-              {getApiErrorMessage(error)}
-            </div>
+            <Card>
+              <ErrorState message={getApiErrorMessage(error)} />
+            </Card>
           ) : (
             <>
-              <section className="flex flex-wrap items-center gap-3">
-                <SearchInput
-                  value={search}
-                  onChange={(event) => {
-                    setSearch(event.target.value);
-                    setPage(1);
-                  }}
-                  placeholder="Topshiriq nomini qidirish..."
-                  className="w-full sm:w-64"
-                />
+              <TableToolbar
+                activeFilters={activeFilterCount}
+                onResetFilters={resetFilters}
+                filters={
+                  <>
+                    <SearchInput
+                      value={search}
+                      onChange={(event) => {
+                        setSearch(event.target.value);
+                        setPage(1);
+                      }}
+                      placeholder="Topshiriq nomini qidirish..."
+                      className="w-full sm:w-64"
+                    />
 
-                <Select
-                  aria-label="Kurs bo'yicha filtr"
-                  options={[{ value: 'all', label: 'Barcha kurslar' }, ...COURSE_OPTIONS]}
-                  value={course}
-                  onChange={(event) => {
-                    setCourse(event.target.value);
-                    setPage(1);
-                  }}
-                  className="w-44"
-                />
+                    <Select
+                      aria-label="Kurs bo'yicha filtr"
+                      options={[{ value: 'all', label: 'Barcha kurslar' }, ...COURSE_OPTIONS]}
+                      value={course}
+                      onChange={(event) => {
+                        setCourse(event.target.value);
+                        setPage(1);
+                      }}
+                      className="w-44"
+                    />
 
-                <Select
-                  aria-label="Semestr bo'yicha filtr"
-                  options={[{ value: 'all', label: 'Barcha semestrlar' }, ...SEMESTER_OPTIONS]}
-                  value={semester}
-                  onChange={(event) => {
-                    setSemester(event.target.value);
-                    setPage(1);
-                  }}
-                  className="w-48"
-                />
+                    <Select
+                      aria-label="Semestr bo'yicha filtr"
+                      options={[{ value: 'all', label: 'Barcha semestrlar' }, ...SEMESTER_OPTIONS]}
+                      value={semester}
+                      onChange={(event) => {
+                        setSemester(event.target.value);
+                        setPage(1);
+                      }}
+                      className="w-48"
+                    />
 
-                <Select
-                  aria-label="Topshiriq turi bo'yicha filtr"
-                  options={typeOptions}
-                  value={type}
-                  onChange={(event) => {
-                    setType(event.target.value);
-                    setPage(1);
-                  }}
-                  className="w-48"
-                />
+                    <Select
+                      aria-label="Topshiriq turi bo'yicha filtr"
+                      options={typeOptions}
+                      value={type}
+                      onChange={(event) => {
+                        setType(event.target.value);
+                        setPage(1);
+                      }}
+                      className="w-48"
+                    />
 
-                <Select
-                  aria-label="Holat bo'yicha filtr"
-                  options={activeOptions}
-                  value={active}
-                  onChange={(event) => {
-                    setActive(event.target.value);
-                    setPage(1);
-                  }}
-                  className="w-40"
-                />
+                    <Select
+                      aria-label="Holat bo'yicha filtr"
+                      options={activeOptions}
+                      value={active}
+                      onChange={(event) => {
+                        setActive(event.target.value);
+                        setPage(1);
+                      }}
+                      className="w-40"
+                    />
 
-                <div className="ml-auto">
-                  <Select
-                    aria-label="Saralash"
-                    options={[...ASSIGNMENT_ORDERING_OPTIONS]}
-                    value={ordering}
-                    onChange={(event) => {
-                      setOrdering(event.target.value);
-                      setPage(1);
-                    }}
-                    className="w-52"
-                  />
-                </div>
-              </section>
+                    <div className="ml-auto">
+                      <Select
+                        aria-label="Saralash"
+                        options={[...ASSIGNMENT_ORDERING_OPTIONS]}
+                        value={ordering}
+                        onChange={(event) => {
+                          setOrdering(event.target.value);
+                          setPage(1);
+                        }}
+                        className="w-52"
+                      />
+                    </div>
+                  </>
+                }
+              />
 
               <Card className="mt-4 overflow-hidden">
                 <Table

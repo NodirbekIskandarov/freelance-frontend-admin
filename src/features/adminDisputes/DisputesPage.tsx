@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
 import { IconButton } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { PersonCell } from '@/components/ui/PersonCell';
@@ -179,9 +180,9 @@ export function DisputesPage() {
       />
 
       {error ? (
-        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card>
+          <ErrorState message={getApiErrorMessage(error)} />
+        </Card>
       ) : (
         <>
           <section className="grid grid-cols-2 gap-3 sm:grid-cols-2 xl:grid-cols-4">

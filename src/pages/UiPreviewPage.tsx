@@ -165,7 +165,11 @@ export function UiPreviewPage() {
             ]}
           />
           <Select aria-label="Kichik" size="sm" options={[{ value: 'x', label: 'Kichik' }]} />
-          <Select aria-label="O‘chirilgan" disabled options={[{ value: 'x', label: 'O‘chirilgan' }]} />
+          <Select
+            aria-label="O‘chirilgan"
+            disabled
+            options={[{ value: 'x', label: 'O‘chirilgan' }]}
+          />
         </Row>
       </Card>
 

@@ -2,13 +2,15 @@ import { Banknote, CircleCheck, ClipboardList, Eye, ShieldAlert, Undo2 } from 'l
 import { useState } from 'react';
 
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
-import { IconButton } from '@/components/ui/Button';
+
 import { Card } from '@/components/ui/Card';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Select } from '@/components/ui/Select';
 import { StatCard } from '@/components/ui/StatCard';
+import { RowActions } from '@/components/ui/RowActions';
 import { Table, type Column } from '@/components/ui/Table';
 import { formatDecimalSom, formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
@@ -142,21 +144,28 @@ export function ExchangeTasksPage() {
       // O'ng chetga yopishadi — jadval siljiganda ham ko'rinadi.
       sticky: true,
       cell: (row) => (
-        <span className="flex items-center justify-end gap-2">
-          <IconButton label="Batafsil" tone="info" size="sm" onClick={() => setDetailTask(row)}>
-            <Eye className="size-4" strokeWidth={1.75} />
-          </IconButton>
-          {REFUNDABLE.includes(row.status) && (
-            <IconButton
-              label="Pulni mijozga qaytarish"
-              tone="danger"
-              size="sm"
-              onClick={() => setRefundTask(row)}
-            >
-              <Undo2 className="size-4" strokeWidth={1.75} />
-            </IconButton>
-          )}
-        </span>
+        <RowActions
+          inlineCount={1}
+          actions={[
+            {
+              label: 'Batafsil',
+              icon: <Eye className="size-4" strokeWidth={1.75} />,
+              onSelect: () => setDetailTask(row),
+            },
+            /* Pulni qaytarish — `⋯` ichida: u pul harakati va uni
+               «Batafsil» dan bir barmoq narida qoldirib bo'lmaydi. */
+            ...(REFUNDABLE.includes(row.status)
+              ? [
+                  {
+                    label: 'Pulni mijozga qaytarish',
+                    icon: <Undo2 className="size-4" strokeWidth={1.75} />,
+                    onSelect: () => setRefundTask(row),
+                    destructive: true,
+                  },
+                ]
+              : []),
+          ]}
+        />
       ),
     },
   ];
@@ -169,9 +178,9 @@ export function ExchangeTasksPage() {
       />
 
       {error ? (
-        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card>
+          <ErrorState message={getApiErrorMessage(error)} />
+        </Card>
       ) : (
         <>
           <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">

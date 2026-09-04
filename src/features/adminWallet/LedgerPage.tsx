@@ -3,6 +3,8 @@ import { useState } from 'react';
 
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
+import { DateCell } from '@/components/ui/Cells';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { PersonCell } from '@/components/ui/PersonCell';
@@ -11,7 +13,7 @@ import { Select } from '@/components/ui/Select';
 import { StatCard } from '@/components/ui/StatCard';
 import { Table, type Column } from '@/components/ui/Table';
 import { cn } from '@/lib/cn';
-import { formatDateTime, formatDecimalSom, formatSom } from '@/lib/format';
+import { formatDecimalSom, formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { getApiErrorMessage } from '@/shared/api';
 import {
@@ -66,9 +68,7 @@ export function LedgerPage() {
     {
       key: 'created_at',
       header: 'Vaqt',
-      cell: (row) => (
-        <span className="whitespace-nowrap text-fg-muted">{formatDateTime(row.created_at)}</span>
-      ),
+      cell: (row) => <DateCell value={row.created_at} />,
     },
     {
       key: 'user',
@@ -149,9 +149,9 @@ export function LedgerPage() {
       />
 
       {error ? (
-        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card>
+          <ErrorState message={getApiErrorMessage(error)} />
+        </Card>
       ) : (
         <>
           {/* Kirim va chiqim ALOHIDA: bir million kirib, bir million

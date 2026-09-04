@@ -63,7 +63,10 @@ export function Tooltip({
       placement === 'bottom'
         ? { top: anchor.bottom + OFFSET, left: centerX }
         : placement === 'left'
-          ? { top: anchor.top + anchor.height / 2 - bubble.height / 2, left: anchor.left - bubble.width - OFFSET }
+          ? {
+              top: anchor.top + anchor.height / 2 - bubble.height / 2,
+              left: anchor.left - bubble.width - OFFSET,
+            }
           : { top: anchor.top - bubble.height - OFFSET, left: centerX };
 
     // Ekrandan chiqib ketmasin.

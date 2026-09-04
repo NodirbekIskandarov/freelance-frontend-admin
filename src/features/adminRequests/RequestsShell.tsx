@@ -3,12 +3,13 @@ import { Check, X } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
-import { IconButton } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Select } from '@/components/ui/Select';
+import { RowActions } from '@/components/ui/RowActions';
 import { Table, type Column } from '@/components/ui/Table';
 import { Tabs } from '@/components/ui/Tabs';
 import { formatSom } from '@/lib/format';
@@ -153,25 +154,22 @@ export function RequestsShell<T extends RequestRow>({
     sticky: true,
     cell: (row) =>
       row.status === 'pending' ? (
-        <span className="flex items-center justify-end gap-2">
-          <IconButton
-            label={`${rowName(row)} — tasdiqlash`}
-            tone="success"
-            size="sm"
-            disabled={approve.isLoading}
-            onClick={() => approve.run(row.id, row)}
-          >
-            <Check className="size-4" strokeWidth={2} />
-          </IconButton>
-          <IconButton
-            label={`${rowName(row)} — rad etish`}
-            tone="danger"
-            size="sm"
-            onClick={() => setRejectTarget(row)}
-          >
-            <X className="size-4" strokeWidth={2} />
-          </IconButton>
-        </span>
+        <RowActions
+          inlineCount={1}
+          actions={[
+            {
+              label: `${rowName(row)} — tasdiqlash`,
+              icon: <Check className="size-4" strokeWidth={2} />,
+              onSelect: () => approve.run(row.id, row),
+            },
+            {
+              label: `${rowName(row)} — rad etish`,
+              icon: <X className="size-4" strokeWidth={2} />,
+              onSelect: () => setRejectTarget(row),
+              destructive: true,
+            },
+          ]}
+        />
       ) : (
         <span className="text-xs text-fg-muted">Ko&apos;rib chiqilgan</span>
       ),
@@ -186,9 +184,9 @@ export function RequestsShell<T extends RequestRow>({
       />
 
       {error !== undefined && error !== null ? (
-        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card>
+          <ErrorState message={getApiErrorMessage(error)} />
+        </Card>
       ) : (
         <>
           {approve.error !== undefined && approve.error !== null && (

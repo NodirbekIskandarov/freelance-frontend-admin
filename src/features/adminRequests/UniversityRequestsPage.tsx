@@ -1,6 +1,6 @@
+import { DateCell } from '@/components/ui/Cells';
 import { Badge } from '@/components/ui/Badge';
 import type { Column } from '@/components/ui/Table';
-import { formatDateTime } from '@/lib/format';
 import type { AdminUniversityRequest } from '@/shared/types/adminRequests';
 
 import { RequestsShell, StatusBadge } from './RequestsShell';
@@ -54,9 +54,7 @@ const columns: Column<AdminUniversityRequest>[] = [
   {
     key: 'created_at',
     header: 'Yuborilgan',
-    cell: (row) => (
-      <span className="whitespace-nowrap text-fg-muted">{formatDateTime(row.created_at)}</span>
-    ),
+    cell: (row) => <DateCell value={row.created_at} />,
   },
   {
     key: 'status',

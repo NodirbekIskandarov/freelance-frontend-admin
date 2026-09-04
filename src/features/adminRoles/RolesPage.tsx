@@ -2,14 +2,17 @@ import { KeyRound, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { Badge } from '@/components/ui/Badge';
-import { Button, IconButton } from '@/components/ui/Button';
+import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { DateCell } from '@/components/ui/Cells';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { Modal } from '@/components/ui/Modal';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
+import { RowActions } from '@/components/ui/RowActions';
 import { Table, type Column } from '@/components/ui/Table';
-import { formatDateTime, formatSom } from '@/lib/format';
+import { formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { getApiErrorMessage } from '@/shared/api';
 import type { Role } from '@/shared/types/adminRoles';
@@ -98,9 +101,7 @@ export function RolesPage() {
     {
       key: 'created_at',
       header: 'Yaratilgan',
-      cell: (row) => (
-        <span className="whitespace-nowrap text-fg-muted">{formatDateTime(row.created_at)}</span>
-      ),
+      cell: (row) => <DateCell value={row.created_at} />,
     },
     {
       key: 'actions',
@@ -109,28 +110,27 @@ export function RolesPage() {
       // O'ng chetga yopishadi — jadval siljiganda ham ko'rinadi.
       sticky: true,
       cell: (row) => (
-        <span className="flex items-center justify-end gap-2">
-          <IconButton
-            label={row.is_system ? `${row.name} — ko'rish` : `${row.name} — tahrirlash`}
-            tone="info"
-            size="sm"
-            onClick={() => openEdit(row)}
-          >
-            <Pencil className="size-4" strokeWidth={1.75} />
-          </IconButton>
-
-          {/* Tizim rolini o'chirib bo'lmaydi — backend ham rad etadi. */}
-          {!row.is_system && (
-            <IconButton
-              label={`${row.name} — o'chirish`}
-              tone="danger"
-              size="sm"
-              onClick={() => setDeleting(row)}
-            >
-              <Trash2 className="size-4" strokeWidth={1.75} />
-            </IconButton>
-          )}
-        </span>
+        <RowActions
+          inlineCount={1}
+          actions={[
+            {
+              label: row.is_system ? `${row.name} — ko'rish` : `${row.name} — tahrirlash`,
+              icon: <Pencil className="size-4" strokeWidth={1.75} />,
+              onSelect: () => openEdit(row),
+            },
+            /* Tizim rolini o'chirib bo'lmaydi — backend ham rad etadi. */
+            ...(row.is_system
+              ? []
+              : [
+                  {
+                    label: `${row.name} — o'chirish`,
+                    icon: <Trash2 className="size-4" strokeWidth={1.75} />,
+                    onSelect: () => setDeleting(row),
+                    destructive: true,
+                  },
+                ]),
+          ]}
+        />
       ),
     },
   ];
@@ -153,9 +153,9 @@ export function RolesPage() {
       />
 
       {error ? (
-        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card>
+          <ErrorState message={getApiErrorMessage(error)} />
+        </Card>
       ) : (
         <>
           <section className="flex flex-wrap items-center gap-3">

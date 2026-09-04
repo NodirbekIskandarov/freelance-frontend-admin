@@ -6,12 +6,14 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
 import { Button, IconButton } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { DateCell } from '@/components/ui/Cells';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Select } from '@/components/ui/Select';
 import { Table, type Column } from '@/components/ui/Table';
-import { formatDateTime, formatSom } from '@/lib/format';
+import { formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { getApiErrorMessage } from '@/shared/api';
 import { assignmentTypeLabel } from '@/shared/types/assignments';
@@ -159,9 +161,7 @@ export function SubmissionsPage() {
     {
       key: 'created_at',
       header: 'Vaqt',
-      cell: (row) => (
-        <span className="whitespace-nowrap text-fg-muted">{formatDateTime(row.created_at)}</span>
-      ),
+      cell: (row) => <DateCell value={row.created_at} />,
     },
     {
       key: 'status',
@@ -255,9 +255,9 @@ export function SubmissionsPage() {
       />
 
       {error ? (
-        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card>
+          <ErrorState message={getApiErrorMessage(error)} />
+        </Card>
       ) : (
         <div className="flex flex-col gap-4 xl:flex-row">
           <SubmissionUniversityPanel

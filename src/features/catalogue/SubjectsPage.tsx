@@ -1,4 +1,13 @@
-import { ClipboardList, FileText, LayoutGrid, Library, Pencil, Plus, SearchX, Trash2 } from 'lucide-react';
+import {
+  ClipboardList,
+  FileText,
+  LayoutGrid,
+  Library,
+  Pencil,
+  Plus,
+  SearchX,
+  Trash2,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { Link, useLocaleNavigate } from '@/i18n/navigation';
@@ -6,6 +15,8 @@ import { Link, useLocaleNavigate } from '@/i18n/navigation';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { DateCell } from '@/components/ui/Cells';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
@@ -14,7 +25,7 @@ import { Select } from '@/components/ui/Select';
 import { RowActions } from '@/components/ui/RowActions';
 import { Table, type Column } from '@/components/ui/Table';
 import { TableToolbar } from '@/components/ui/TableToolbar';
-import { formatDateTime, formatSom } from '@/lib/format';
+import { formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { useGetSubjectRequestsListQuery } from '@/features/adminRequests/adminRequestsApi';
 import { getApiErrorMessage } from '@/shared/api';
@@ -258,9 +269,7 @@ export function SubjectsPage() {
     {
       key: 'created_at',
       header: "Qo'shilgan sana",
-      cell: (row) => (
-        <span className="whitespace-nowrap text-fg-muted">{formatDateTime(row.created_at)}</span>
-      ),
+      cell: (row) => <DateCell value={row.created_at} />,
     },
     {
       key: 'source',
@@ -399,9 +408,9 @@ export function SubjectsPage() {
           </Card>
 
           {error ? (
-            <div className="mt-4 rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-              {getApiErrorMessage(error)}
-            </div>
+            <Card className="mt-4">
+              <ErrorState message={getApiErrorMessage(error)} />
+            </Card>
           ) : (
             <>
               <TableToolbar

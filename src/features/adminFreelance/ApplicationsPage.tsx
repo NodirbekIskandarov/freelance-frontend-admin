@@ -2,15 +2,17 @@ import { Check, CircleCheck, CircleX, Clock, FileText, X } from 'lucide-react';
 import { useState } from 'react';
 
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
-import { IconButton } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { DateCell } from '@/components/ui/Cells';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Select } from '@/components/ui/Select';
 import { StatCard } from '@/components/ui/StatCard';
+import { RowActions } from '@/components/ui/RowActions';
 import { Table, type Column } from '@/components/ui/Table';
-import { formatDateTime, formatSom } from '@/lib/format';
+import { formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { getApiErrorMessage } from '@/shared/api';
 import {
@@ -125,9 +127,7 @@ export function ApplicationsPage() {
     {
       key: 'created_at',
       header: 'Yuborilgan',
-      cell: (row) => (
-        <span className="whitespace-nowrap text-fg-muted">{formatDateTime(row.created_at)}</span>
-      ),
+      cell: (row) => <DateCell value={row.created_at} />,
     },
     {
       key: 'status',
@@ -144,25 +144,22 @@ export function ApplicationsPage() {
       sticky: true,
       cell: (row) =>
         row.status === 'pending' ? (
-          <span className="flex items-center justify-end gap-2">
-            <IconButton
-              label={`${row.full_name} — tasdiqlash`}
-              tone="success"
-              size="sm"
-              disabled={approveState.isLoading}
-              onClick={() => void approve(row.id)}
-            >
-              <Check className="size-4" strokeWidth={2} />
-            </IconButton>
-            <IconButton
-              label={`${row.full_name} — rad etish`}
-              tone="danger"
-              size="sm"
-              onClick={() => setRejectTarget(row)}
-            >
-              <X className="size-4" strokeWidth={2} />
-            </IconButton>
-          </span>
+          <RowActions
+            inlineCount={1}
+            actions={[
+              {
+                label: `${row.full_name} — tasdiqlash`,
+                icon: <Check className="size-4" strokeWidth={2} />,
+                onSelect: () => void approve(row.id),
+              },
+              {
+                label: `${row.full_name} — rad etish`,
+                icon: <X className="size-4" strokeWidth={2} />,
+                onSelect: () => setRejectTarget(row),
+                destructive: true,
+              },
+            ]}
+          />
         ) : (
           /* Ko'rib chiqilgan ariza qayta baholanmaydi — backend ham rad etadi. */
           <span className="text-xs text-fg-muted">Ko&apos;rib chiqilgan</span>
@@ -178,9 +175,9 @@ export function ApplicationsPage() {
       />
 
       {error ? (
-        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card>
+          <ErrorState message={getApiErrorMessage(error)} />
+        </Card>
       ) : (
         <>
           {approveState.error && (

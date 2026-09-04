@@ -15,6 +15,7 @@ import { BarSparkline } from '@/components/charts/BarSparkline';
 import { SplitRevenueChart } from '@/components/charts/SplitRevenueChart';
 import { useChartTheme } from '@/components/charts/chartTheme';
 import { Card } from '@/components/ui/Card';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { cn } from '@/lib/cn';
@@ -590,9 +591,9 @@ export function DashboardPage() {
 
   if (error) {
     return (
-      <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-        {getApiErrorMessage(error)}
-      </div>
+      <Card>
+        <ErrorState message={getApiErrorMessage(error)} />
+      </Card>
     );
   }
 

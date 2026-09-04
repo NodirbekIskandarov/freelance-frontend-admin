@@ -2,13 +2,14 @@ import { BanknoteArrowDown, CircleCheck, CircleX, Clock, Wallet } from 'lucide-r
 import { useState } from 'react';
 
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
-import { IconButton } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Select } from '@/components/ui/Select';
 import { StatCard } from '@/components/ui/StatCard';
+import { RowActions } from '@/components/ui/RowActions';
 import { Table, type Column } from '@/components/ui/Table';
 import { formatDecimalSom, formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
@@ -152,24 +153,22 @@ export function WithdrawalsPage() {
       cell: (row) =>
         // Yakunlangan so'rovga qayta tegib bo'lmaydi.
         row.status === 'pending' ? (
-          <span className="flex items-center justify-end gap-2">
-            <IconButton
-              label="To'landi deb belgilash"
-              tone="success"
-              size="sm"
-              onClick={() => setAction({ row, kind: 'pay' })}
-            >
-              <CircleCheck className="size-4" strokeWidth={1.75} />
-            </IconButton>
-            <IconButton
-              label="Rad etish"
-              tone="danger"
-              size="sm"
-              onClick={() => setAction({ row, kind: 'reject' })}
-            >
-              <CircleX className="size-4" strokeWidth={1.75} />
-            </IconButton>
-          </span>
+          <RowActions
+            inlineCount={1}
+            actions={[
+              {
+                label: "To'landi deb belgilash",
+                icon: <CircleCheck className="size-4" strokeWidth={1.75} />,
+                onSelect: () => setAction({ row, kind: 'pay' }),
+              },
+              {
+                label: 'Rad etish',
+                icon: <CircleX className="size-4" strokeWidth={1.75} />,
+                onSelect: () => setAction({ row, kind: 'reject' }),
+                destructive: true,
+              },
+            ]}
+          />
         ) : (
           <span className="text-xs text-fg-muted">{row.processed_by?.full_name ?? '—'}</span>
         ),
@@ -184,9 +183,9 @@ export function WithdrawalsPage() {
       />
 
       {error ? (
-        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card>
+          <ErrorState message={getApiErrorMessage(error)} />
+        </Card>
       ) : (
         <>
           <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">

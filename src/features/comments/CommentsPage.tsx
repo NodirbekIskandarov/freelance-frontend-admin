@@ -6,6 +6,7 @@ import { Link } from '@/i18n/navigation';
 import { Avatar } from '@/components/ui/Avatar';
 import { IconButton } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
@@ -151,9 +152,9 @@ export function CommentsPage() {
       />
 
       {error ? (
-        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card>
+          <ErrorState message={getApiErrorMessage(error)} />
+        </Card>
       ) : (
         <Card className="overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-4">

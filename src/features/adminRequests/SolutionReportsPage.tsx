@@ -1,6 +1,6 @@
+import { DateCell } from '@/components/ui/Cells';
 import { Badge } from '@/components/ui/Badge';
 import type { Column } from '@/components/ui/Table';
-import { formatDateTime } from '@/lib/format';
 import { REPORT_REASON_LABELS, type AdminSolutionReport } from '@/shared/types/adminRequests';
 
 import {
@@ -42,9 +42,7 @@ const columns: Column<AdminSolutionReport>[] = [
   {
     key: 'created_at',
     header: 'Yuborilgan',
-    cell: (row) => (
-      <span className="whitespace-nowrap text-fg-muted">{formatDateTime(row.created_at)}</span>
-    ),
+    cell: (row) => <DateCell value={row.created_at} />,
   },
   {
     key: 'status',

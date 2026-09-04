@@ -24,6 +24,7 @@ import { useChartTheme } from '@/components/charts/chartTheme';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Select } from '@/components/ui/Select';
 import { Table, type Column } from '@/components/ui/Table';
@@ -223,9 +224,9 @@ export function MonitoringPage() {
       />
 
       {error ? (
-        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card>
+          <ErrorState message={getApiErrorMessage(error)} />
+        </Card>
       ) : isLoading || !data ? (
         <div className="grid gap-4">
           <div className="h-24 animate-pulse rounded-card bg-elevated" />

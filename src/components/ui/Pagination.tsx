@@ -73,7 +73,10 @@ export function Pagination({
             aria-label="Oldingi sahifa"
             disabled={page <= 1}
             onClick={() => onPageChange(page - 1)}
-            className={cn(buttonBase, 'border border-line text-fg-muted hover:bg-surface-hover hover:text-fg')}
+            className={cn(
+              buttonBase,
+              'border border-line text-fg-muted hover:bg-surface-hover hover:text-fg',
+            )}
           >
             <ChevronLeft className="size-4" strokeWidth={2} />
           </button>
@@ -113,7 +116,10 @@ export function Pagination({
             aria-label="Keyingi sahifa"
             disabled={page >= totalPages}
             onClick={() => onPageChange(page + 1)}
-            className={cn(buttonBase, 'border border-line text-fg-muted hover:bg-surface-hover hover:text-fg')}
+            className={cn(
+              buttonBase,
+              'border border-line text-fg-muted hover:bg-surface-hover hover:text-fg',
+            )}
           >
             <ChevronRight className="size-4" strokeWidth={2} />
           </button>

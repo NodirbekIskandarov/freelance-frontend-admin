@@ -5,6 +5,7 @@ import { Navigate, useParams } from 'react-router';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { TextAreaField } from '@/components/ui/Field';
 import { InfoList, InfoRow } from '@/components/ui/InfoRow';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -96,9 +97,9 @@ export function DisputeDetailPage() {
     return (
       <>
         <PageHeader title="Shikoyat" breadcrumbs={crumbs} />
-        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card>
+          <ErrorState message={getApiErrorMessage(error)} />
+        </Card>
       </>
     );
   }

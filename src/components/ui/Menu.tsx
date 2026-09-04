@@ -42,7 +42,9 @@ export function Menu({
   align?: 'left' | 'right';
   className?: string;
 }) {
-  const [position, setPosition] = useState<{ top: number; left?: number; right?: number }>({ top: 0 });
+  const [position, setPosition] = useState<{ top: number; left?: number; right?: number }>({
+    top: 0,
+  });
   const menuRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {

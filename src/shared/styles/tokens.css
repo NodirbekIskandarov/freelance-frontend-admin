@@ -106,7 +106,7 @@
 
   --color-neutral: #9ca3af;
   --color-neutral-quiet: rgb(255 255 255 / 0.06);
-  --color-neutral-line: rgb(255 255 255 / 0.10);
+  --color-neutral-line: rgb(255 255 255 / 0.1);
 
   /* ---------------------------------------------------------------------
    * To'ldirilgan sirtlar uchun ALOHIDA, to'qroq ranglar.
@@ -168,8 +168,7 @@
    * Shuning uchun karta ikki qismdan ko'tariladi: ichkarida 2% oq chiziq
    * (yuqori qirra yorishadi) va pastda juda tarqoq qora yoyilma.
    * ------------------------------------------------------------------- */
-  --shadow-card:
-    0 1px 0 rgb(255 255 255 / 0.02) inset, 0 8px 24px -16px rgb(0 0 0 / 0.8);
+  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.02) inset, 0 8px 24px -16px rgb(0 0 0 / 0.8);
   --shadow-dropdown: 0 16px 40px -12px rgb(0 0 0 / 0.7);
   --shadow-modal: 0 32px 80px -20px rgb(0 0 0 / 0.8);
 
@@ -237,29 +236,29 @@
   --color-primary: #047857;
   --color-primary-hover: #059669;
   --color-primary-active: #065f46;
-  --color-primary-quiet: rgb(4 120 87 / 0.10);
+  --color-primary-quiet: rgb(4 120 87 / 0.1);
   --color-primary-line: rgb(4 120 87 / 0.22);
   --color-on-accent: #ffffff;
 
   --color-success: #15803d;
-  --color-success-quiet: rgb(21 128 61 / 0.10);
+  --color-success-quiet: rgb(21 128 61 / 0.1);
   --color-success-line: rgb(21 128 61 / 0.22);
 
   --color-warning: #b45309;
-  --color-warning-quiet: rgb(180 83 9 / 0.10);
+  --color-warning-quiet: rgb(180 83 9 / 0.1);
   --color-warning-line: rgb(180 83 9 / 0.22);
 
   --color-danger: #b91c1c;
-  --color-danger-quiet: rgb(185 28 28 / 0.10);
+  --color-danger-quiet: rgb(185 28 28 / 0.1);
   --color-danger-line: rgb(185 28 28 / 0.22);
 
   --color-info: #1d4ed8;
-  --color-info-quiet: rgb(29 78 216 / 0.10);
+  --color-info-quiet: rgb(29 78 216 / 0.1);
   --color-info-line: rgb(29 78 216 / 0.22);
 
   --color-neutral: #52525b;
   --color-neutral-quiet: rgb(0 0 0 / 0.05);
-  --color-neutral-line: rgb(0 0 0 / 0.10);
+  --color-neutral-line: rgb(0 0 0 / 0.1);
 
   --color-primary-solid: #047857;
   --color-primary-solid-hover: #059669;
@@ -277,7 +276,7 @@
   /* Oq kartada soya yana ma'noga ega — qorong'ida u ko'rinmasdi. */
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.05), 0 1px 3px -1px rgb(0 0 0 / 0.04);
   --shadow-dropdown: 0 16px 40px -12px rgb(0 0 0 / 0.14);
-  --shadow-modal: 0 32px 80px -20px rgb(0 0 0 / 0.20);
+  --shadow-modal: 0 32px 80px -20px rgb(0 0 0 / 0.2);
 
   --ring: 0 0 0 2px var(--color-canvas), 0 0 0 4px var(--color-primary-line);
 }

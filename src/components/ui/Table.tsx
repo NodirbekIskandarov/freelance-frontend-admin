@@ -134,7 +134,9 @@ export function Table<T>({
             <Skeleton key={index} className="h-24 rounded-card" />
           ))}
 
-        {!isLoading && rows.length === 0 && (empty ?? <EmptyState icon={Inbox} title={emptyMessage} />)}
+        {!isLoading &&
+          rows.length === 0 &&
+          (empty ?? <EmptyState icon={Inbox} title={emptyMessage} />)}
 
         {!isLoading &&
           rows.map((row, index) => (

@@ -17,8 +17,7 @@ import { cn } from '@/lib/cn';
  * teskari — to'q yashil fon, oq matn.
  */
 const variants = {
-  primary:
-    'bg-primary text-on-accent hover:bg-primary-hover active:bg-primary-active shadow-card',
+  primary: 'bg-primary text-on-accent hover:bg-primary-hover active:bg-primary-active shadow-card',
   secondary: 'border border-line text-fg-soft hover:bg-surface-hover hover:text-fg',
   ghost: 'text-fg-muted hover:bg-surface-hover hover:text-fg',
   'danger-quiet': 'border border-danger-line bg-danger-quiet text-danger hover:bg-danger/20',
@@ -57,7 +56,18 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'primary', size = 'md', icon, trailing, loading, className, children, type = 'button', disabled, ...props },
+  {
+    variant = 'primary',
+    size = 'md',
+    icon,
+    trailing,
+    loading,
+    className,
+    children,
+    type = 'button',
+    disabled,
+    ...props
+  },
   ref,
 ) {
   return (
@@ -74,7 +84,13 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       {loading && (
         <Loader2 className="absolute size-4 animate-spin motion-reduce:animate-none" aria-hidden />
       )}
-      <span className={cn('inline-flex items-center', sizes[size].includes('gap-2') ? 'gap-2' : 'gap-1.5', loading && 'invisible')}>
+      <span
+        className={cn(
+          'inline-flex items-center',
+          sizes[size].includes('gap-2') ? 'gap-2' : 'gap-1.5',
+          loading && 'invisible',
+        )}
+      >
         {icon}
         {children}
         {trailing}
@@ -117,7 +133,16 @@ interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
-  { label, tone = 'neutral', size = 'md', bordered = false, className, children, type = 'button', ...props },
+  {
+    label,
+    tone = 'neutral',
+    size = 'md',
+    bordered = false,
+    className,
+    children,
+    type = 'button',
+    ...props
+  },
   ref,
 ) {
   return (

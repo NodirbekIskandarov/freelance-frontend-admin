@@ -2,6 +2,7 @@ import { ArrowLeft, FileText } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from '@/i18n/navigation';
 
+import { DateCell } from '@/components/ui/Cells';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import type { Column } from '@/components/ui/Table';
@@ -78,9 +79,7 @@ const columns: Column<AdminAssignmentRequest>[] = [
   {
     key: 'created_at',
     header: 'Yuborilgan',
-    cell: (row) => (
-      <span className="whitespace-nowrap text-fg-muted">{formatDateTime(row.created_at)}</span>
-    ),
+    cell: (row) => <DateCell value={row.created_at} />,
   },
   {
     key: 'reviewed',

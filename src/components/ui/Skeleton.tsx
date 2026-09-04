@@ -11,7 +11,7 @@ import { cn } from '@/lib/cn';
  * sirt qoladi.
  */
 export function Skeleton({ className }: { className?: string }) {
-  return <span aria-hidden className={cn('block rounded-control bg-skeleton', className)} />;
+  return <span aria-hidden className={cn('block bg-skeleton rounded-control', className)} />;
 }
 
 /** Matn qatori uchun — balandligi shrift qatoriga teng. */

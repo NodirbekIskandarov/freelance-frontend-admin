@@ -4,11 +4,13 @@ import { useState } from 'react';
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
 import { IconButton } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Select } from '@/components/ui/Select';
 import { StatCard } from '@/components/ui/StatCard';
+import { TableToolbar } from '@/components/ui/TableToolbar';
 import { Table, type Column } from '@/components/ui/Table';
 import { formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
@@ -73,6 +75,21 @@ export function AppealsPage() {
   });
 
   const [take, takeState] = useTakeAppealMutation();
+
+  /* Sukut qiymatidan farq qiladigan filtrlar soni — «hammasi»
+     hisoblanmaydi. */
+  const activeFilterCount = [
+    search,
+    status !== 'all' ? status : '',
+    topic !== 'all' ? topic : '',
+  ].filter(Boolean).length;
+
+  function resetFilters() {
+    setSearch('');
+    setStatus('all');
+    setTopic('all');
+    setPage(1);
+  }
 
   const columns: Column<AdminAppeal>[] = [
     {
@@ -186,9 +203,9 @@ export function AppealsPage() {
       />
 
       {error ? (
-        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card>
+          <ErrorState message={getApiErrorMessage(error)} />
+        </Card>
       ) : (
         <>
           {takeState.error !== undefined && takeState.error !== null && (
@@ -224,39 +241,46 @@ export function AppealsPage() {
             />
           </section>
 
-          <section className="mt-4 flex flex-wrap items-center gap-3">
-            <Select
-              aria-label="Holat bo'yicha filtr"
-              options={statusOptions}
-              value={status}
-              onChange={(event) => {
-                setStatus(event.target.value);
-                setPage(1);
-              }}
-              className="w-48"
-            />
-            <Select
-              aria-label="Mavzu bo'yicha filtr"
-              options={topicOptions}
-              value={topic}
-              onChange={(event) => {
-                setTopic(event.target.value);
-                setPage(1);
-              }}
-              className="w-48"
-            />
+          <TableToolbar
+            className="mt-4"
+            activeFilters={activeFilterCount}
+            onResetFilters={resetFilters}
+            filters={
+              <>
+                <Select
+                  aria-label="Holat bo'yicha filtr"
+                  options={statusOptions}
+                  value={status}
+                  onChange={(event) => {
+                    setStatus(event.target.value);
+                    setPage(1);
+                  }}
+                  className="w-48"
+                />
+                <Select
+                  aria-label="Mavzu bo'yicha filtr"
+                  options={topicOptions}
+                  value={topic}
+                  onChange={(event) => {
+                    setTopic(event.target.value);
+                    setPage(1);
+                  }}
+                  className="w-48"
+                />
 
-            <div className="ml-auto">
-              <SearchInput
-                value={search}
-                onChange={(event) => {
-                  setSearch(event.target.value);
-                  setPage(1);
-                }}
-                className="w-72"
-              />
-            </div>
-          </section>
+                <div className="ml-auto">
+                  <SearchInput
+                    value={search}
+                    onChange={(event) => {
+                      setSearch(event.target.value);
+                      setPage(1);
+                    }}
+                    className="w-72"
+                  />
+                </div>
+              </>
+            }
+          />
 
           <Card className="mt-4 overflow-hidden">
             <Table

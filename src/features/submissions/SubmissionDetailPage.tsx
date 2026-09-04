@@ -6,13 +6,15 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Button, IconButton } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { DateCell } from '@/components/ui/Cells';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Table, type Column } from '@/components/ui/Table';
 import { Tabs } from '@/components/ui/Tabs';
 import { cn } from '@/lib/cn';
-import { formatDateTime, formatDecimalSom, formatSom } from '@/lib/format';
+import { formatDecimalSom, formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { getApiErrorMessage } from '@/shared/api';
 import { assignmentTypeLabel } from '@/shared/types/assignments';
@@ -240,9 +242,7 @@ export function SubmissionDetailPage() {
     {
       key: 'created_at',
       header: 'Yuborilgan',
-      cell: (row) => (
-        <span className="whitespace-nowrap text-fg-muted">{formatDateTime(row.created_at)}</span>
-      ),
+      cell: (row) => <DateCell value={row.created_at} />,
     },
     {
       key: 'status',
@@ -365,9 +365,9 @@ export function SubmissionDetailPage() {
       />
 
       {error ? (
-        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card>
+          <ErrorState message={getApiErrorMessage(error)} />
+        </Card>
       ) : (
         <div className="flex flex-col gap-4 xl:flex-row">
           <Card className="flex w-full flex-col p-5 xl:w-[280px] xl:shrink-0">

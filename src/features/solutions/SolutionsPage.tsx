@@ -4,12 +4,15 @@ import { useLocaleNavigate } from '@/i18n/navigation';
 
 import { IconButton } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { DateCell } from '@/components/ui/Cells';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Select } from '@/components/ui/Select';
+import { TableToolbar } from '@/components/ui/TableToolbar';
 import { Table, type Column } from '@/components/ui/Table';
-import { formatDateTime, formatDecimalSom, formatSom } from '@/lib/format';
+import { formatDecimalSom, formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { getApiErrorMessage } from '@/shared/api';
 import { SOLUTION_ORDERING_OPTIONS, type Solution } from '@/shared/types/solutions';
@@ -34,6 +37,15 @@ export function SolutionsPage() {
     ordering,
     search: debouncedSearch || undefined,
   });
+
+  /* Sukut qiymatidan farq qiladigan filtrlar soni — «hammasi»
+     hisoblanmaydi. */
+  const activeFilterCount = [search].filter(Boolean).length;
+
+  function resetFilters() {
+    setSearch('');
+    setPage(1);
+  }
 
   const columns: Column<Solution>[] = [
     {
@@ -75,9 +87,7 @@ export function SolutionsPage() {
     {
       key: 'created_at',
       header: 'Yuborilgan',
-      cell: (row) => (
-        <span className="whitespace-nowrap text-fg-muted">{formatDateTime(row.created_at)}</span>
-      ),
+      cell: (row) => <DateCell value={row.created_at} />,
     },
     {
       key: 'status',
@@ -114,34 +124,40 @@ export function SolutionsPage() {
       />
 
       {error ? (
-        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card>
+          <ErrorState message={getApiErrorMessage(error)} />
+        </Card>
       ) : (
         <>
-          <section className="flex flex-wrap items-center gap-3">
-            <Select
-              aria-label="Saralash"
-              options={[...SOLUTION_ORDERING_OPTIONS]}
-              value={ordering}
-              onChange={(event) => {
-                setOrdering(event.target.value);
-                setPage(1);
-              }}
-              className="w-56"
-            />
+          <TableToolbar
+            activeFilters={activeFilterCount}
+            onResetFilters={resetFilters}
+            filters={
+              <>
+                <Select
+                  aria-label="Saralash"
+                  options={[...SOLUTION_ORDERING_OPTIONS]}
+                  value={ordering}
+                  onChange={(event) => {
+                    setOrdering(event.target.value);
+                    setPage(1);
+                  }}
+                  className="w-56"
+                />
 
-            <div className="ml-auto">
-              <SearchInput
-                value={search}
-                onChange={(event) => {
-                  setSearch(event.target.value);
-                  setPage(1);
-                }}
-                className="w-72"
-              />
-            </div>
-          </section>
+                <div className="ml-auto">
+                  <SearchInput
+                    value={search}
+                    onChange={(event) => {
+                      setSearch(event.target.value);
+                      setPage(1);
+                    }}
+                    className="w-72"
+                  />
+                </div>
+              </>
+            }
+          />
 
           <Card className="mt-4 overflow-hidden">
             <Table

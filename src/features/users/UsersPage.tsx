@@ -1,4 +1,14 @@
-import { CircleCheck, CircleX, Clock, Eye, KeyRound, Lock, SearchX, UserRoundCheck, Users } from 'lucide-react';
+import {
+  CircleCheck,
+  CircleX,
+  Clock,
+  Eye,
+  KeyRound,
+  Lock,
+  SearchX,
+  UserRoundCheck,
+  Users,
+} from 'lucide-react';
 import { useState } from 'react';
 import { useLocaleNavigate } from '@/i18n/navigation';
 
@@ -6,6 +16,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Badge, VerificationBadge, type BadgeTone } from '@/components/ui/Badge';
 
 import { Card } from '@/components/ui/Card';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
@@ -143,16 +154,12 @@ export function UsersPage() {
     {
       key: 'created_at',
       header: "Ro'yxatdan o'tgan",
-      cell: (row) => (
-        <DateCell value={row.created_at} />
-      ),
+      cell: (row) => <DateCell value={row.created_at} />,
     },
     {
       key: 'last_login_at',
       header: 'Oxirgi kirish',
-      cell: (row) => (
-        <DateCell value={row.last_login_at} />
-      ),
+      cell: (row) => <DateCell value={row.last_login_at} />,
     },
     {
       key: 'status',
@@ -231,9 +238,9 @@ export function UsersPage() {
       />
 
       {error ? (
-        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card>
+          <ErrorState message={getApiErrorMessage(error)} />
+        </Card>
       ) : (
         <>
           {activateError && (
