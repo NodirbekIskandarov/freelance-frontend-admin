@@ -26,7 +26,7 @@ export function ChartTooltip({ active, payload, label, formatter }: ChartTooltip
   if (!active || !payload?.length) return null;
 
   return (
-    <div className="rounded-control border border-line bg-card px-3 py-2 shadow-dropdown">
+    <div className="rounded-control border border-line bg-elevated px-3 py-2 shadow-dropdown">
       <p className="mb-1 text-xs text-fg-muted">{label}</p>
       {payload.map((entry, index) => (
         <p
@@ -39,7 +39,7 @@ export function ChartTooltip({ active, payload, label, formatter }: ChartTooltip
             style={{ backgroundColor: entry.color }}
           />
           <span className="text-fg-muted">{entry.name}</span>
-          <span className="ml-auto font-medium">
+          <span className="ml-auto font-medium tabular-nums">
             {typeof entry.value === 'number' && formatter ? formatter(entry.value) : entry.value}
           </span>
         </p>

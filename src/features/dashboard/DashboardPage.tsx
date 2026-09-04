@@ -1,9 +1,11 @@
 import {
   ArrowDown,
   ArrowUp,
+  ChevronRight,
   ClipboardList,
   FileCheck2,
   Mail,
+  Minus,
   TriangleAlert,
   type LucideIcon,
 } from 'lucide-react';
@@ -50,28 +52,28 @@ function waitLabel(hours: number): string {
   return `${Math.round(hours / 24)} kun`;
 }
 
-type QueueTone = 'neutral' | 'info' | 'danger';
-
-const queueTones: Record<QueueTone | 'warning', string> = {
-  neutral: 'bg-elevated text-fg-muted',
-  info: 'bg-info/12 text-info',
-  warning: 'bg-warning/12 text-warning',
-  danger: 'bg-danger/12 text-danger',
+const queueTones: Record<'neutral' | 'warning' | 'danger', string> = {
+  neutral: 'bg-neutral-quiet text-fg-muted border-neutral-line',
+  warning: 'bg-warning-quiet text-warning border-warning-line',
+  danger: 'bg-danger-quiet text-danger border-danger-line',
 };
 
 /**
- * Yorliq rangi ikki narsadan kelib chiqadi: ish TURI va KUTISH vaqti.
+ * Keskinlik ish TURIDAN emas, eng eski ishning YOSHIDAN kelib chiqadi.
  *
- * Nizo bir soat kutgan bo'lsa ham qizil — u har doim shoshilinch. Yechim
- * moderatsiyasi esa vaqt o'tgani sari keskinlashadi: sakkiz soatdan
- * oshsa sariq, bir kundan oshsa qizil. Faqat vaqtga qarasak nizo
- * boshqalar bilan bir xil ko'rinardi; faqat turga qarasak ikki kundan
- * beri yotgan navbat sezilmasdi.
+ * Ilgari «Xarid shikoyati» turi bo'yicha doim qizil edi va NOLTA nizo
+ * ham qizil `—` tamg'a bilan chizilardi: ekranda hech qanday ish yo'q
+ * joyda ogohlantirish turardi. Bir necha kun shunday ko'rgan odam qizil
+ * rangga umuman ishonmay qo'yadi — va o'shanda haqiqiy nizo ham
+ * sezilmay qoladi.
+ *
+ * Bo'sh navbat — TINCH holat va u shunday deb ham yoziladi.
  */
-function waitTone(hours: number, tone: QueueTone): string {
-  if (tone === 'danger' || hours >= 24) return queueTones.danger;
-  if (hours >= 8) return queueTones.warning;
-  return queueTones[tone];
+function queueSeverity(bucket: QueueBucket): 'neutral' | 'warning' | 'danger' {
+  if (bucket.count <= 0) return 'neutral';
+  if (bucket.waiting_hours >= 24) return 'danger';
+  if (bucket.waiting_hours >= 8) return 'warning';
+  return 'neutral';
 }
 
 function QueueCard({
@@ -80,45 +82,71 @@ function QueueCard({
   bucket,
   to,
   icon: Icon,
-  tone,
 }: {
   label: string;
   unit: string;
   bucket: QueueBucket;
   to: string;
   icon: LucideIcon;
-  tone: QueueTone;
 }) {
+  const severity = queueSeverity(bucket);
+  const empty = bucket.count <= 0;
+
   return (
-    <div className="rounded-control border border-line bg-card p-3.5">
+    /* BUTUN karta havola. Ilgari bosiladigan joy o'ng pastdagi
+       «Ko'rish →» yozuvi edi — kartaning o'ndan bir qismi. */
+    <Link
+      to={to}
+      className={cn(
+        'group block rounded-control border border-line-subtle bg-card p-3.5',
+        'transition-colors duration-(--dur) ease-soft outline-none',
+        'hover:bg-surface-hover focus-visible:shadow-(--ring)',
+      )}
+    >
       <div className="flex items-center justify-between gap-2">
         <span className="flex min-w-0 items-center gap-2">
           <span
-            className={cn('grid size-6 shrink-0 place-items-center rounded-md', queueTones[tone])}
+            className={cn(
+              'grid size-6 shrink-0 place-items-center rounded-md border',
+              queueTones[severity],
+            )}
           >
             <Icon className="size-3.5" strokeWidth={1.75} />
           </span>
-          <span className="truncate text-sm font-medium text-fg">{label}</span>
+          <span className="truncate text-[13px] font-medium text-fg">{label}</span>
         </span>
-        <span
-          className={cn(
-            'shrink-0 rounded-badge px-2 py-0.5 text-[11px] font-medium tabular-nums',
-            waitTone(bucket.waiting_hours, tone),
-          )}
-        >
-          {waitLabel(bucket.waiting_hours)}
-        </span>
+
+        {!empty && (
+          <span
+            className={cn(
+              'shrink-0 rounded-badge border px-2 py-0.5 text-[11px] leading-[16px] font-medium tabular-nums',
+              queueTones[severity],
+            )}
+          >
+            {waitLabel(bucket.waiting_hours)}
+          </span>
+        )}
       </div>
 
       <div className="mt-3 flex items-end justify-between gap-2">
-        <span className="text-sm text-fg-muted">
-          <span className="text-2xl font-semibold text-fg tabular-nums">{bucket.count}</span> {unit}
-        </span>
-        <Link to={to} className="text-xs font-medium text-primary hover:underline">
-          Ko&apos;rish →
-        </Link>
+        {empty ? (
+          <span className="text-[13px] text-fg-muted">Hammasi tartibda</span>
+        ) : (
+          <span className="text-[13px] text-fg-muted">
+            <span className="text-2xl leading-none font-semibold text-fg tabular-nums">
+              {bucket.count}
+            </span>{' '}
+            {unit}
+          </span>
+        )}
+
+        <ChevronRight
+          aria-hidden
+          className="size-4 shrink-0 text-fg-dim transition-transform duration-(--dur) ease-soft group-hover:translate-x-0.5 group-hover:text-fg-muted"
+          strokeWidth={2}
+        />
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -130,11 +158,11 @@ function AttentionRow({ data }: { data: AdminOverview }) {
     <Card className="p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="flex items-center gap-2 text-sm font-semibold text-fg">
-          <span className="grid size-6 place-items-center rounded-md bg-warning/12 text-warning">
+          <span className="grid size-6 place-items-center rounded-md border border-warning-line bg-warning-quiet text-warning">
             <TriangleAlert className="size-3.5" strokeWidth={2} />
           </span>
           E&apos;tiboringiz kerak
-          <span className="rounded-badge bg-elevated px-2 py-0.5 text-[11px] font-medium text-fg-muted tabular-nums">
+          <span className="rounded-badge border border-neutral-line bg-neutral-quiet px-2 py-0.5 text-[11px] leading-[16px] font-medium text-fg-muted tabular-nums">
             {queue.total} ta ish
           </span>
         </p>
@@ -150,7 +178,6 @@ function AttentionRow({ data }: { data: AdminOverview }) {
           label="Yechim moderatsiyasi"
           unit="ta yechim"
           bucket={queue.solutions}
-          tone="neutral"
           to="/yechimlar"
           icon={FileCheck2}
         />
@@ -158,7 +185,6 @@ function AttentionRow({ data }: { data: AdminOverview }) {
           label="Topshiriq arizalari"
           unit="ta ariza"
           bucket={queue.assignment_requests}
-          tone="info"
           to="/topshiriqlar/arizalar"
           icon={ClipboardList}
         />
@@ -166,7 +192,6 @@ function AttentionRow({ data }: { data: AdminOverview }) {
           label="Xarid shikoyati"
           unit="ta nizo"
           bucket={queue.disputes}
-          tone="danger"
           to="/xarid-shikoyatlari"
           icon={TriangleAlert}
         />
@@ -174,7 +199,6 @@ function AttentionRow({ data }: { data: AdminOverview }) {
           label="Yangi murojaat"
           unit="ta xat"
           bucket={queue.appeals}
-          tone="info"
           to="/murojaatlar"
           icon={Mail}
         />
@@ -186,14 +210,21 @@ function AttentionRow({ data }: { data: AdminOverview }) {
 function Change({ value, className }: { value: number | null; className?: string }) {
   if (value === null) return null;
 
-  const up = value >= 0;
-  const Icon = up ? ArrowUp : ArrowDown;
+  /* Nol — o'sish ham, pasayish ham emas. Ilgari u yashil «↑ 0%» bo'lib
+     chiqardi va o'sish bo'lmagan joyda o'sish borday ko'rinardi. */
+  const flat = value === 0;
+  const up = value > 0;
+  const Icon = flat ? Minus : up ? ArrowUp : ArrowDown;
 
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-0.5 rounded-badge px-1.5 py-0.5 text-[11px] font-medium tabular-nums',
-        up ? 'bg-success/12 text-success' : 'bg-danger/12 text-danger',
+        'inline-flex items-center gap-0.5 rounded-badge border px-1.5 py-0.5 text-[11px] leading-[16px] font-medium tabular-nums',
+        flat
+          ? 'border-neutral-line bg-neutral-quiet text-fg-muted'
+          : up
+            ? 'border-success-line bg-success-quiet text-success'
+            : 'border-danger-line bg-danger-quiet text-danger',
         className,
       )}
     >
@@ -207,16 +238,29 @@ function RevenueCard({ data }: { data: AdminOverview }) {
   const theme = useChartTheme();
   const { revenue } = data;
 
+  const sellerPercent = Math.max(0, Math.round(100 - revenue.commission_percent));
+
   /* Uch qator uch xil narsani aytadi: ustunning ikki bo'lagi va
      ulardan tashqarida qaytib ketgan pul. Qaytarilgan pul QIZIL —
      u aylanmaning bo'lagi emas, uning teskarisi. */
   const legend = [
-    { label: 'Sotuvchilarga', value: revenue.seller_earning, color: theme.series[0] },
-    { label: 'Platforma komissiyasi', value: revenue.commission, color: theme.series[2] },
-    { label: 'Qaytarilgan', value: revenue.refunded, color: theme.danger },
+    {
+      label: 'Sotuvchilarga',
+      value: revenue.seller_earning,
+      color: theme.series[0],
+      share: sellerPercent,
+    },
+    {
+      label: 'Platforma komissiyasi',
+      value: revenue.commission,
+      color: theme.series[2],
+      share: Math.round(revenue.commission_percent),
+    },
+    /* Qaytarilgan pul ulushsiz: u ustunning bir bo'lagi EMAS, undan
+       tashqarida qaytib ketgan summa. Ulush yozilsa u ham ustunga
+       kirgandek ko'rinardi. */
+    { label: 'Qaytarilgan', value: revenue.refunded, color: theme.danger, share: undefined },
   ];
-
-  const sellerPercent = Math.max(0, Math.round(100 - revenue.commission_percent));
 
   return (
     <Card className="p-5">
@@ -248,32 +292,19 @@ function RevenueCard({ data }: { data: AdminOverview }) {
         />
       </div>
 
-      {/* Ustun nimadan tuzilgani — grafikning O'ZI ostida, ulushi bilan.
-          Pastdagi qator esa summalar: bittasi shaklni, ikkinchisi
-          miqdorni tushuntiradi. */}
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px]">
-        <span className="font-medium tracking-wider text-fg-muted uppercase">
-          {bucketCaption(data.period)}
-        </span>
-        <span className="flex items-center gap-1.5 text-fg-soft">
-          <span
-            aria-hidden
-            className="size-2 shrink-0 rounded-[3px]"
-            style={{ background: theme.series[0] }}
-          />
-          Sotuvchilarga ({sellerPercent}%)
-        </span>
-        <span className="flex items-center gap-1.5 text-fg-soft">
-          <span
-            aria-hidden
-            className="size-2 shrink-0 rounded-[3px]"
-            style={{ background: theme.series[2] }}
-          />
-          Platforma komissiyasi ({Math.round(revenue.commission_percent)}%)
-        </span>
-      </div>
+      {/*
+        BITTA legenda.
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line pt-3">
+        Ilgari ikkitasi bor edi: biri grafik ostida ulushlar bilan, ikkinchisi
+        pastda summalar bilan — bir xil uch rang ikki marta tushuntirilardi
+        va o'quvchi ular boshqa-boshqa narsa deb o'ylashi mumkin edi. Endi
+        bitta qator: rang, nomi, ulushi va summasi.
+      */}
+      <p className="mt-3 text-[11px] font-medium tracking-[0.06em] text-fg-dim uppercase">
+        {bucketCaption(data.period)}
+      </p>
+
+      <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line-subtle pt-3">
         {legend.map((item) => (
           <span key={item.label} className="flex items-center gap-2">
             <span
@@ -281,7 +312,10 @@ function RevenueCard({ data }: { data: AdminOverview }) {
               className="size-2 shrink-0 rounded-[3px]"
               style={{ background: item.color }}
             />
-            <span className="text-xs text-fg-muted">{item.label}</span>
+            <span className="text-xs text-fg-muted">
+              {item.label}
+              {item.share !== undefined && ` (${item.share}%)`}
+            </span>
             <span className="text-sm font-medium text-fg tabular-nums">
               {formatDecimalSom(item.value)}
             </span>
@@ -359,12 +393,15 @@ function GrowthCard({ data }: { data: AdminOverview }) {
  * qolgandi: yorliq raqamni emas, faqat uning turkumini aytadi. Turkum
  * matnning o'zida yozilgan, unga rang kerak emas.
  */
-const groupTones: Record<MetricGroup, string> = {
-  people: 'bg-neutral-quiet text-fg-dim',
-  content: 'bg-neutral-quiet text-fg-dim',
-  sales: 'bg-neutral-quiet text-fg-dim',
-};
-
+/**
+ * Turkum yorlig'i — RANGSIZ va yorliqning O'ZI.
+ *
+ * Ilgari u rangli tamg'a edi (ko'k / binafsha / sariq) va sahifadagi eng
+ * rangli narsa eng kam ma'lumot tashiydigan narsa bo'lib qolgandi:
+ * tamg'a raqamni emas, faqat uning turkumini aytadi. Endi u ko'rsatkich
+ * nomining ustidagi xira sarlavha — o'qiladi, lekin e'tibor talab
+ * qilmaydi.
+ */
 const groupLabels: Record<MetricGroup, string> = {
   people: 'ODAM',
   content: 'KONTENT',
@@ -382,50 +419,46 @@ const periodNotes: Record<OverviewPeriod, string> = {
 function MetricCard({ metric, period }: { metric: OverviewMetric; period: OverviewPeriod }) {
   const theme = useChartTheme();
 
-  /* Sparkline rangi ko'rsatkich guruhiga ergashadi — karta yorlig'i
-     bilan bir xil, ya'ni ikkisi bitta narsani aytadi. */
-  const sparkColor =
-    metric.group === 'sales'
-      ? theme.series[2]
-      : metric.group === 'content'
-        ? theme.series[3]
-        : theme.series[1];
-
   /* «+4» o'z-o'zicha savol qoldiradi — qachondan beri to'rtta? Davr
      so'zi javobni yoniga qo'yadi. Boshqa shakldagi izohlar («7 faol»)
      tegilmaydi. */
   const note = metric.note.startsWith('+') ? `${metric.note} ${periodNotes[period]}` : metric.note;
 
   return (
-    <Card className="flex flex-col p-4">
-      <span
-        className={cn(
-          'w-fit rounded-badge px-1.5 py-0.5 text-[10px] font-semibold tracking-wider',
-          groupTones[metric.group],
-        )}
-      >
+    <Card className="flex min-h-27 flex-col p-5">
+      <p className="text-[11px] font-medium tracking-[0.08em] text-fg-dim uppercase">
         {groupLabels[metric.group]}
-      </span>
+      </p>
 
-      <p className="mt-2 truncate text-xs text-fg-muted" title={metric.label}>
+      <p className="mt-1 truncate text-[13px] text-fg-muted" title={metric.label}>
         {metric.label}
       </p>
 
       <p className="mt-1.5 flex items-baseline gap-1.5">
-        <span className="text-[22px] leading-none font-semibold tracking-tight text-fg tabular-nums">
+        <span className="text-[28px] leading-none font-semibold tracking-tight text-fg tabular-nums">
           {metric.value}
         </span>
-        {metric.unit && <span className="text-xs text-fg-muted">{metric.unit}</span>}
+        {metric.unit && <span className="text-sm text-fg-muted">{metric.unit}</span>}
       </p>
 
       {/* `mt-auto`: izoh va grafik kartaning PASTIGA yopishadi, ya'ni
           yonma-yon turgan o'nta kartada ular bitta chiziqda bo'ladi —
           nomi ikki qatorli kartada ham. */}
-      <div className="mt-auto flex items-end justify-between gap-2 pt-3">
-        <span className="text-[11px] text-fg-muted tabular-nums">
-          {metric.change_percent !== null ? <Change value={metric.change_percent} /> : note}
+      <div className="mt-auto flex items-end justify-between gap-3 pt-3">
+        {/* Yorliq QISQARTIRILMAYDI: «bu h…» hech nima anglatmaydi.
+            O'rniga sparkline qisqaradi — u shakl beradi, aniq qiymat
+            emas, ya'ni sakkizta ustun ham o'n ikkitasicha ish qiladi. */}
+        <span className="flex items-center gap-1.5 text-[11px] whitespace-nowrap text-fg-dim tabular-nums">
+          <Change value={metric.change_percent} />
+          {metric.change_percent !== null ? periodNotes[period] : note}
         </span>
-        {metric.spark.length > 0 && <BarSparkline data={metric.spark} color={sparkColor} />}
+
+        {/* Sparkline AKSENT rangida va xira: u tendensiyani ko'rsatadi,
+            raqamning o'zi bilan bellashmaydi. Ilgari har guruh o'z
+            rangida edi va o'nta karta o'nta rangli grafik berardi. */}
+        {metric.spark.length > 0 && (
+          <BarSparkline data={metric.spark.slice(-8)} color={theme.series[0]} />
+        )}
       </div>
     </Card>
   );

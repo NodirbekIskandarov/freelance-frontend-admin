@@ -20,6 +20,7 @@ import {
   YAxis,
 } from 'recharts';
 
+import { ChartTooltip } from '@/components/charts/ChartTooltip';
 import { useChartTheme } from '@/components/charts/chartTheme';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -293,11 +294,11 @@ export function MonitoringPage() {
                 <AreaChart data={chartData} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
                   <defs>
                     <linearGradient id="rpmFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={chart.series[0]} stopOpacity={0.35} />
+                      <stop offset="0%" stopColor={chart.series[0]} stopOpacity={0.18} />
                       <stop offset="100%" stopColor={chart.series[0]} stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid stroke={chart.grid} vertical={false} />
+                  <CartesianGrid stroke={chart.gridSubtle} vertical={false} />
                   <XAxis
                     dataKey="label"
                     stroke={chart.axis}
@@ -313,15 +314,13 @@ export function MonitoringPage() {
                     axisLine={false}
                     width={44}
                   />
+                  {/* Dashboard bilan BIR XIL tooltip. Ilgari bu yerda
+                      Recharts'ning `contentStyle` i ishlatilardi va
+                      natijada bitta mahsulotda ikki xil grafik tili
+                      bo'lgandi. */}
                   <Tooltip
-                    contentStyle={{
-                      background: chart.surface,
-                      border: `1px solid ${chart.grid}`,
-                      borderRadius: 12,
-                      fontSize: 12,
-                    }}
-                    labelStyle={{ color: chart.axis }}
-                    formatter={(value) => [`${Number(value)} / daqiqa`, "So'rov"]}
+                    content={<ChartTooltip formatter={(value) => `${value} / daqiqa`} />}
+                    isAnimationActive={false}
                   />
                   <Area
                     type="monotone"
@@ -329,6 +328,9 @@ export function MonitoringPage() {
                     stroke={chart.series[0]}
                     strokeWidth={2}
                     fill="url(#rpmFill)"
+                    dot={false}
+                    activeDot={{ r: 4, strokeWidth: 0 }}
+                    isAnimationActive={false}
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -346,7 +348,7 @@ export function MonitoringPage() {
                       <stop offset="100%" stopColor={chart.series[2]} stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid stroke={chart.grid} vertical={false} />
+                  <CartesianGrid stroke={chart.gridSubtle} vertical={false} />
                   <XAxis
                     dataKey="label"
                     stroke={chart.axis}
@@ -363,14 +365,8 @@ export function MonitoringPage() {
                     width={44}
                   />
                   <Tooltip
-                    contentStyle={{
-                      background: chart.surface,
-                      border: `1px solid ${chart.grid}`,
-                      borderRadius: 12,
-                      fontSize: 12,
-                    }}
-                    labelStyle={{ color: chart.axis }}
-                    formatter={(value) => [`${Math.round(Number(value))} ms`, 'p95']}
+                    content={<ChartTooltip formatter={(value) => `${Math.round(value)} ms`} />}
+                    isAnimationActive={false}
                   />
                   <Area
                     type="monotone"
@@ -435,7 +431,7 @@ export function MonitoringPage() {
                           <stop offset="100%" stopColor={chart.series[3]} stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid stroke={chart.grid} vertical={false} />
+                      <CartesianGrid stroke={chart.gridSubtle} vertical={false} />
                       <XAxis
                         dataKey="label"
                         stroke={chart.axis}
@@ -457,17 +453,8 @@ export function MonitoringPage() {
                         tickFormatter={(value) => `${value}%`}
                       />
                       <Tooltip
-                        contentStyle={{
-                          background: chart.surface,
-                          border: `1px solid ${chart.grid}`,
-                          borderRadius: 12,
-                          fontSize: 12,
-                        }}
-                        labelStyle={{ color: chart.axis }}
-                        formatter={(value, name) => [
-                          `${Number(value)}%`,
-                          name === 'cpu' ? 'Protsessor' : 'Xotira',
-                        ]}
+                        content={<ChartTooltip formatter={(value) => `${value}%`} />}
+                        isAnimationActive={false}
                       />
                       {/*
                         `connectNulls` YO'Q: namuna olinmagan daqiqa

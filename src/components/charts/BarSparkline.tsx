@@ -16,21 +16,21 @@ export function BarSparkline({ data, color }: { data: number[]; color: string })
   const max = Math.max(...data, 1);
 
   return (
-    <span className="flex h-8 items-end gap-[2px] overflow-hidden" aria-hidden>
+    <span className="ml-3 flex h-7 shrink-0 items-end gap-[2px] overflow-hidden" aria-hidden>
       {data.map((value, index) => {
         const last = index === data.length - 1;
 
         return (
           <span
             key={index}
-            className="w-[3px] shrink-0 rounded-[1px]"
+            className="w-[3px] shrink-0 rounded-[2px]"
             style={{
               // Eng past ustun ham ko'rinib tursin: nol balandlik
               // «ma'lumot yo'q» degan taassurot berardi.
               height: `${Math.max(8, Math.round((value / max) * 100))}%`,
               background: color,
               // Oxirgi ustun — joriy holat, shuning uchun to'liq rangda.
-              opacity: last ? 1 : 0.28,
+              opacity: last ? 1 : 0.4,
             }}
           />
         );

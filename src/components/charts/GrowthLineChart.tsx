@@ -1,7 +1,7 @@
 import {
   CartesianGrid,
-  Line,
-  LineChart,
+  Area,
+  AreaChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -40,8 +40,8 @@ export function GrowthLineChart({ points, label }: { points: GrowthPoint[]; labe
 
   return (
     <ResponsiveContainer width="100%" height={210}>
-      <LineChart data={points} margin={{ top: 4, right: 8, bottom: 0, left: -14 }}>
-        <CartesianGrid stroke={theme.grid} vertical={false} />
+      <AreaChart data={points} margin={{ top: 4, right: 8, bottom: 0, left: -14 }}>
+        <CartesianGrid stroke={theme.gridSubtle} vertical={false} />
         <XAxis
           dataKey="label"
           stroke={theme.axis}
@@ -62,16 +62,28 @@ export function GrowthLineChart({ points, label }: { points: GrowthPoint[]; labe
           allowDecimals={false}
         />
         <Tooltip content={<ChartTooltip />} isAnimationActive={false} />
-        <Line
+        {/* Maydon to'ldirish 10% — chiziqning ostidagi hajm ko'rinsin,
+            lekin to'rni bosib qolmasin. */}
+        <defs>
+          <linearGradient id="growth-area" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={theme.series[0]} stopOpacity={0.18} />
+            <stop offset="100%" stopColor={theme.series[0]} stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <Area
           type="monotone"
           dataKey="total"
           name={label}
           stroke={theme.series[0]}
           strokeWidth={2}
+          fill="url(#growth-area)"
+          /* Nuqtalar FAQAT ustiga kelganda: o'ttiz kunlik chiziqda
+             o'ttizta doira chiziqning o'zini yashirib qo'yardi. */
           dot={false}
+          activeDot={{ r: 4, strokeWidth: 0 }}
           isAnimationActive={false}
         />
-      </LineChart>
+      </AreaChart>
     </ResponsiveContainer>
   );
 }

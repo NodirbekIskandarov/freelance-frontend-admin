@@ -56,8 +56,8 @@ export function SplitRevenueChart({
 
   return (
     <ResponsiveContainer width="100%" height={210}>
-      <BarChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -8 }} barCategoryGap="34%">
-        <CartesianGrid stroke={theme.grid} vertical={false} />
+      <BarChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -8 }} barCategoryGap="40%">
+        <CartesianGrid stroke={theme.gridSubtle} vertical={false} />
         <XAxis
           dataKey="label"
           stroke={theme.axis}
@@ -98,7 +98,7 @@ export function SplitRevenueChart({
           stackId="revenue"
           name={commissionLabel}
           fill={theme.series[2]}
-          radius={[2, 2, 0, 0]}
+          radius={[6, 6, 0, 0]}
           isAnimationActive={false}
         />
       </BarChart>

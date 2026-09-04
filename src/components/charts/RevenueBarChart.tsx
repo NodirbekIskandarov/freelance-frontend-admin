@@ -53,13 +53,13 @@ export function RevenueBarChart({ data }: { data: RevenuePoint[] }) {
         <BarChart
           data={data}
           margin={{ top: 4, right: 8, bottom: 0, left: -8 }}
-          barCategoryGap="34%"
+          barCategoryGap="40%"
         >
-          <CartesianGrid stroke={theme.grid} vertical={false} />
+          <CartesianGrid stroke={theme.gridSubtle} vertical={false} />
           <XAxis
             dataKey="date"
             stroke={theme.axis}
-            fontSize={12}
+            fontSize={11}
             tickLine={false}
             axisLine={false}
             dy={8}
@@ -69,7 +69,7 @@ export function RevenueBarChart({ data }: { data: RevenuePoint[] }) {
           />
           <YAxis
             stroke={theme.axis}
-            fontSize={12}
+            fontSize={11}
             tickLine={false}
             axisLine={false}
             tickFormatter={formatAxis}
@@ -86,7 +86,7 @@ export function RevenueBarChart({ data }: { data: RevenuePoint[] }) {
             dataKey="amount"
             name="Kunlik daromad"
             fill={theme.series[0]}
-            radius={[2, 2, 0, 0]}
+            radius={[6, 6, 0, 0]}
           />
         </BarChart>
       </ResponsiveContainer>

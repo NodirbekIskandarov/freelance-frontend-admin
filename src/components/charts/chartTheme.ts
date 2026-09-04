@@ -32,6 +32,7 @@ const FALLBACKS: Record<string, string> = {
   '--color-chart-6': '#fda4af',
   '--color-danger': '#f87171',
   '--color-surface-hover': 'rgba(255,255,255,0.035)',
+  '--color-line-subtle': '#202623',
 };
 
 /** Bitta tokenning hisoblangan qiymati (test muhitida — zaxira). */
@@ -57,6 +58,14 @@ export interface ChartTheme {
   danger: string;
   /** Ustun ustiga kelganda ortidagi yorug'lik — `--color-surface-hover`. */
   hover: string;
+  /**
+   * Gorizontal to'r chizig'i.
+   *
+   * `grid` dan XIRAROQ: to'r ma'lumot emas, u faqat ko'zga o'lchov
+   * beradi. Chegaralar bilan bir xil kuchda chizilganda grafik
+   * ustunlardan ko'ra to'rga o'xshab qolardi.
+   */
+  gridSubtle: string;
 }
 
 function snapshot(): ChartTheme {
@@ -72,6 +81,7 @@ function snapshot(): ChartTheme {
     ],
     danger: readToken('--color-danger'),
     hover: readToken('--color-surface-hover'),
+    gridSubtle: readToken('--color-line-subtle'),
   };
 }
 
