@@ -122,7 +122,7 @@ export function SolutionDetailPage() {
 
             {can.reject && (
               <Button
-                variant="danger"
+                variant="danger-quiet"
                 icon={<X className="size-4" strokeWidth={2} />}
                 onClick={() => setRejectOpen(true)}
               >

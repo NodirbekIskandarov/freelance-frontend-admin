@@ -70,26 +70,33 @@ export function FileDropzone({
           emit(event.dataTransfer.files);
         }}
         onClick={() => inputRef.current?.click()}
+        /*
+          Chegara UZUQ va QALIN. Ilgari u maydonlar bilan bir xil radius
+          va bir xil kuchdagi chiziqqa ega edi — zona «katta input» bo'lib
+          ko'rinardi va unga fayl tashlash mumkinligi bilinmasdi.
+        */
         className={cn(
-          'flex cursor-pointer flex-col items-center justify-center gap-3 rounded-card border border-dashed px-6 py-8 text-center transition-colors',
-          isDragging ? 'border-primary bg-primary/5' : 'border-line hover:border-primary/40',
+          'flex min-h-30 cursor-pointer flex-col items-center justify-center gap-2 rounded-card border border-dashed px-6 py-6 text-center',
+          'transition-colors duration-(--dur) ease-soft',
+          isDragging
+            ? 'border-primary bg-primary-quiet'
+            : 'border-line-strong hover:border-primary/50 hover:bg-surface-hover',
         )}
       >
-        <UploadCloud className="size-8 text-primary" strokeWidth={1.5} />
+        <span className="grid size-10 place-items-center rounded-full border border-primary-line bg-primary-quiet text-primary">
+          <UploadCloud className="size-5" strokeWidth={1.75} />
+        </span>
 
-        <p className="text-sm text-fg-muted">
+        <p className="text-[13px] text-fg-muted">
           {children ?? (
             <>
-              Faylni yuklash yoki <span className="text-primary">tanlash</span>
+              Faylni yuklang yoki{' '}
+              <span className="font-medium text-primary underline underline-offset-2">
+                {actionLabel ?? 'tanlang'}
+              </span>
             </>
           )}
         </p>
-
-        {actionLabel && (
-          <span className="rounded-control border border-line bg-card px-4 py-2 text-sm font-medium text-fg-soft">
-            {actionLabel}
-          </span>
-        )}
 
         {hint && <p className="text-xs text-fg-dim">{hint}</p>}
 

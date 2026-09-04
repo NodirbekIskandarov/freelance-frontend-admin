@@ -6,6 +6,8 @@ import { useT } from '@/i18n/I18nProvider';
 import { cn } from '@/lib/cn';
 import { tokenStore } from '@/store/api';
 
+import { Toaster } from '@/components/ui/Toaster';
+
 import { CommandPalette } from './CommandPalette';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
@@ -151,6 +153,7 @@ export function AdminLayout() {
       </div>
 
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <Toaster />
     </div>
   );
 }

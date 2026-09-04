@@ -33,7 +33,7 @@ export function ProfilePage() {
         subtitle={m.profile.subtitle}
         actions={
           <Button
-            variant="danger"
+            variant="danger-quiet"
             icon={<LogOut className="size-4" strokeWidth={1.75} />}
             disabled={isSigningOut}
             onClick={() => void signOut()}

@@ -3,14 +3,28 @@ import { useEffect, useRef, type ReactNode } from 'react';
 
 import { cn } from '@/lib/cn';
 
+/**
+ * Kenglik MAZMUNGA qarab, `className` bilan emas.
+ *
+ * Ilgari hamma modal 580px edi: bitta tasdiq savoli ham, sakkiz maydonli
+ * forma ham. Tasdiq oynasida matn qatorlari juda uzun bo'lib o'qilmasdi,
+ * formada esa qisqa maydonlar (kod, viloyat) yonma-yon sig'masdi.
+ */
+const sizes = {
+  sm: 'max-w-[420px]',
+  md: 'max-w-[560px]',
+  lg: 'max-w-[720px]',
+} as const;
+
 interface ModalProps {
   open: boolean;
   onClose: () => void;
   title: string;
-  /** Sarlavha ostidagi kichik tavsif (15-rasmdagi modalda bor). */
+  /** Sarlavha ostidagi kichik tavsif. */
   description?: string;
+  size?: keyof typeof sizes;
   children: ReactNode;
-  /** Pastdagi tugmalar qatori. */
+  /** Pastdagi tugmalar qatori. Asosiy tugma OXIRIDA turadi. */
   footer?: ReactNode;
   className?: string;
 }
@@ -27,6 +41,7 @@ export function Modal({
   onClose,
   title,
   description,
+  size = 'md',
   children,
   footer,
   className,
@@ -60,30 +75,43 @@ export function Modal({
         if (event.target === dialogRef.current) onClose();
       }}
       className={cn(
-        'm-auto w-full max-w-[580px] rounded-modal border border-line bg-card p-0 text-fg shadow-modal backdrop:bg-black/70',
+        'm-auto w-full rounded-modal border border-line bg-elevated p-0 text-fg shadow-modal',
+        // Fon xiralashadi — ortidagi jadval matni modal chekkasida
+        // o'qilib turmasin. `open:` — animatsiya faqat ochilganda.
+        'backdrop:bg-black/60 backdrop:backdrop-blur-[6px]',
+        'motion-safe:open:animate-[modal-in_140ms_var(--ease-soft)]',
+        sizes[size],
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-4 px-6 pt-6">
+      <div className="flex items-start justify-between gap-4 border-b border-line-subtle px-6 py-5">
         <div className="min-w-0">
-          <h2 className="text-lg font-semibold text-fg">{title}</h2>
-          {description && <p className="mt-1 text-sm text-fg-muted">{description}</p>}
+          <h2 className="text-base font-semibold text-fg">{title}</h2>
+          {description && <p className="mt-1 text-[13px] text-fg-muted">{description}</p>}
         </div>
 
         <button
           type="button"
           onClick={onClose}
-          aria-label="Yopish"
-          className="-mt-1 -mr-1 grid size-8 shrink-0 place-items-center rounded-control text-fg-muted transition-colors hover:bg-elevated hover:text-fg"
+          aria-label="Yopish (Esc)"
+          className={cn(
+            '-mt-1 -mr-1 grid size-8 shrink-0 place-items-center rounded-control text-fg-muted',
+            'transition-colors duration-(--dur) ease-soft outline-none',
+            'hover:bg-surface-hover hover:text-fg focus-visible:shadow-(--ring)',
+          )}
         >
-          <X className="size-5" strokeWidth={1.75} />
+          <X className="size-4" strokeWidth={1.75} />
         </button>
       </div>
 
-      <div className="max-h-[70vh] overflow-y-auto px-6 py-5">{children}</div>
+      <div className="max-h-[70vh] overflow-y-auto px-6 py-6">{children}</div>
 
+      {/* Tugmalar qatori YOPISHGAN: uzun formada u aylantirilib
+          ko'rinmas joyga tushib ketardi va odam «Saqlash» ni qidirardi. */}
       {footer && (
-        <div className="flex flex-wrap items-center justify-end gap-3 px-6 pb-6">{footer}</div>
+        <div className="sticky bottom-0 flex flex-wrap items-center justify-end gap-2 border-t border-line-subtle bg-elevated px-6 py-4">
+          {footer}
+        </div>
       )}
     </dialog>
   );

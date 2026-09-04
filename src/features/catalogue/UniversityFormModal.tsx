@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
+import { Checkbox } from '@/components/ui/Checkbox';
 import { TextField } from '@/components/ui/Field';
 import { FileDropzone } from '@/components/ui/FileDropzone';
+import { FormFull, FormSection } from '@/components/ui/FormSection';
 import { Modal } from '@/components/ui/Modal';
+import { showToast } from '@/lib/toast';
 import { getApiErrorMessage } from '@/shared/api';
 import type { University } from '@/shared/types/catalogue';
 
@@ -87,6 +90,10 @@ export function UniversityFormModal({
       return;
     }
 
+    /* Saqlangani AYTILADI. Ilgari yagona belgi modalning yopilishi edi —
+       lekin u bekor qilishda ham yopiladi, ya'ni ikkalasi bir xil
+       ko'rinardi. */
+    showToast(university ? 'Institut yangilandi' : "Institut qo'shildi");
     onClose();
   }
 
@@ -94,25 +101,74 @@ export function UniversityFormModal({
     <Modal
       open={open}
       onClose={onClose}
+      size="lg"
       title={university ? 'Institutni tahrirlash' : "Yangi institut qo'shish"}
       footer={
         <>
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" size="lg" onClick={onClose}>
             Bekor qilish
           </Button>
-          <Button onClick={() => void handleSubmit()} disabled={isSaving}>
-            {isSaving ? 'Saqlanmoqda…' : 'Saqlash'}
+          {/* Asosiy tugma OXIRIDA — o'qish yo'nalishi bo'yicha oxirgi
+              qadam. Aylanma tugmaning ichida: yonida chizilsa qator
+              kengligi sakrardi. */}
+          <Button size="lg" loading={isSaving} onClick={() => void handleSubmit()}>
+            Saqlash
           </Button>
         </>
       }
     >
-      <div className="flex flex-col gap-4">
-        <div>
+      <div className="flex flex-col gap-5">
+        <FormSection title="Asosiy ma'lumot" columns>
+          <FormFull>
+            <TextField
+              label="To'liq nomi (o'zbekcha)"
+              required
+              placeholder="Institutning to'liq nomini kiriting"
+              value={name}
+              error={nameError}
+              onChange={(event) => setName(event.target.value)}
+            />
+          </FormFull>
+
+          <FormFull>
+            <TextField
+              label="To'liq nomi (ruscha)"
+              placeholder="Ташкентский университет информационных технологий"
+              value={nameRu}
+              hint="Ixtiyoriy — bo'sh qoldirilsa faqat o'zbekcha nom saqlanadi."
+              onChange={(event) => setNameRu(event.target.value)}
+            />
+          </FormFull>
+
+          <TextField
+            label="Qisqartma nomi"
+            required
+            placeholder="Masalan: TATU, TDYU, ADU"
+            value={shortName}
+            onChange={(event) => setShortName(event.target.value)}
+          />
+
+          <TextField
+            label="Shahar"
+            placeholder="Toshkent"
+            value={city}
+            onChange={(event) => setCity(event.target.value)}
+          />
+
+          <TextField
+            label="Kod"
+            placeholder="Bo'sh qoldirsangiz qisqa nomdan yasaladi"
+            value={code}
+            hint="Faqat harf, raqam, defis va pastki chiziq."
+            onChange={(event) => setCode(event.target.value)}
+          />
+        </FormSection>
+
+        <FormSection title="Ko'rinish">
           <FileDropzone
-            label="Logotip yuklash"
-            description="PNG, JPG yoki SVG formatda. Maksimal hajm: 2MB"
             accept="image/png,image/jpeg,image/svg+xml,image/webp"
-            actionLabel="tanlash"
+            actionLabel="tanlang"
+            hint="PNG, JPG yoki SVG. Maksimal hajm: 2MB"
             onFiles={(files) => setLogo(files[0] ?? null)}
           />
 
@@ -121,7 +177,7 @@ export function UniversityFormModal({
             foydalanuvchi bosgan-bosmagani bilinmasdi.
           */}
           {logo ? (
-            <p className="mt-2 flex items-center gap-2 text-xs text-fg-muted">
+            <p className="flex items-center gap-2 text-xs text-fg-muted">
               <span className="truncate text-fg-soft">{logo.name}</span>
               <button
                 type="button"
@@ -132,66 +188,25 @@ export function UniversityFormModal({
               </button>
             </p>
           ) : university?.logo ? (
-            <p className="mt-2 text-xs text-fg-muted">
+            <p className="text-xs text-fg-muted">
               Hozirgi logotip saqlanadi — almashtirish uchun yangi fayl tanlang.
             </p>
           ) : null}
-        </div>
+        </FormSection>
 
-        <TextField
-          label="Qisqartma nomi"
-          required
-          placeholder="Masalan: TATU, TDYU, ADU"
-          value={shortName}
-          onChange={(event) => setShortName(event.target.value)}
-        />
-
-        <TextField
-          label="To'liq nomi (o'zbekcha)"
-          required
-          placeholder="Institutning to'liq nomini kiriting"
-          value={name}
-          error={nameError}
-          onChange={(event) => setName(event.target.value)}
-        />
-
-        <TextField
-          label="To'liq nomi (ruscha)"
-          placeholder="Ташкентский университет информационных технологий"
-          value={nameRu}
-          hint="Ixtiyoriy — bo'sh qoldirilsa faqat o'zbekcha nom saqlanadi."
-          onChange={(event) => setNameRu(event.target.value)}
-        />
-
-        <TextField
-          label="Shahar"
-          placeholder="Toshkent"
-          value={city}
-          onChange={(event) => setCity(event.target.value)}
-        />
-
-        <TextField
-          label="Kod"
-          placeholder="Bo'sh qoldirsangiz qisqa nomdan yasaladi"
-          value={code}
-          hint="Faqat harf, raqam, defis va pastki chiziq."
-          onChange={(event) => setCode(event.target.value)}
-        />
-
-        <label className="flex cursor-pointer items-center gap-2.5">
-          <input
-            type="checkbox"
+        <FormSection title="Holat">
+          <Checkbox
             checked={isActive}
-            onChange={(event) => setIsActive(event.target.checked)}
-            className="size-4 accent-primary"
+            onChange={setIsActive}
+            label="Faol"
+            hint="Nofaol institut katalogda ko'rinmaydi, lekin fanlari saqlanib qoladi."
           />
-          <span className="text-sm text-fg-soft">Faol — katalogda ko&apos;rinadi</span>
-        </label>
+        </FormSection>
 
         {error && (
           <p
             role="alert"
-            className="rounded-control border border-danger/25 bg-danger/10 px-3.5 py-2.5 text-sm text-danger"
+            className="rounded-control border border-danger-line bg-danger-quiet px-3.5 py-2.5 text-[13px] text-danger"
           >
             {getApiErrorMessage(error)}
           </p>

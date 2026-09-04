@@ -98,7 +98,7 @@ export function UserDetailPage() {
               </Button>
             ) : (
               <Button
-                variant="danger"
+                variant="danger-quiet"
                 icon={<Ban className="size-4" strokeWidth={1.75} />}
                 onClick={() =>
                   setBlockTarget({
