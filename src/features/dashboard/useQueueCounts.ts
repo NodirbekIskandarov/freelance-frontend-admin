@@ -1,5 +1,5 @@
 import { useGetAdminDashboardQuery } from '@/features/adminFreelance/adminFreelanceApi';
-import { useGetDisputeStatsQuery } from '@/features/adminDisputes/disputesApi';
+import type { DashboardQueueBucket } from '@/shared/types/adminDashboard';
 
 /**
  * Dashboard davri — sidebar va Dashboard sahifasi UCHUN BIR XIL.
@@ -7,46 +7,43 @@ import { useGetDisputeStatsQuery } from '@/features/adminDisputes/disputesApi';
  * Ikkalasi bir xil argument bilan so'rasa RTK Query bitta keshdan
  * foydalanadi: sidebar qo'shimcha so'rov yubormaydi. Boshqa qiymat
  * berilsa, har sahifada ikkinchi marta so'ralardi.
- *
- * 7 kun, 30 emas: platformada ma'lumot yaqinda paydo bo'lgan va 30
- * kunlik oynada grafikning katta qismi nolda yotgan tekis chiziq
- * bo'lardi — u trendni ko'rsatmaydi, faqat joy egallaydi.
  */
 export const DASHBOARD_DAYS = 7;
 
+const EMPTY: DashboardQueueBucket = { count: 0, waiting_hours: 0 };
+
 export interface QueueCounts {
-  solutions: number;
-  subjectRequests: number;
-  assignmentRequests: number;
-  reports: number;
-  disputes: number;
+  solutions: DashboardQueueBucket;
+  subjectRequests: DashboardQueueBucket;
+  assignmentRequests: DashboardQueueBucket;
+  reports: DashboardQueueBucket;
+  disputes: DashboardQueueBucket;
 }
 
 /**
- * Menyudagi ish navbati sonlari.
+ * Menyudagi ish navbatlari — sanoq va eng eski ishning yoshi.
  *
- * Manba — dashboard so'rovi. Alohida yengil endpoint yo'q, lekin
- * so'rov Dashboard sahifasi bilan umumiy: admin odatda undan
- * boshlaydi, ya'ni kesh issiq bo'ladi va sidebar tekinga oladi.
+ * Yosh SANOQ BILAN BIRGA keladi va menyudagi rang aynan shundan
+ * hisoblanadi: sanoqning o'zi shoshilinchlikni aytmaydi. Ilgari bu
+ * yerda faqat sanoq bor edi va shu sababli har bir tamg'a bir xil
+ * sariq bo'lib turardi — ya'ni rang hech nima anglatmasdi.
+ *
+ * Nizolar ham shu javobdan: ilgari ular alohida `dispute-stats`
+ * so'rovidan olinardi va menyu har sahifada ikkita so'rov yuborardi.
+ *
+ * Har bosqichda `?.` — javob to'liq kelmasa ham menyu yiqilmasligi
+ * kerak: sidebar har sahifada chiziladi va bu yerdagi xato butun
+ * panelni o'chirардi.
  */
 export function useQueueCounts(): QueueCounts {
   const { data } = useGetAdminDashboardQuery({ days: DASHBOARD_DAYS });
-  // Xarid shikoyatlari dashboard javobida yo'q — ularning o'z yengil
-  // statistikasi bor va u ochiqlar sonini beradi.
-  const { data: disputes } = useGetDisputeStatsQuery();
+  const queue = data?.queue;
 
-  /*
-    Har bosqichda `?.` — `data?.solutions.pending` YETARLI EMAS edi: u
-    faqat `data` ni tekshiradi, ichki obyekt yo'q bo'lsa esa xato
-    tashlaydi. Sidebar har sahifada chiziladi, ya'ni bunday xato butun
-    panelni yiqitardi — javob to'liq kelmagani uchun menyu yo'qolishi
-    mumkin bo'lmagan narsa.
-  */
   return {
-    solutions: data?.solutions?.pending ?? 0,
-    subjectRequests: data?.requests?.subject_pending ?? 0,
-    assignmentRequests: data?.requests?.assignment_pending ?? 0,
-    reports: data?.requests?.report_pending ?? 0,
-    disputes: disputes?.open ?? 0,
+    solutions: queue?.solutions ?? EMPTY,
+    subjectRequests: queue?.subject_requests ?? EMPTY,
+    assignmentRequests: queue?.assignment_requests ?? EMPTY,
+    reports: queue?.reports ?? EMPTY,
+    disputes: queue?.disputes ?? EMPTY,
   };
 }

@@ -57,11 +57,26 @@ export interface OrderSeriesPoint extends SeriesPoint {
   revenue: string;
 }
 
+/** Bitta ish navbati: nechta ish va eng eskisi necha soatdan beri kutmoqda. */
+export interface DashboardQueueBucket {
+  count: number;
+  waiting_hours: number;
+}
+
+export interface DashboardQueue {
+  solutions: DashboardQueueBucket;
+  subject_requests: DashboardQueueBucket;
+  assignment_requests: DashboardQueueBucket;
+  reports: DashboardQueueBucket;
+  disputes: DashboardQueueBucket;
+}
+
 export interface AdminDashboard {
   users: DashboardUsers;
   solutions: DashboardSolutions;
   catalogue: DashboardCatalogue;
   requests: DashboardRequests;
+  queue: DashboardQueue;
   sales: DashboardSales;
   series_days: number;
   series: {

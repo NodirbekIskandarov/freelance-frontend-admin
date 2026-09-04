@@ -9,6 +9,7 @@ import { useT } from '@/i18n/I18nProvider';
 import type { Messages } from '@/i18n/messages/uz';
 import { usePermissions } from '@/features/adminRoles/usePermissions';
 import { useQueueCounts, type QueueCounts } from '@/features/dashboard/useQueueCounts';
+import type { DashboardQueueBucket } from '@/shared/types/adminDashboard';
 import { cn } from '@/lib/cn';
 
 import { getOpenGroups, subscribeToGroups, toggleGroup } from './sidebarGroups';
@@ -47,25 +48,61 @@ function ActiveBar() {
 }
 
 /**
+ * Navbat tamg'asining rangi — YOSHDAN, sanoqdan emas.
+ *
+ * Sanoqning o'zi shoshilinchlikni aytmaydi: ikkita kutayotgan yechim bir
+ * soat oldin kelgan bo'lsa oddiy ish, uch kundan beri yotgan bo'lsa
+ * e'tibordan chetda qolgan ish. Ilgari HAR BIR tamg'a bir xil sariq edi
+ * va shu sababli rang hech nima anglatmasdi — menyudagi o'nlab sariq
+ * nuqta Dashboarddagi haqiqiy ogohlantirishdan baland ovozda gapirardi.
+ */
+const QUEUE_TONES = {
+  neutral: 'border-neutral-line bg-neutral-quiet text-fg-muted',
+  warning: 'border-warning-line bg-warning-quiet text-warning',
+  danger: 'border-danger-line bg-danger-quiet text-danger',
+} as const;
+
+function queueTone(bucket: DashboardQueueBucket): keyof typeof QUEUE_TONES {
+  if (bucket.count <= 0) return 'neutral';
+  if (bucket.waiting_hours >= 24) return 'danger';
+  if (bucket.waiting_hours >= 8) return 'warning';
+  return 'neutral';
+}
+
+/**
  * Ish navbati soni.
  *
  * Nol bo'lsa UMUMAN chizilmaydi: «0» ish emas, va bo'sh navbatni
  * to'lganidan farqlab bo'lmay qolardi.
- *
- * Rangi NEYTRAL. Ilgari u sariq edi va menyudagi o'nlab kichik sariq
- * tamg'a Dashboarddagi haqiqiy ogohlantirishlardan baland ovozda
- * gapirardi. Sariq yoki qizil faqat KECHIKKAN ish uchun o'rinli
- * bo'lardi, lekin sanoq endpointi kutish vaqtini bermaydi — u
- * qo'shilgunicha son shunchaki son bo'lib qoladi.
  */
-function QueueBadge({ count }: { count: number }) {
-  if (count <= 0) return null;
+function QueueBadge({ bucket }: { bucket: DashboardQueueBucket }) {
+  if (bucket.count <= 0) return null;
+
+  const tone = queueTone(bucket);
 
   return (
-    <span className="ml-auto rounded-badge border border-neutral-line bg-neutral-quiet px-1.5 py-0.5 text-[11px] leading-[16px] font-medium text-fg-muted tabular-nums">
-      {count}
+    <span
+      /* Rang yolg'iz yetarli emas — tamg'a nima ekanini `title` aytadi
+         va u klaviatura bilan yurgan odamga ham yetadi. */
+      title={
+        bucket.waiting_hours > 0
+          ? `${bucket.count} ta ish · eng eskisi ${waitLabel(bucket.waiting_hours)}dan beri kutmoqda`
+          : `${bucket.count} ta ish`
+      }
+      className={cn(
+        'ml-auto rounded-badge border px-1.5 py-0.5 text-[11px] leading-[16px] font-medium tabular-nums',
+        QUEUE_TONES[tone],
+      )}
+    >
+      {bucket.count}
     </span>
   );
+}
+
+/** `41` → `2 kun`. Navbat yoshini odam o'qiydigan shaklga keltiradi. */
+function waitLabel(hours: number): string {
+  if (hours < 24) return `${hours} soat`;
+  return `${Math.round(hours / 24)} kun`;
 }
 
 function LeafItem({
@@ -81,7 +118,7 @@ function LeafItem({
 }) {
   const Icon = item.icon;
   const label = item.label(m);
-  const count = item.queue ? counts[item.queue] : 0;
+  const bucket = item.queue ? counts[item.queue] : null;
 
   return (
     <NavLink
@@ -111,14 +148,23 @@ function LeafItem({
             <Icon className="size-4" strokeWidth={1.75} />
             {/* Yig'ilgan rejimda son sig'maydi — nuqta bo'lib qoladi,
                 lekin ish borligi baribir ko'rinib turishi kerak. */}
-            {collapsed && count > 0 && (
-              <span className="absolute -top-0.5 -right-1 size-2 rounded-full bg-warning" />
+            {collapsed && bucket && bucket.count > 0 && (
+              <span
+                className={cn(
+                  'absolute -top-0.5 -right-1 size-2 rounded-full',
+                  queueTone(bucket) === 'danger'
+                    ? 'bg-danger'
+                    : queueTone(bucket) === 'warning'
+                      ? 'bg-warning'
+                      : 'bg-fg-dim',
+                )}
+              />
             )}
           </span>
           {!collapsed && (
             <>
               <span className="truncate">{label}</span>
-              <QueueBadge count={count} />
+              {bucket && <QueueBadge bucket={bucket} />}
             </>
           )}
         </>
@@ -150,7 +196,7 @@ function Group({
   const title = group.title(m);
   // Guruhdagi umumiy ish — yopiq bo'lsa ham ichida ish borligi ko'rinsin.
   const pending = group.items.reduce(
-    (total, item) => total + (item.queue ? counts[item.queue] : 0),
+    (total, item) => total + (item.queue ? counts[item.queue].count : 0),
     0,
   );
 
