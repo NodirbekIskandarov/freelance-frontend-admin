@@ -60,11 +60,11 @@ interface TableProps<T> {
 }
 
 const densityStyles = {
-  normal: { head: 'px-4 py-3.5 text-[13px]', cell: 'px-4 py-4 text-sm' },
+  normal: { head: 'px-4 py-3 text-[11px]', cell: 'px-4 py-3 text-[13px]' },
   // Sarlavha shrifti kataknikidan kichik: 11 ustunli jadvalda eng keng
   // sarlavhalar ("Pasport/ID rasmi", "Bajarilgan ishlar") jadval kengligini
   // belgilab qo'yadi va oxirgi ustunni ekrandan chiqarib yuboradi.
-  compact: { head: 'px-2.5 py-3.5 text-[11px]', cell: 'px-2.5 py-3 text-[13px]' },
+  compact: { head: 'px-2.5 py-3 text-[11px]', cell: 'px-2.5 py-2.5 text-[13px]' },
 } as const;
 
 /*
@@ -82,7 +82,7 @@ const densityStyles = {
  */
 const stickyCell =
   'sticky right-0 z-10 bg-card before:pointer-events-none before:absolute before:inset-y-0 before:-left-3 before:w-3 before:bg-gradient-to-l before:from-card before:to-transparent before:content-[""]';
-const stickyHead = 'sticky right-0 z-10 bg-elevated';
+const stickyHead = 'sticky right-0 z-10 bg-card';
 
 const alignClass = {
   left: 'text-left',
@@ -142,8 +142,8 @@ export function Table<T>({
               key={rowKey(row)}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
               className={cn(
-                'rounded-card border border-line p-3.5',
-                onRowClick && 'cursor-pointer transition-colors active:bg-elevated',
+                'rounded-card border border-line-subtle p-3.5',
+                onRowClick && 'cursor-pointer transition-colors active:bg-surface-active',
               )}
             >
               <div className="text-sm font-medium text-fg">{primaryColumn?.cell(row, index)}</div>
@@ -167,11 +167,16 @@ export function Table<T>({
       <div className="hidden overflow-x-auto sm:block">
         <table className="w-full border-collapse">
           {/*
-          Sarlavha qatori fonli va katta harflarda — shablondagi admin
-          jadvalida shunday. Bu ustun nomlarini ma'lumotdan ajratadi,
-          faqat chegara bilan ajratishdan ko'ra aniqroq.
+          Sarlavha qatori kartaning O'Z fonida, alohida kulrang yo'lakda
+          emas: yo'lak jadvalning tepasiga ikkinchi chegara qo'shardi.
+          Ustunlarni ma'lumotdan bitta chiziq va harf o'lchami ajratadi.
+
+          `sticky` — jadval o'z aylantirish sohasiga ega bo'lganda ishga
+          tushadi. Hozir sahifa `main` bilan aylanadi va bu yerda u
+          befarq turadi; jadvalga o'z sohasi berilsa, hech nima
+          o'zgartirmasdan ishlab ketadi.
         */}
-          <thead className="bg-fg/[0.04]">
+          <thead className="sticky top-0 z-20 bg-card">
             <tr className="border-b border-line">
               {columns.map((column) => {
                 const isSorted = sort?.key === column.key;
@@ -185,7 +190,7 @@ export function Table<T>({
                     }
                     className={cn(
                       // Sarlavhalar bir qatorda qoladi — dizaynda ham shunday.
-                      'font-semibold tracking-wider whitespace-nowrap text-fg-dim uppercase',
+                      'group font-medium tracking-[0.06em] whitespace-nowrap text-fg-dim uppercase',
                       spacing.head,
                       alignClass[column.align ?? 'left'],
                       column.sticky && stickyHead,
@@ -196,7 +201,11 @@ export function Table<T>({
                       <button
                         type="button"
                         onClick={() => onSortChange(column.key)}
-                        className="inline-flex items-center gap-1.5 transition-colors hover:text-fg"
+                        className={cn(
+                          'inline-flex items-center gap-1.5 rounded-xs outline-none',
+                          'transition-colors duration-(--dur) ease-soft',
+                          'hover:text-fg focus-visible:shadow-(--ring)',
+                        )}
                       >
                         {column.header}
                         {isSorted ? (
@@ -208,7 +217,13 @@ export function Table<T>({
                             strokeWidth={2}
                           />
                         ) : (
-                          <ChevronsUpDown className="size-3.5 opacity-60" strokeWidth={2} />
+                          /* Saralanmagan ustunda strelka faqat ustiga
+                             kelganda: yigirmata xira strelka sarlavha
+                             qatorini shovqinga aylantirardi. */
+                          <ChevronsUpDown
+                            className="size-3.5 opacity-0 transition-opacity group-hover:opacity-60"
+                            strokeWidth={2}
+                          />
                         )}
                       </button>
                     ) : (
@@ -245,11 +260,26 @@ export function Table<T>({
                 <tr
                   key={rowKey(row)}
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
+                  tabIndex={onRowClick ? 0 : undefined}
+                  onKeyDown={
+                    onRowClick
+                      ? (event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            onRowClick(row);
+                          }
+                        }
+                      : undefined
+                  }
                   className={cn(
                     // Hover har qatorda, bosiladiganida ham, bosilmaydiganida
-                    // ham: shablonda u ko'zni qatorda ushlab turadi, «bu qator
-                    // bosiladi» degani emas.
-                    'border-b border-line transition-colors last:border-b-0 hover:bg-fg/[0.02]',
+                    // ham: u ko'zni qatorda ushlab turadi, «bu qator bosiladi»
+                    // degani emas. Zebra YO'Q — u hoverni yutib yuboradi.
+                    'h-13 border-b border-line-subtle last:border-b-0',
+                    'transition-colors duration-(--dur) ease-soft hover:bg-surface-hover',
+                    // Halqa ICHKARIDA: qator butun kenglikni egallaydi va
+                    // tashqi halqa qo'shni qatorlar ostida qolib ketardi.
+                    'outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary',
                     onRowClick && 'cursor-pointer',
                   )}
                 >

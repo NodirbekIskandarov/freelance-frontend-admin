@@ -60,3 +60,31 @@ export function formatDateTime(value: string | null | undefined): string {
     minute: '2-digit',
   });
 }
+
+/**
+ * `"2026-08-17T04:44:52Z"` → `"17.08.2026"` va `"04:44"` — ALOHIDA.
+ *
+ * Jadvalda ular ikki qatorga bo'linadi: bitta qatorda yozilganda ustun
+ * kengayib ketardi va sanalarni ko'z bilan solishtirib bo'lmasdi.
+ */
+export function formatDate(value: string | null | undefined): string {
+  if (!value) return '—';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return date.toLocaleDateString('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
+
+export function formatTime(value: string | null | undefined): string {
+  if (!value) return '';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+
+  return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+}

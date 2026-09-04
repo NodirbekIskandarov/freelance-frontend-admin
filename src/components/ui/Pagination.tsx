@@ -45,8 +45,11 @@ function pageItems(page: number, totalPages: number): (number | '…')[] {
   return items;
 }
 
-const buttonBase =
-  'grid h-8 min-w-8 place-items-center rounded-control border px-2 text-[13px] font-medium transition-colors';
+const buttonBase = cn(
+  'grid h-8 min-w-8 place-items-center rounded-control px-2 text-[13px] font-medium',
+  'transition-[background-color,border-color,color,box-shadow] duration-(--dur) ease-soft',
+  'outline-none focus-visible:shadow-(--ring) disabled:pointer-events-none disabled:opacity-40',
+);
 
 export function Pagination({
   page,
@@ -60,7 +63,7 @@ export function Pagination({
   const items = pageItems(page, totalPages);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line px-5 py-4">
+    <div className="flex min-h-12 flex-wrap items-center justify-between gap-4 border-t border-line-subtle px-5 py-2">
       {summary ? <p className="text-[13px] text-fg-muted">{summary}</p> : <span />}
 
       <div className="flex items-center gap-4">
@@ -70,10 +73,7 @@ export function Pagination({
             aria-label="Oldingi sahifa"
             disabled={page <= 1}
             onClick={() => onPageChange(page - 1)}
-            className={cn(
-              buttonBase,
-              'border-line text-fg-muted hover:bg-elevated hover:text-fg disabled:pointer-events-none disabled:opacity-40',
-            )}
+            className={cn(buttonBase, 'border border-line text-fg-muted hover:bg-surface-hover hover:text-fg')}
           >
             <ChevronLeft className="size-4" strokeWidth={2} />
           </button>
@@ -95,8 +95,12 @@ export function Pagination({
                 className={cn(
                   buttonBase,
                   item === page
-                    ? 'border-primary-solid bg-primary-solid text-white'
-                    : 'border-line text-fg-muted hover:bg-elevated hover:text-fg',
+                    ? // Joriy sahifa — TUS, to'ldirilgan blok emas: u
+                      // shunchaki «siz shu yerdasiz» deydi va bu jadval
+                      // ustidagi asosiy tugmadan baland ovozda
+                      // aytilmasligi kerak.
+                      'border border-primary-line bg-primary-quiet text-primary'
+                    : 'text-fg-muted hover:bg-surface-hover hover:text-fg',
                 )}
               >
                 {item}
@@ -109,10 +113,7 @@ export function Pagination({
             aria-label="Keyingi sahifa"
             disabled={page >= totalPages}
             onClick={() => onPageChange(page + 1)}
-            className={cn(
-              buttonBase,
-              'border-line text-fg-muted hover:bg-elevated hover:text-fg disabled:pointer-events-none disabled:opacity-40',
-            )}
+            className={cn(buttonBase, 'border border-line text-fg-muted hover:bg-surface-hover hover:text-fg')}
           >
             <ChevronRight className="size-4" strokeWidth={2} />
           </button>

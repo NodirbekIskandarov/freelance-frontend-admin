@@ -1,17 +1,21 @@
-import { FileText, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Building2, FileText, Pencil, Plus, SearchX, Trash2, TriangleAlert } from 'lucide-react';
 import { useState } from 'react';
 
 import { Link } from '@/i18n/navigation';
 
 import { Badge } from '@/components/ui/Badge';
-import { Button, IconButton } from '@/components/ui/Button';
+import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { DateCell, NumberCell } from '@/components/ui/Cells';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Select } from '@/components/ui/Select';
+import { RowActions } from '@/components/ui/RowActions';
 import { Table, type Column } from '@/components/ui/Table';
-import { formatDateTime, formatSom } from '@/lib/format';
+import { TableToolbar } from '@/components/ui/TableToolbar';
+import { formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { getApiErrorMessage } from '@/shared/api';
 import { CATALOGUE_ORDERING_OPTIONS, type University } from '@/shared/types/catalogue';
@@ -57,7 +61,7 @@ export function InstitutesPage() {
 
   const debouncedSearch = useDebouncedValue(search, 350);
 
-  const { data, isLoading, isFetching, error } = useGetUniversitiesQuery({
+  const { data, isLoading, isFetching, error, refetch } = useGetUniversitiesQuery({
     page,
     page_size: perPage,
     ordering,
@@ -95,6 +99,27 @@ export function InstitutesPage() {
     setDeleteTarget(null);
   }
 
+  /*
+   * Nechta filtr sukut qiymatidan farq qiladi.
+   *
+   * Saralash HISOBGA OLINMAYDI: u ro'yxatni qisqartirmaydi, faqat
+   * tartibini o'zgartiradi — «filtr faol» deb ko'rsatilsa, bo'sh
+   * natijaning sababini u yerdan qidirishga majbur qilardi.
+   */
+  const activeFilterCount = [
+    search,
+    city !== 'all' ? city : '',
+    active !== 'all' ? active : '',
+  ].filter(Boolean).length;
+  const hasFilters = activeFilterCount > 0;
+
+  function resetFilters() {
+    setSearch('');
+    setCity('all');
+    setActive('all');
+    setPage(1);
+  }
+
   const columns: Column<University>[] = [
     {
       key: 'index',
@@ -130,14 +155,14 @@ export function InstitutesPage() {
     {
       key: 'subject_count',
       header: 'Fanlar soni',
-      align: 'center',
-      cell: (row) => <span className="tabular-nums">{formatSom(row.subject_count)}</span>,
+      align: 'right',
+      cell: (row) => <NumberCell>{formatSom(row.subject_count)}</NumberCell>,
     },
     {
       key: 'assignment_count',
       header: 'Topshiriqlar',
-      align: 'center',
-      cell: (row) => <span className="tabular-nums">{formatSom(row.assignment_count)}</span>,
+      align: 'right',
+      cell: (row) => <NumberCell>{formatSom(row.assignment_count)}</NumberCell>,
     },
     {
       key: 'is_active',
@@ -151,9 +176,7 @@ export function InstitutesPage() {
     {
       key: 'created_at',
       header: "Qo'shilgan sana",
-      cell: (row) => (
-        <span className="whitespace-nowrap text-fg-muted">{formatDateTime(row.created_at)}</span>
-      ),
+      cell: (row) => <DateCell value={row.created_at} />,
     },
     {
       key: 'actions',
@@ -161,28 +184,33 @@ export function InstitutesPage() {
       align: 'right',
       // O'ng chetga yopishadi — jadval siljiganda ham ko'rinadi.
       sticky: true,
+      /*
+        Tahrirlash tashqarida, o'chirish `⋯` ichida.
+
+        Ilgari ikkalasi yonma-yon, bir xil o'lchamda turardi va o'chirish
+        tugmasi tahrirlashdan 8px narida edi — qaytarib bo'lmaydigan amal
+        uchun bu juda yaqin masofa.
+      */
       cell: (row) => (
-        <span className="flex items-center justify-end gap-2">
-          <IconButton
-            label={`${row.short_name || row.name} — tahrirlash`}
-            tone="warning"
-            size="sm"
-            onClick={() => {
-              setEditTarget(row);
-              setFormOpen(true);
-            }}
-          >
-            <Pencil className="size-4" strokeWidth={1.75} />
-          </IconButton>
-          <IconButton
-            label={`${row.short_name || row.name} — o'chirish`}
-            tone="danger"
-            size="sm"
-            onClick={() => setDeleteTarget(row)}
-          >
-            <Trash2 className="size-4" strokeWidth={1.75} />
-          </IconButton>
-        </span>
+        <RowActions
+          inlineCount={1}
+          actions={[
+            {
+              label: `${row.short_name || row.name} — tahrirlash`,
+              icon: <Pencil className="size-4" strokeWidth={1.75} />,
+              onSelect: () => {
+                setEditTarget(row);
+                setFormOpen(true);
+              },
+            },
+            {
+              label: `${row.short_name || row.name} — o'chirish`,
+              icon: <Trash2 className="size-4" strokeWidth={1.75} />,
+              onSelect: () => setDeleteTarget(row),
+              destructive: true,
+            },
+          ]}
+        />
       ),
     },
   ];
@@ -228,48 +256,64 @@ export function InstitutesPage() {
       />
 
       {error ? (
-        <div className="rounded-card border border-danger/25 bg-danger/10 p-5 text-sm text-danger">
-          {getApiErrorMessage(error)}
-        </div>
+        <Card>
+          <EmptyState
+            icon={TriangleAlert}
+            tone="danger"
+            title="Ro'yxat yuklanmadi"
+            description={getApiErrorMessage(error)}
+            action={
+              <Button variant="secondary" size="sm" onClick={() => void refetch()}>
+                Qayta urinish
+              </Button>
+            }
+          />
+        </Card>
       ) : (
         <>
-          <section className="flex flex-wrap items-center gap-3">
-            <SearchInput
-              value={search}
-              onChange={(event) => {
-                setSearch(event.target.value);
-                setPage(1);
-              }}
-              placeholder="Qidirish (nom, qisqartma...)"
-              className="w-full sm:w-72"
-            />
+          <TableToolbar
+            activeFilters={activeFilterCount}
+            onResetFilters={resetFilters}
+            search={
+              <SearchInput
+                value={search}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setPage(1);
+                }}
+                placeholder="Qidirish (nom, qisqartma...)"
+                className="w-full sm:w-72"
+              />
+            }
+            filters={
+              <>
+                <Select
+                  aria-label="Viloyat bo'yicha filtr"
+                  options={cityOptions}
+                  value={city}
+                  onChange={(event) => {
+                    setCity(event.target.value);
+                    setPage(1);
+                  }}
+                  /* Viloyatlar ko'p — aylantirishdan ko'ra yozib topish tezroq. */
+                  searchable={cityOptions.length > 8}
+                  searchPlaceholder="Viloyat nomi..."
+                  className="w-52"
+                />
 
-            <Select
-              aria-label="Viloyat bo'yicha filtr"
-              options={cityOptions}
-              value={city}
-              onChange={(event) => {
-                setCity(event.target.value);
-                setPage(1);
-              }}
-              /* Viloyatlar ko'p — aylantirishdan ko'ra yozib topish tezroq. */
-              searchable={cityOptions.length > 8}
-              searchPlaceholder="Viloyat nomi..."
-              className="w-52"
-            />
-
-            <Select
-              aria-label="Status bo'yicha filtr"
-              options={activeOptions}
-              value={active}
-              onChange={(event) => {
-                setActive(event.target.value);
-                setPage(1);
-              }}
-              className="w-44"
-            />
-
-            <div className="ml-auto">
+                <Select
+                  aria-label="Status bo'yicha filtr"
+                  options={activeOptions}
+                  value={active}
+                  onChange={(event) => {
+                    setActive(event.target.value);
+                    setPage(1);
+                  }}
+                  className="w-44"
+                />
+              </>
+            }
+            actions={
               <Select
                 aria-label="Saralash"
                 options={[...CATALOGUE_ORDERING_OPTIONS]}
@@ -280,8 +324,8 @@ export function InstitutesPage() {
                 }}
                 className="w-52"
               />
-            </div>
-          </section>
+            }
+          />
 
           <Card className="mt-4 overflow-hidden">
             <Table
@@ -295,7 +339,38 @@ export function InstitutesPage() {
               */
               isLoading={isLoading || (isFetching && !data)}
               skeletonRows={perPage > 20 ? 20 : perPage}
-              emptyMessage="Bunday institut topilmadi"
+              empty={
+                hasFilters ? (
+                  <EmptyState
+                    icon={SearchX}
+                    title="Bunday institut topilmadi"
+                    description="Qidiruv so'zini o'zgartiring yoki filtrlarni tozalang."
+                    action={
+                      <Button variant="secondary" size="sm" onClick={resetFilters}>
+                        Filtrlarni tozalash
+                      </Button>
+                    }
+                  />
+                ) : (
+                  <EmptyState
+                    icon={Building2}
+                    title="Katalogda hali institut yo'q"
+                    description="Birinchi institutni qo'shsangiz, fanlar va topshiriqlar unga bog'lanadi."
+                    action={
+                      <Button
+                        size="sm"
+                        icon={<Plus className="size-4" strokeWidth={2} />}
+                        onClick={() => {
+                          setEditTarget(null);
+                          setFormOpen(true);
+                        }}
+                      >
+                        Yangi institut qo&apos;shish
+                      </Button>
+                    }
+                  />
+                )
+              }
             />
 
             <Pagination

@@ -1,16 +1,19 @@
-import { ClipboardList, FileText, Library, Pencil, Plus, Trash2 } from 'lucide-react';
+import { ClipboardList, FileText, LayoutGrid, Library, Pencil, Plus, SearchX, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { Link, useLocaleNavigate } from '@/i18n/navigation';
 
 import { Badge } from '@/components/ui/Badge';
-import { Button, IconButton } from '@/components/ui/Button';
+import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Select } from '@/components/ui/Select';
+import { RowActions } from '@/components/ui/RowActions';
 import { Table, type Column } from '@/components/ui/Table';
+import { TableToolbar } from '@/components/ui/TableToolbar';
 import { formatDateTime, formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { useGetSubjectRequestsListQuery } from '@/features/adminRequests/adminRequestsApi';
@@ -169,6 +172,24 @@ export function SubjectsPage() {
     ...(categoryPage?.results ?? []).map((item) => ({ value: item.id, label: item.name })),
   ];
 
+  /*
+   * Nechta filtr sukut qiymatidan farq qiladi — «hammasi» hisoblanmaydi.
+   */
+  const activeFilterCount = [
+    search,
+    course !== 'all' ? course : '',
+    semester !== 'all' ? semester : '',
+    category !== 'all' ? category : '',
+  ].filter(Boolean).length;
+
+  function resetFilters() {
+    setSearch('');
+    setCourse('all');
+    setSemester('all');
+    setCategory('all');
+    setPage(1);
+  }
+
   const columns: Column<Subject>[] = [
     {
       key: 'index',
@@ -256,43 +277,38 @@ export function SubjectsPage() {
       align: 'right',
       // O'ng chetga yopishadi — jadval siljiganda ham ko'rinadi.
       sticky: true,
+      /*
+        Topshiriqlar ro'yxati tashqarida — kunda o'nlab marta bosiladi.
+        Tahrirlash va o'chirish `⋯` ichida: uchta bir xil o'lchamdagi
+        ikonka qatorida qaysi biri qaysi ekanini har safar o'qib chiqishga
+        to'g'ri kelardi va o'chirish tugmasi ular orasida edi.
+      */
       cell: (row) => (
-        <span className="flex items-center justify-end gap-2">
-          {/*
-            Topshiriqlar ro'yxatiga o'tadi va shu fan bo'yicha filtrlaydi.
-            Filtr manzilda uzatiladi, shunda havola ulashilsa ham o'sha
-            ko'rinish ochiladi.
-          */}
-          <IconButton
-            label={`${row.name} — topshiriqlari`}
-            tone="success"
-            size="sm"
-            onClick={() =>
-              void navigate(`/topshiriqlar?university=${row.university}&subject=${row.id}`)
-            }
-          >
-            <ClipboardList className="size-4" strokeWidth={1.75} />
-          </IconButton>
-          <IconButton
-            label={`${row.name} — tahrirlash`}
-            tone="warning"
-            size="sm"
-            onClick={() => {
-              setEditTarget(row);
-              setFormOpen(true);
-            }}
-          >
-            <Pencil className="size-4" strokeWidth={1.75} />
-          </IconButton>
-          <IconButton
-            label={`${row.name} — o'chirish`}
-            tone="danger"
-            size="sm"
-            onClick={() => setDeleteTarget(row)}
-          >
-            <Trash2 className="size-4" strokeWidth={1.75} />
-          </IconButton>
-        </span>
+        <RowActions
+          inlineCount={1}
+          actions={[
+            {
+              label: `${row.name} — topshiriqlari`,
+              icon: <ClipboardList className="size-4" strokeWidth={1.75} />,
+              onSelect: () =>
+                void navigate(`/topshiriqlar?university=${row.university}&subject=${row.id}`),
+            },
+            {
+              label: `${row.name} — tahrirlash`,
+              icon: <Pencil className="size-4" strokeWidth={1.75} />,
+              onSelect: () => {
+                setEditTarget(row);
+                setFormOpen(true);
+              },
+            },
+            {
+              label: `${row.name} — o'chirish`,
+              icon: <Trash2 className="size-4" strokeWidth={1.75} />,
+              onSelect: () => setDeleteTarget(row),
+              destructive: true,
+            },
+          ]}
+        />
       ),
     },
   ];
@@ -388,56 +404,63 @@ export function SubjectsPage() {
             </div>
           ) : (
             <>
-              <section className="mt-4 flex flex-wrap items-center gap-3">
-                <SearchInput
-                  value={search}
-                  onChange={(event) => {
-                    setSearch(event.target.value);
-                    setPage(1);
-                  }}
-                  placeholder="Fan nomini qidirish..."
-                  className="w-full sm:w-64"
-                />
-
-                <Select
-                  aria-label="Kurs bo'yicha filtr"
-                  options={[{ value: 'all', label: 'Barcha kurslar' }, ...COURSE_OPTIONS]}
-                  value={course}
-                  onChange={(event) => {
-                    setCourse(event.target.value);
-                    setPage(1);
-                  }}
-                  className="w-44"
-                />
-
-                <Select
-                  aria-label="Semestr bo'yicha filtr"
-                  options={[{ value: 'all', label: 'Barcha semestrlar' }, ...SEMESTER_OPTIONS]}
-                  value={semester}
-                  onChange={(event) => {
-                    setSemester(event.target.value);
-                    setPage(1);
-                  }}
-                  className="w-48"
-                />
-
-                {/* Institut tanlanmagan bo'lsa ham ko'rinadi: toifa global. */}
-                {categoryOptions.length > 1 ? (
-                  <Select
-                    aria-label="Toifa bo'yicha filtr"
-                    /* Uzun ro'yxatda aylantirishdan ko'ra yozib topish tezroq. */
-                    searchable={categoryOptions.length > 8}
-                    searchPlaceholder="Toifa nomi..."
-                    options={categoryOptions}
-                    value={category}
+              <TableToolbar
+                activeFilters={activeFilterCount}
+                onResetFilters={resetFilters}
+                search={
+                  <SearchInput
+                    value={search}
                     onChange={(event) => {
-                      setCategory(event.target.value);
+                      setSearch(event.target.value);
                       setPage(1);
                     }}
-                    className="w-52"
+                    placeholder="Fan nomini qidirish..."
+                    className="w-full sm:w-64"
                   />
-                ) : null}
-              </section>
+                }
+                filters={
+                  <>
+                    <Select
+                      aria-label="Kurs bo'yicha filtr"
+                      options={[{ value: 'all', label: 'Barcha kurslar' }, ...COURSE_OPTIONS]}
+                      value={course}
+                      onChange={(event) => {
+                        setCourse(event.target.value);
+                        setPage(1);
+                      }}
+                      className="w-44"
+                    />
+
+                    <Select
+                      aria-label="Semestr bo'yicha filtr"
+                      options={[{ value: 'all', label: 'Barcha semestrlar' }, ...SEMESTER_OPTIONS]}
+                      value={semester}
+                      onChange={(event) => {
+                        setSemester(event.target.value);
+                        setPage(1);
+                      }}
+                      className="w-48"
+                    />
+
+                    {/* Institut tanlanmagan bo'lsa ham ko'rinadi: toifa global. */}
+                    {categoryOptions.length > 1 ? (
+                      <Select
+                        aria-label="Toifa bo'yicha filtr"
+                        /* Uzun ro'yxatda aylantirishdan ko'ra yozib topish tezroq. */
+                        searchable={categoryOptions.length > 8}
+                        searchPlaceholder="Toifa nomi..."
+                        options={categoryOptions}
+                        value={category}
+                        onChange={(event) => {
+                          setCategory(event.target.value);
+                          setPage(1);
+                        }}
+                        className="w-52"
+                      />
+                    ) : null}
+                  </>
+                }
+              />
 
               <Card className="mt-4 overflow-hidden">
                 <Table
@@ -452,7 +475,26 @@ export function SubjectsPage() {
                       */
                   isLoading={isLoading || (isFetching && !data)}
                   skeletonRows={perPage > 20 ? 20 : perPage}
-                  emptyMessage="Bunday fan topilmadi"
+                  empty={
+                    activeFilterCount > 0 ? (
+                      <EmptyState
+                        icon={SearchX}
+                        title="Bunday fan topilmadi"
+                        description="Qidiruv so'zini o'zgartiring yoki filtrlarni tozalang."
+                        action={
+                          <Button variant="secondary" size="sm" onClick={resetFilters}>
+                            Filtrlarni tozalash
+                          </Button>
+                        }
+                      />
+                    ) : (
+                      <EmptyState
+                        icon={LayoutGrid}
+                        title="Bu institutda hali fan yo'q"
+                        description="Fan qo'shsangiz, unga topshiriq va variantlar bog'lanadi."
+                      />
+                    )
+                  }
                 />
 
                 <Pagination

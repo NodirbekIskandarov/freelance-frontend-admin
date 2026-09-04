@@ -1,13 +1,4 @@
-import {
-  CircleCheck,
-  CircleX,
-  Clock,
-  Eye,
-  KeyRound,
-  Lock,
-  Users,
-  UserRoundCheck,
-} from 'lucide-react';
+import { CircleCheck, CircleX, Clock, Eye, KeyRound, Lock, SearchX, UserRoundCheck, Users } from 'lucide-react';
 import { useState } from 'react';
 import { useLocaleNavigate } from '@/i18n/navigation';
 
@@ -21,7 +12,7 @@ import { SearchInput } from '@/components/ui/SearchInput';
 import { Select } from '@/components/ui/Select';
 import { StatCard } from '@/components/ui/StatCard';
 import { Table, type Column } from '@/components/ui/Table';
-import { formatDateTime, formatSom } from '@/lib/format';
+import { formatSom } from '@/lib/format';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { getApiErrorMessage } from '@/shared/api';
 import {
@@ -36,7 +27,11 @@ import { usePermissions } from '@/features/adminRoles/usePermissions';
 
 import { useActivateUserMutation, useGetAdminUsersQuery } from './adminUsersApi';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { Button } from '@/components/ui/Button';
+import { DateCell } from '@/components/ui/Cells';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { RowActions } from '@/components/ui/RowActions';
+import { TableToolbar } from '@/components/ui/TableToolbar';
 
 import { BlockUserModal } from './BlockUserModal';
 
@@ -103,6 +98,14 @@ export function UsersPage() {
   const [activateUser, { isLoading: isActivating, error: activateError }] =
     useActivateUserMutation();
 
+  const activeFilterCount = [search, status !== 'all' ? status : ''].filter(Boolean).length;
+
+  function resetFilters() {
+    setSearch('');
+    setStatus('all');
+    setPage(1);
+  }
+
   const columns: Column<AdminUserAccount>[] = [
     {
       key: 'full_name',
@@ -141,14 +144,14 @@ export function UsersPage() {
       key: 'created_at',
       header: "Ro'yxatdan o'tgan",
       cell: (row) => (
-        <span className="whitespace-nowrap text-fg-muted">{formatDateTime(row.created_at)}</span>
+        <DateCell value={row.created_at} />
       ),
     },
     {
       key: 'last_login_at',
       header: 'Oxirgi kirish',
       cell: (row) => (
-        <span className="whitespace-nowrap text-fg-muted">{formatDateTime(row.last_login_at)}</span>
+        <DateCell value={row.last_login_at} />
       ),
     },
     {
@@ -261,40 +264,47 @@ export function UsersPage() {
             />
           </section>
 
-          <section className="mt-4 flex flex-wrap items-center gap-3">
-            <Select
-              aria-label="Status bo'yicha filtr"
-              options={statusOptions}
-              value={status}
-              onChange={(event) => {
-                setStatus(event.target.value as UserStatus | 'all');
-                setPage(1);
-              }}
-              className="w-48"
-            />
-
-            <Select
-              aria-label="Saralash"
-              options={[...USER_ORDERING_OPTIONS]}
-              value={ordering}
-              onChange={(event) => {
-                setOrdering(event.target.value);
-                setPage(1);
-              }}
-              className="w-52"
-            />
-
-            <div className="ml-auto">
+          {/* Qidiruv CHAPDA — hamma ro'yxatda bir joyda. Ilgari u shu
+              sahifada o'ngda, boshqalarida chapda turardi. */}
+          <TableToolbar
+            className="mt-4"
+            activeFilters={activeFilterCount}
+            onResetFilters={resetFilters}
+            search={
               <SearchInput
                 value={search}
                 onChange={(event) => {
                   setSearch(event.target.value);
                   setPage(1);
                 }}
-                className="w-72"
+                className="w-full sm:w-72"
               />
-            </div>
-          </section>
+            }
+            filters={
+              <Select
+                aria-label="Status bo'yicha filtr"
+                options={statusOptions}
+                value={status}
+                onChange={(event) => {
+                  setStatus(event.target.value as UserStatus | 'all');
+                  setPage(1);
+                }}
+                className="w-48"
+              />
+            }
+            actions={
+              <Select
+                aria-label="Saralash"
+                options={[...USER_ORDERING_OPTIONS]}
+                value={ordering}
+                onChange={(event) => {
+                  setOrdering(event.target.value);
+                  setPage(1);
+                }}
+                className="w-52"
+              />
+            }
+          />
 
           <Card className="mt-4 overflow-hidden">
             <Table
@@ -308,7 +318,22 @@ export function UsersPage() {
               */
               isLoading={isLoading || (isFetching && !data)}
               skeletonRows={perPage > 20 ? 20 : perPage}
-              emptyMessage="Bunday foydalanuvchi topilmadi"
+              empty={
+                activeFilterCount > 0 ? (
+                  <EmptyState
+                    icon={SearchX}
+                    title="Bunday foydalanuvchi topilmadi"
+                    description="Qidiruv so'zini o'zgartiring yoki filtrni tozalang."
+                    action={
+                      <Button variant="secondary" size="sm" onClick={resetFilters}>
+                        Filtrlarni tozalash
+                      </Button>
+                    }
+                  />
+                ) : (
+                  <EmptyState icon={Users} title="Hozircha foydalanuvchi yo'q" />
+                )
+              }
             />
 
             <Pagination
