@@ -19,8 +19,8 @@ export function SearchInput({
       <Search
         aria-hidden
         className={cn(
-          'pointer-events-none absolute top-1/2 size-4 -translate-y-1/2 text-fg-muted',
-          iconPosition === 'left' ? 'left-3.5' : 'right-3.5',
+          'pointer-events-none absolute top-1/2 size-4 -translate-y-1/2 text-fg-dim',
+          iconPosition === 'left' ? 'left-3' : 'right-3',
         )}
         strokeWidth={1.75}
       />
@@ -28,8 +28,10 @@ export function SearchInput({
         type="search"
         placeholder={placeholder}
         className={cn(
-          'h-10 w-full rounded-control border border-line bg-card text-sm text-fg placeholder:text-fg-muted focus:border-primary/50',
-          iconPosition === 'left' ? 'pr-3.5 pl-10' : 'pr-10 pl-3.5',
+          'h-[34px] w-full rounded-control border border-line bg-input text-[13px] text-fg placeholder:text-fg-dim',
+          'transition-[background-color,border-color,box-shadow] duration-(--dur) ease-soft',
+          'outline-none focus-visible:border-primary/60 focus-visible:shadow-(--ring)',
+          iconPosition === 'left' ? 'pr-3 pl-9' : 'pr-9 pl-3',
         )}
         {...props}
       />

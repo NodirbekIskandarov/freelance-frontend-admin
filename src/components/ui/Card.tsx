@@ -24,15 +24,24 @@ export function Card({ className, children }: { className?: string; children: Re
 export function CardHeader({
   title,
   action,
+  divided = false,
   className,
 }: {
   title: ReactNode;
   action?: ReactNode;
+  /** Sarlavha ostidagi ajratgich chiziq. Ro'yxatli kartalarda — ha. */
+  divided?: boolean;
   className?: string;
 }) {
   return (
-    <div className={cn('flex items-center justify-between gap-4 px-5 pt-5', className)}>
-      <h2 className="text-base font-semibold text-fg">{title}</h2>
+    <div
+      className={cn(
+        'flex items-center justify-between gap-4 px-5',
+        divided ? 'border-b border-line-subtle py-4' : 'pt-5',
+        className,
+      )}
+    >
+      <h2 className="text-sm font-semibold text-fg">{title}</h2>
       {action}
     </div>
   );

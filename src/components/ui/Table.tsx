@@ -1,6 +1,8 @@
-import { ChevronsUpDown, ChevronUp } from 'lucide-react';
+import { ChevronsUpDown, ChevronUp, Inbox } from 'lucide-react';
 import type { ReactNode } from 'react';
 
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Skeleton, SkeletonText } from '@/components/ui/Skeleton';
 import { cn } from '@/lib/cn';
 
 export type SortDirection = 'asc' | 'desc';
@@ -42,6 +44,11 @@ interface TableProps<T> {
   /** Skeleton qatorlar soni — yuklanayotganda jadval balandligi sakramasin. */
   skeletonRows?: number;
   emptyMessage?: string;
+  /**
+   * Bo'sh holat uchun to'liq blok — sabab va keyingi qadam bilan.
+   * Berilmasa `emptyMessage` dan oddiy `EmptyState` yasaladi.
+   */
+  empty?: ReactNode;
   sort?: SortState;
   onSortChange?: (key: string) => void;
   onRowClick?: (row: T) => void;
@@ -98,6 +105,7 @@ export function Table<T>({
   isLoading,
   skeletonRows = 8,
   emptyMessage = "Ma'lumot topilmadi",
+  empty,
   sort,
   onSortChange,
   onRowClick,
@@ -123,12 +131,10 @@ export function Table<T>({
       <div className="flex flex-col gap-2.5 p-3 sm:hidden">
         {isLoading &&
           Array.from({ length: Math.min(skeletonRows, 5) }, (_, index) => (
-            <div key={index} className="h-24 animate-pulse rounded-card bg-elevated" />
+            <Skeleton key={index} className="h-24 rounded-card" />
           ))}
 
-        {!isLoading && rows.length === 0 && (
-          <p className="py-12 text-center text-sm text-fg-muted">{emptyMessage}</p>
-        )}
+        {!isLoading && rows.length === 0 && (empty ?? <EmptyState icon={Inbox} title={emptyMessage} />)}
 
         {!isLoading &&
           rows.map((row, index) => (
@@ -217,10 +223,10 @@ export function Table<T>({
           <tbody>
             {isLoading &&
               Array.from({ length: skeletonRows }, (_, rowIndex) => (
-                <tr key={rowIndex} className="border-b border-line">
+                <tr key={rowIndex} className="border-b border-line-subtle">
                   {columns.map((column) => (
                     <td key={column.key} className={spacing.cell}>
-                      <span className="block h-4 animate-pulse rounded bg-elevated" />
+                      <SkeletonText />
                     </td>
                   ))}
                 </tr>
@@ -228,8 +234,8 @@ export function Table<T>({
 
             {!isLoading && rows.length === 0 && (
               <tr>
-                <td colSpan={columns.length} className="px-5 py-16 text-center text-fg-muted">
-                  {emptyMessage}
+                <td colSpan={columns.length} className="p-0">
+                  {empty ?? <EmptyState icon={Inbox} title={emptyMessage} />}
                 </td>
               </tr>
             )}

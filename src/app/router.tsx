@@ -17,6 +17,12 @@ import { PlaceholderPage } from '@/pages/PlaceholderPage';
  * bo'lsa, login sahifasini ochgan foydalanuvchi ham grafik kutubxonasini
  * yuklab olardi. Lazy qilinganda har sahifa o'z chunk'ida qoladi.
  */
+/* Primitivlar ko'rgazmasi — o'z chunk'ida: productionda yo'l qo'shilmaydi
+   va bu fayl hech qachon so'ralmaydi. */
+const UiPreviewPage = lazy(async () => ({
+  default: (await import('@/pages/UiPreviewPage')).UiPreviewPage,
+}));
+
 const ProfilePage = lazy(async () => ({
   default: (await import('@/features/profile/ProfilePage')).ProfilePage,
 }));
@@ -219,6 +225,14 @@ export const router = createBrowserRouter([
       { index: true, element: <LocaleNavigate to="/dashboard" /> },
 
       { path: 'dashboard', element: gated('dashboard.view', <DashboardPage />) },
+
+      /*
+       * Primitivlar ko'rgazmasi — FAQAT ishlab chiqishda.
+       *
+       * Ruxsat tekshiruvi yo'q: bu sahifada ma'lumot yo'q, faqat
+       * komponentlar. Productionda esa u umuman qo'shilmaydi.
+       */
+      ...(import.meta.env.DEV ? [{ path: '_ui', element: <UiPreviewPage /> }] : []),
 
       { path: 'foydalanuvchilar', element: gated('users.view', <UsersPage />) },
       { path: 'foydalanuvchilar/:id', element: gated('users.view', <UserDetailPage />) },

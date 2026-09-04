@@ -34,7 +34,7 @@ export function Tabs({ items, active, onChange, className }: TabsProps) {
   };
 
   return (
-    <div className={cn('border-b border-line', className)}>
+    <div className={cn('border-b border-line-subtle', className)}>
       <div role="tablist" className="flex gap-1 overflow-x-auto">
         {items.map((item, index) => {
           const Icon = item.icon;
@@ -60,8 +60,10 @@ export function Tabs({ items, active, onChange, className }: TabsProps) {
               {item.count !== undefined && (
                 <span
                   className={cn(
-                    'rounded-badge px-1.5 py-0.5 text-xs',
-                    isActive ? 'bg-primary/15 text-primary' : 'bg-elevated text-fg-muted',
+                    'rounded-badge border px-1.5 py-0.5 text-[11px] leading-[16px]',
+                    isActive
+                      ? 'border-primary-line bg-primary-quiet text-primary'
+                      : 'border-neutral-line bg-neutral-quiet text-fg-muted',
                   )}
                 >
                   {item.count}

@@ -34,14 +34,14 @@ interface SelectProps {
 }
 
 const sizes = {
-  sm: 'h-8 pl-3 pr-8 text-[13px]',
-  md: 'h-10 pl-3.5 pr-9 text-sm',
+  sm: 'h-7 pl-2.5 pr-7 text-[13px]',
+  md: 'h-[34px] pl-3 pr-8 text-[13px]',
 } as const;
 
 /** Ikonka bo'lganda matn uning ustiga tushmasligi uchun qo'shimcha chap joy. */
 const sizesWithIcon = {
-  sm: 'h-8 pl-8 pr-8 text-[13px]',
-  md: 'h-10 pl-10 pr-9 text-sm',
+  sm: 'h-7 pl-7 pr-7 text-[13px]',
+  md: 'h-[34px] pl-9 pr-8 text-[13px]',
 } as const;
 
 /**
@@ -185,7 +185,10 @@ export function Select({
         aria-controls={open ? listId : undefined}
         onClick={() => !disabled && setMenuOpen(!open)}
         className={cn(
-          'w-full truncate rounded-control border border-line bg-card text-left font-medium text-fg-soft transition-colors hover:bg-elevated disabled:pointer-events-none disabled:opacity-50',
+          'w-full truncate rounded-control border border-line bg-input text-left font-medium text-fg-soft',
+          'transition-[background-color,border-color,box-shadow] duration-(--dur) ease-soft',
+          'outline-none hover:bg-surface-hover focus-visible:shadow-(--ring)',
+          'disabled:pointer-events-none disabled:opacity-50',
           icon ? sizesWithIcon[size] : sizes[size],
         )}
       >
@@ -205,11 +208,11 @@ export function Select({
       {open && anchor ? (
         <div
           ref={menuRef}
-          className="fixed z-100 w-max max-w-[min(22rem,80vw)] overflow-hidden rounded-control border border-line bg-card"
+          className="fixed z-100 w-max max-w-[min(22rem,80vw)] overflow-hidden rounded-control border border-line bg-elevated shadow-dropdown motion-safe:animate-[menu-in_120ms_var(--ease-soft)]"
           style={{ top: anchor.top, left: anchor.left, minWidth: anchor.width }}
         >
           {searchable ? (
-            <div className="border-b border-line p-2">
+            <div className="border-b border-line-subtle p-2">
               <div className="relative">
                 <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-fg-muted" />
                 <input
@@ -225,7 +228,7 @@ export function Select({
                       pick(visibleOptions[0].value);
                     }
                   }}
-                  className="h-8 w-full rounded-control border border-line bg-elevated pr-2 pl-8 text-[13px] text-fg outline-none placeholder:text-fg-dim focus:border-primary/50"
+                  className="h-8 w-full rounded-control border border-line bg-input pr-2 pl-8 text-[13px] text-fg outline-none placeholder:text-fg-dim focus:border-primary/60"
                 />
               </div>
             </div>
@@ -249,8 +252,8 @@ export function Select({
                       className={cn(
                         'flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] transition-colors',
                         active
-                          ? 'bg-primary/10 font-medium text-primary'
-                          : 'text-fg-soft hover:bg-elevated hover:text-fg',
+                          ? 'bg-primary-quiet font-medium text-primary'
+                          : 'text-fg-soft hover:bg-surface-hover hover:text-fg',
                       )}
                     >
                       <Check

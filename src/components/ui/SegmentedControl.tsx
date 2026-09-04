@@ -25,7 +25,10 @@ export function SegmentedControl<T extends string>({
     <div
       role="group"
       aria-label={ariaLabel}
-      className={cn('inline-flex rounded-control border border-line bg-card p-1', className)}
+      /* Yo'lak CHUQURROQ, faol qism esa undan KO'TARILADI — teskarisi
+         emas. Ilgari yo'lak karta rangida, faol qism esa undan yorug'roq
+         edi va tanlov «bosilgan» emas, «boshqacha» bo'lib ko'rinardi. */
+      className={cn('inline-flex rounded-control bg-elevated p-1', className)}
     >
       {options.map((option) => {
         const active = option.value === value;
@@ -37,8 +40,10 @@ export function SegmentedControl<T extends string>({
             onClick={() => onChange(option.value)}
             aria-pressed={active}
             className={cn(
-              'rounded-[6px] px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors',
-              active ? 'bg-elevated text-fg' : 'text-fg-muted hover:text-fg',
+              'rounded-xs px-3 py-1 text-[13px] font-medium whitespace-nowrap',
+              'transition-[background-color,color,box-shadow] duration-(--dur) ease-soft',
+              'outline-none focus-visible:shadow-(--ring)',
+              active ? 'bg-card text-fg shadow-card' : 'text-fg-muted hover:text-fg',
             )}
           >
             {option.label}

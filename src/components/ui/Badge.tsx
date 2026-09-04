@@ -4,18 +4,24 @@ import type { ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
 /**
- * Badge foni — accent rangning 15% shaffofligi karta ustida, chegarasiz.
+ * Badge — TO'LDIRILMAGAN.
  *
- * Shablondagi admin panelda shunday: dumaloq, chegarasiz, ozgina fonli.
- * Chegara qo'shilsa qatorlar ichida u ikkinchi ramka bo'lib ko'rinardi.
+ * Uch qatlam: 12% fon, 22% chegara va to'yingan matn. Ilgari ular
+ * to'ldirilgan edi va zich jadvalda olti xil to'yingan tamg'a qatorlarni
+ * o'qishga xalaqit berardi — holat ustuni sahifadagi eng baland ovozli
+ * narsa bo'lib qolgandi. Chegara esa fonni belgilaydi va shu bilan
+ * to'ldirishning o'rnini bosadi.
+ *
+ * Ohanglar soni beshta + aksent. Boshqasi yo'q: `purple`, `orange` va
+ * `cyan` 1-fazada olib tashlangan.
  */
 const tones = {
-  success: 'bg-success/15 text-success',
-  warning: 'bg-warning/15 text-warning',
-  danger: 'bg-danger/15 text-danger',
-  info: 'bg-info/15 text-info',
-  neutral: 'bg-fg/10 text-fg-muted',
-  primary: 'bg-primary/15 text-primary',
+  primary: 'bg-primary-quiet text-primary border-primary-line',
+  success: 'bg-success-quiet text-success border-success-line',
+  warning: 'bg-warning-quiet text-warning border-warning-line',
+  danger: 'bg-danger-quiet text-danger border-danger-line',
+  info: 'bg-info-quiet text-info border-info-line',
+  neutral: 'bg-neutral-quiet text-fg-muted border-neutral-line',
 } as const;
 
 export type BadgeTone = keyof typeof tones;
@@ -34,7 +40,8 @@ export function Badge({
       className={cn(
         // Bitta o'lcham hamma joyda: ilgari 11px va 13px badge'lar bir
         // qatorda uchrab, ular boshqa-boshqa narsadek ko'rinardi.
-        'inline-flex items-center gap-1 rounded-badge px-2 py-0.5 text-xs leading-[18px] font-medium whitespace-nowrap',
+        'inline-flex items-center gap-1 rounded-badge border px-2 py-0.5',
+        'text-[11px] leading-[16px] font-medium whitespace-nowrap',
         tones[tone],
         className,
       )}
