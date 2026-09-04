@@ -9,6 +9,8 @@ import {
   rememberLocale,
   stripLocale,
 } from '@/i18n/config';
+import { Button } from '@/components/ui/Button';
+import { Tooltip } from '@/components/ui/Tooltip';
 import { useT } from '@/i18n/I18nProvider';
 
 /**
@@ -33,21 +35,25 @@ export function LocaleToggle() {
 
   const next = LOCALES[(LOCALES.indexOf(locale) + 1) % LOCALES.length]!;
 
+  const label = t((m) => m.locale.ariaSwitch, {
+    from: LOCALE_LABELS[locale],
+    to: LOCALE_LABELS[next],
+  });
+
   return (
-    <button
-      type="button"
-      aria-label={t((m) => m.locale.ariaSwitch, {
-        from: LOCALE_LABELS[locale],
-        to: LOCALE_LABELS[next],
-      })}
-      onClick={() => {
-        rememberLocale(next);
-        void navigate(`${localizeHref(stripLocale(pathname), next)}${search}${hash}`);
-      }}
-      className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-control px-2.5 text-xs font-semibold text-fg-muted transition-colors hover:bg-elevated hover:text-fg"
-    >
-      <Globe className="size-4" strokeWidth={1.75} />
-      <span className="min-w-[1.5rem]">{LOCALE_SHORT_LABELS[locale]}</span>
-    </button>
+    <Tooltip label={label}>
+      <Button
+        variant="secondary"
+        size="sm"
+        aria-label={label}
+        icon={<Globe className="size-3.5" strokeWidth={1.75} />}
+        onClick={() => {
+          rememberLocale(next);
+          void navigate(`${localizeHref(stripLocale(pathname), next)}${search}${hash}`);
+        }}
+      >
+        {LOCALE_SHORT_LABELS[locale]}
+      </Button>
+    </Tooltip>
   );
 }

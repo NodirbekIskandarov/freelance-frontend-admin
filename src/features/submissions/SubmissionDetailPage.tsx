@@ -346,7 +346,6 @@ export function SubmissionDetailPage() {
   return (
     <>
       <PageHeader
-        breadcrumbsPosition="above"
         breadcrumbs={[
           { label: 'Bosh sahifa', to: '/' },
           { label: 'Yuborilgan javoblar', to: '/yuborilgan/javoblar' },

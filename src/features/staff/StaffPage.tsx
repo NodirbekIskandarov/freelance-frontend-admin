@@ -205,7 +205,6 @@ export function StaffPage() {
   return (
     <>
       <PageHeader
-        breadcrumbsPosition="above"
         breadcrumbs={[{ label: 'Bosh sahifa', to: '/' }, { label: 'Admin foydalanuvchilar' }]}
         title="Admin foydalanuvchilar"
         subtitle="Panelga kirish huquqi rollardan kelib chiqadi: rol bering — kira oladi, olib tashlang — kira olmaydi."

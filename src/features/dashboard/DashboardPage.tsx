@@ -15,6 +15,7 @@ import { BarSparkline } from '@/components/charts/BarSparkline';
 import { SplitRevenueChart } from '@/components/charts/SplitRevenueChart';
 import { useChartTheme } from '@/components/charts/chartTheme';
 import { Card } from '@/components/ui/Card';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { cn } from '@/lib/cn';
 import { formatDecimalSom } from '@/lib/format';
@@ -597,10 +598,10 @@ export function DashboardPage() {
 
   return (
     <>
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-fg">Dashboard</h1>
-          <p className="mt-1 flex items-center gap-2 text-sm text-fg-muted">
+      <PageHeader
+        title="Dashboard"
+        subtitle={
+          <span className="flex items-center gap-2">
             <span
               aria-hidden
               className={cn(
@@ -609,16 +610,17 @@ export function DashboardPage() {
               )}
             />
             {isFetching ? 'Yangilanmoqda…' : 'Ma’lumot joriy holatda'}
-          </p>
-        </div>
-
-        <SegmentedControl
-          aria-label="Davr"
-          options={periodOptions}
-          value={period}
-          onChange={setPeriod}
-        />
-      </div>
+          </span>
+        }
+        actions={
+          <SegmentedControl
+            aria-label="Davr"
+            options={periodOptions}
+            value={period}
+            onChange={setPeriod}
+          />
+        }
+      />
 
       {isLoading || !data ? (
         <div className="mt-4 flex flex-col gap-4">

@@ -145,7 +145,6 @@ export function CommentsPage() {
   return (
     <>
       <PageHeader
-        breadcrumbsPosition="above"
         breadcrumbs={[{ label: 'Bosh sahifa', to: '/' }, { label: 'Izohlar' }]}
         title="Topshiriq izohlari"
         subtitle="Izohlar saytda darrov ko'rinadi — bu yerda nomaqbulini olib tashlanadi."

@@ -69,7 +69,6 @@ export function UserDetailPage() {
   return (
     <>
       <PageHeader
-        breadcrumbsPosition="above"
         breadcrumbs={crumbs}
         title={name}
         subtitle={USER_STATUS_LABELS[data.status]}

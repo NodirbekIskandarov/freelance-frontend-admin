@@ -194,7 +194,6 @@ export function MonitoringPage() {
   return (
     <>
       <PageHeader
-        breadcrumbsPosition="above"
         breadcrumbs={[{ label: 'Bosh sahifa', to: '/' }, { label: 'Server monitoringi' }]}
         title="Server monitoringi"
         subtitle="API yuklamasi, javob vaqti va server resurslari. Har 15 soniyada yangilanadi."

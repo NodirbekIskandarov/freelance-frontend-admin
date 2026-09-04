@@ -28,7 +28,6 @@ export function ProfilePage() {
   return (
     <>
       <PageHeader
-        breadcrumbsPosition="above"
         breadcrumbs={[{ label: m.layout.home, to: '/dashboard' }, { label: m.profile.title }]}
         title={m.profile.title}
         subtitle={m.profile.subtitle}

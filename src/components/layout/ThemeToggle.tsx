@@ -1,7 +1,7 @@
 import { Monitor, Moon, Sun } from 'lucide-react';
 import { useSyncExternalStore } from 'react';
 
-import { cn } from '@/lib/cn';
+import { IconButton } from '@/components/ui/Button';
 import { getThemeMode, setThemeMode, subscribeToTheme, type ThemeMode } from '@/lib/theme';
 
 const ORDER = ['system', 'light', 'dark'] as const satisfies readonly ThemeMode[];
@@ -29,17 +29,11 @@ export function ThemeToggle() {
   const next = ORDER[(current + 1) % ORDER.length] ?? 'system';
 
   return (
-    <button
-      type="button"
-      aria-label={`Mavzu: ${LABELS[mode]}. Almashtirish — ${LABELS[next]}`}
-      title={LABELS[mode]}
+    <IconButton
+      label={`Mavzu: ${LABELS[mode]}. Almashtirish — ${LABELS[next]}`}
       onClick={() => setThemeMode(next)}
-      className={cn(
-        'relative grid size-9 place-items-center rounded-control text-fg-muted',
-        'transition-colors hover:bg-elevated hover:text-fg',
-      )}
     >
-      <Icon className="size-5" strokeWidth={1.75} />
-    </button>
+      <Icon className="size-[18px]" strokeWidth={1.75} />
+    </IconButton>
   );
 }

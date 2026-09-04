@@ -249,7 +249,6 @@ export function SubmissionsPage() {
   return (
     <>
       <PageHeader
-        breadcrumbsPosition="above"
         breadcrumbs={[{ label: 'Bosh sahifa', to: '/' }, { label: 'Yuborilgan javoblar' }]}
         title="Yuborilgan javoblar"
         subtitle="Institutlar bo'yicha yuborilgan topshiriq javoblarini ko'rish va boshqarish."

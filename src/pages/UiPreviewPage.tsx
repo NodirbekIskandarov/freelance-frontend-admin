@@ -5,6 +5,7 @@ import { Badge, StatusBadge, type BadgeTone } from '@/components/ui/Badge';
 import { Button, IconButton } from '@/components/ui/Button';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { TextAreaField, TextField } from '@/components/ui/Field';
 import { RowActions } from '@/components/ui/RowActions';
 import { SearchInput } from '@/components/ui/SearchInput';
@@ -48,23 +49,21 @@ export function UiPreviewPage() {
 
   return (
     <div className="space-y-4 pb-10">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold text-fg">Primitivlar</h1>
-          <p className="mt-1 text-[13px] text-fg-muted">
-            Faqat ishlab chiqish rejimida ochiladi. Har komponent barcha holatlari bilan.
-          </p>
-        </div>
-        <SegmentedControl
-          aria-label="Mavzu"
-          options={[
-            { value: 'dark', label: 'Qorong‘i' },
-            { value: 'light', label: 'Yorug‘' },
-          ]}
-          value={theme}
-          onChange={(next) => setThemeMode(next as 'dark' | 'light')}
-        />
-      </div>
+      <PageHeader
+        title="Primitivlar"
+        subtitle="Faqat ishlab chiqish rejimida ochiladi. Har komponent barcha holatlari bilan."
+        actions={
+          <SegmentedControl
+            aria-label="Mavzu"
+            options={[
+              { value: 'dark', label: 'Qorong‘i' },
+              { value: 'light', label: 'Yorug‘' },
+            ]}
+            value={theme}
+            onChange={(next) => setThemeMode(next as 'dark' | 'light')}
+          />
+        }
+      />
 
       <Card>
         <CardHeader title="Button" divided />

@@ -1,5 +1,6 @@
 import { Bell, Menu, Search } from 'lucide-react';
 
+import { IconButton } from '@/components/ui/Button';
 import { useT } from '@/i18n/I18nProvider';
 import { cn } from '@/lib/cn';
 
@@ -16,72 +17,65 @@ interface TopbarProps {
   notificationCount?: number;
 }
 
-function IconAction({
-  label,
-  onClick,
-  children,
-  className,
-}: {
-  label: string;
-  onClick?: () => void;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className={cn(
-        'relative grid size-9 place-items-center rounded-control text-fg-muted transition-colors hover:bg-elevated hover:text-fg',
-        className,
-      )}
-    >
-      {children}
-    </button>
-  );
-}
-
 export function Topbar({ onToggleSidebar, onOpenSearch, notificationCount = 0 }: TopbarProps) {
   const { m } = useT();
 
   return (
-    <header className="sticky top-0 z-20 flex h-topbar shrink-0 items-center justify-between border-b border-line bg-topbar px-6">
-      <div className="flex items-center gap-2">
-        <IconAction label={m.layout.toggleSidebar} onClick={onToggleSidebar} className="-ml-2">
-          <Menu className="size-5" strokeWidth={1.75} />
-        </IconAction>
+    <header className="sticky top-0 z-20 flex h-topbar shrink-0 items-center justify-between gap-4 border-b border-line-subtle bg-topbar px-4 sm:px-6">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <IconButton label={m.layout.toggleSidebar} onClick={onToggleSidebar} className="-ml-2">
+          <Menu className="size-[18px]" strokeWidth={1.75} />
+        </IconButton>
 
         {/*
           Qidiruv maydoni EMAS, tugma: palitraning o'zi kirish maydoni
           va ikkinchi maydon chizish odamni qaysi biriga yozishni
           o'ylashga majbur qilardi.
         */}
+        {/* Qidiruv — TABLETKA shaklida va kengroq: ilgari u panelning
+            o'zi bilan bir xil fonda edi va boshqaruv ekanini ko'rsatib
+            turadigan hech nima yo'q edi. */}
         <button
           type="button"
           onClick={onOpenSearch}
-          className="hidden items-center gap-2 rounded-control border border-line bg-input px-3 py-1.5 text-sm text-fg-dim transition-colors hover:border-line-strong hover:text-fg-muted sm:flex"
+          className={cn(
+            'hidden h-9 w-full max-w-100 items-center gap-2 rounded-badge border border-line bg-input px-3.5',
+            'text-[13px] text-fg-dim',
+            'transition-[background-color,border-color,box-shadow] duration-(--dur) ease-soft',
+            'outline-none hover:border-line-strong hover:text-fg-muted focus-visible:shadow-(--ring) sm:flex',
+          )}
         >
-          <Search className="size-4" strokeWidth={1.75} />
-          <span>{m.layout.commandPlaceholder}</span>
-          <kbd className="ml-6 rounded border border-line-strong px-1.5 py-0.5 font-sans text-[10px] text-fg-dim">
-            Ctrl K
+          <Search className="size-4 shrink-0" strokeWidth={1.75} />
+          <span className="truncate">{m.layout.commandPlaceholder}</span>
+          <kbd className="ml-auto rounded-badge border border-neutral-line bg-neutral-quiet px-1.5 py-0.5 font-sans text-[11px] leading-[16px] text-fg-dim">
+            ⌘K
           </kbd>
         </button>
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex shrink-0 items-center gap-1">
         <ThemeToggle />
         <LocaleToggle />
 
-        <IconAction label={m.layout.notifications}>
-          <Bell className="size-5" strokeWidth={1.75} />
+        {/*
+          Qo'ng'iroqda RAQAM emas, NUQTA.
+          Raqamli blok qatordagi eng to'yingan narsa bo'lib qolardi,
+          holbuki aniq son bu yerda hech qanday qaror bermaydi — u
+          faqat «qarash kerak» deydi. Aniq son bildirishnomalar
+          ro'yxatining o'zida.
+        */}
+        <IconButton label={m.layout.notifications} className="relative">
+          <Bell className="size-[18px]" strokeWidth={1.75} />
           {notificationCount > 0 && (
-            <span className="absolute top-1 right-1 grid min-w-4 place-items-center rounded-full bg-danger px-1 text-[10px] leading-4 font-semibold text-white">
-              {notificationCount}
-            </span>
+            <>
+              <span
+                aria-hidden
+                className="absolute top-2 right-2 size-1.5 rounded-full bg-danger ring-2 ring-topbar"
+              />
+              <span className="sr-only">{notificationCount} ta o‘qilmagan</span>
+            </>
           )}
-        </IconAction>
+        </IconButton>
 
         <UserMenu />
       </div>

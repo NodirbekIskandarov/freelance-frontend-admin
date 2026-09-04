@@ -33,13 +33,16 @@ function Logo({ collapsed }: { collapsed: boolean }) {
   );
 }
 
-const itemBase =
-  'relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors';
+const itemBase = cn(
+  'relative flex h-9 w-full items-center gap-2.5 rounded-control px-2.5 text-[13px]',
+  'transition-[background-color,color] duration-(--dur) ease-soft',
+  'outline-none focus-visible:shadow-(--ring)',
+);
 
 /** Faol elementning chap chetidagi yashil vertikal chiziq. */
 function ActiveBar() {
   return (
-    <span className="absolute inset-y-1 -left-3 w-[3px] rounded-r-full bg-primary" aria-hidden />
+    <span className="absolute inset-y-1.5 -left-3 w-0.5 rounded-r-full bg-primary" aria-hidden />
   );
 }
 
@@ -48,12 +51,18 @@ function ActiveBar() {
  *
  * Nol bo'lsa UMUMAN chizilmaydi: «0» ish emas, va bo'sh navbatni
  * to'lganidan farqlab bo'lmay qolardi.
+ *
+ * Rangi NEYTRAL. Ilgari u sariq edi va menyudagi o'nlab kichik sariq
+ * tamg'a Dashboarddagi haqiqiy ogohlantirishlardan baland ovozda
+ * gapirardi. Sariq yoki qizil faqat KECHIKKAN ish uchun o'rinli
+ * bo'lardi, lekin sanoq endpointi kutish vaqtini bermaydi — u
+ * qo'shilgunicha son shunchaki son bo'lib qoladi.
  */
 function QueueBadge({ count }: { count: number }) {
   if (count <= 0) return null;
 
   return (
-    <span className="ml-auto rounded-badge bg-warning/15 px-1.5 py-0.5 text-xs font-medium text-warning tabular-nums">
+    <span className="ml-auto rounded-badge border border-neutral-line bg-neutral-quiet px-1.5 py-0.5 text-[11px] leading-[16px] font-medium text-fg-muted tabular-nums">
       {count}
     </span>
   );
@@ -87,11 +96,11 @@ function LeafItem({
           itemBase,
           collapsed && 'justify-center px-0',
           isActive
-            ? // Yashil tus, kulrang emas: faol band panelning qolgan
-              // qismidan RANGI bilan ajralib tursin — kulrang fon
-              // shunchaki «ustiga borilgan» band bilan bir xil ko'rinardi.
-              'bg-primary/12 font-medium text-primary'
-            : 'text-fg-muted hover:bg-elevated/60 hover:text-fg',
+            ? // Yashil TUS, to'ldirilgan blok emas: faol band panelning
+              // qolgan qismidan ajralib tursin, lekin ekrandagi eng
+              // baland ovozli narsa bo'lib qolmasin.
+              'bg-primary-quiet font-medium text-primary'
+            : 'text-fg-soft hover:bg-surface-hover hover:text-fg',
         )
       }
     >
@@ -99,7 +108,7 @@ function LeafItem({
         <>
           {isActive && !collapsed && <ActiveBar />}
           <span className="relative shrink-0">
-            <Icon className="size-[18px]" strokeWidth={1.75} />
+            <Icon className="size-4" strokeWidth={1.75} />
             {/* Yig'ilgan rejimda son sig'maydi — nuqta bo'lib qoladi,
                 lekin ish borligi baribir ko'rinib turishi kerak. */}
             {collapsed && count > 0 && (
@@ -147,7 +156,7 @@ function Group({
 
   if (collapsed) {
     return (
-      <div className="mt-2 flex flex-col gap-0.5 border-t border-line pt-2 first:mt-0 first:border-t-0 first:pt-0">
+      <div className="mt-2 flex flex-col gap-0.5 border-t border-line-subtle pt-2 first:mt-0 first:border-t-0 first:pt-0">
         {group.items.map((item) => (
           <LeafItem
             key={item.to ?? item.label(m)}
@@ -162,16 +171,21 @@ function Group({
   }
 
   return (
-    <div className="mb-1">
+    <div className="mt-5 first:mt-0">
       <button
         type="button"
         onClick={() => toggleGroup(group.id)}
         aria-expanded={open}
-        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[11px] font-medium tracking-wider text-fg-dim uppercase transition-colors hover:text-fg-muted"
+        className={cn(
+          'flex w-full items-center gap-2 rounded-control px-2.5 py-1.5',
+          'text-[11px] font-medium tracking-[0.08em] text-fg-dim uppercase',
+          'transition-colors duration-(--dur) ease-soft outline-none',
+          'hover:text-fg-muted focus-visible:shadow-(--ring)',
+        )}
       >
         <span className="truncate">{title}</span>
         {!open && pending > 0 && (
-          <span className="rounded-badge bg-warning/15 px-1.5 py-0.5 text-[10px] font-medium text-warning tabular-nums">
+          <span className="rounded-badge border border-neutral-line bg-neutral-quiet px-1.5 py-0.5 text-[10px] font-medium text-fg-muted tabular-nums">
             {pending}
           </span>
         )}
@@ -214,12 +228,13 @@ function SupportRow({ collapsed }: { collapsed: boolean }) {
       title={collapsed ? m.layout.supportAction : undefined}
       aria-label={collapsed ? m.layout.supportAction : undefined}
       className={cn(
-        'mx-3 mb-3 flex items-center gap-3 rounded-control border border-line px-3 py-2.5',
-        'text-sm text-fg-muted transition-colors hover:bg-elevated hover:text-fg',
-        collapsed && 'mx-2 justify-center px-0',
+        'flex h-9 items-center gap-2.5 rounded-control px-2.5 text-[13px] text-fg-muted',
+        'transition-colors duration-(--dur) ease-soft outline-none',
+        'hover:bg-surface-hover hover:text-fg focus-visible:shadow-(--ring)',
+        collapsed && 'justify-center px-0',
       )}
     >
-      <Headphones className="size-[18px] shrink-0" strokeWidth={1.75} />
+      <Headphones className="size-4 shrink-0" strokeWidth={1.75} />
       {!collapsed && <span className="truncate">{m.layout.supportAction}</span>}
     </button>
   );
@@ -252,7 +267,7 @@ export function Sidebar({
     <aside
       {...rest}
       className={cn(
-        'flex shrink-0 flex-col border-r border-line bg-sidebar',
+        'flex shrink-0 flex-col border-r border-line-subtle bg-sidebar',
         collapsed ? 'w-16' : 'w-sidebar',
         className,
       )}
@@ -285,7 +300,10 @@ export function Sidebar({
         ))}
       </nav>
 
-      <SupportRow collapsed={collapsed} />
+      {/* Pastki blok o'z chizig'i bilan ajraladi — u navigatsiya emas. */}
+      <div className={cn('border-t border-line-subtle py-2', collapsed ? 'px-2' : 'px-3')}>
+        <SupportRow collapsed={collapsed} />
+      </div>
     </aside>
   );
 }
